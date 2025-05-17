@@ -1,0 +1,80 @@
+/* HTMLPopup.css */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .popup-container {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+  }
+  
+  .popup-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0);
+  }
+  
+  .popup-close-button {
+    position: absolute;
+    color: #333333fb;
+    border: none;
+    width: 32px;
+    height: 32px;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+    transform: none; 
+    margin-left: 63%;
+    margin-top: 3.5%;
+    padding: 0; 
+  }
+  
+ 
+/* Button Style - Customize to match your theme */
+.payment-button.primary {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: 01rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  outline: none;
+  background: white;
+  color: #4F46E5;
+  border: 1px solid #E5E7EB;
+}
+
+.payment-button.primary:hover {
+  border-color: #D1D5DB;
+}
+
+.payment-button.primary img {
+  transition: transform 0.4s ease;
+  width: 120px;
+  height: 23px;
+  position: relative;
+}
+
+.payment-button.primary:hover img {
+  transform: scale(1.04) translateY(-1px);
+}

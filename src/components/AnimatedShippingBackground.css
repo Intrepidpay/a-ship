@@ -1,0 +1,65 @@
+/* Base container */
+.shipping-background {
+    position: fixed;
+    width: 100%;
+    height: 100vh;
+    background-color: #ffffff; /* premium white */
+    overflow: hidden;
+    z-index: -1;
+  }
+  
+  /* Common element styling */
+  .shipping-background div {
+    position: absolute;
+    background-repeat: no-repeat;
+    background-size: contain;
+    opacity: 0.08; /* very soft background feel */
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  /* Cargo ship on bottom-left */
+  .cargo-ship {
+    bottom: 2rem;
+    left: -2.2rem;
+    width: 280px;
+    height: 140px;
+    background-image: url('../assets/illustrations/cargo-ship.svg');
+    animation-delay: 0s;
+  }
+  
+  /* Truck on bottom-right */
+  .truck {
+    bottom: 1rem;
+    right: -3rem;
+    width: 220px;
+    height: 120px;
+    background-image: url('../assets/illustrations/delivery-truck.svg');
+    animation-delay: 2s;
+  }
+  
+  /* Shipping container floating top-right */
+  .shipping-container {
+    top: 3rem;
+    right: -4rem;
+    width: 180px;
+    height: 100px;
+    background-image: url('../assets/illustrations/shipping-container.svg');
+    animation-delay: 1s;
+  }
+  
+  /* Subtle floating animation */
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
+  }
+  
+  @media only screen and (max-width: 768px) {
+    .truck {
+     bottom: 3.9rem;
+     right: -5.2rem;
+    }
+  }

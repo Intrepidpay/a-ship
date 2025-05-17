@@ -1,0 +1,79 @@
+.loader-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  overflow: hidden;
+}
+
+.loader-container {
+  text-align: center;
+  position: relative;
+}
+
+.logo-loader {
+  font-family: 'Arial', sans-serif;
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 20%;
+  letter-spacing: 0.5px;
+}
+
+
+.logo-loader span:first-child {
+  color: #5c9dff; /* Purple color for "Ajet" */
+}
+
+.logo-loader span:last-child {
+  color: #161b22; /* Emerald color for "Ship" */
+}
+
+.progress-bar-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  position: relative;
+}
+
+.progress-bar {
+  width: 80%;
+  height: 12px;
+  background-color: #f0f0f0;
+  border-radius: 6px;
+  margin-left: 20px;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: #3a7ca5;
+  border-radius: 6px;
+  transition: width 0.3s ease;
+}
+
+.ship-animation {
+  position: absolute;
+  left: -100px; /* Start position of the ship */
+  bottom: 29;
+  animation: ship-move 5s linear infinite;
+}
+
+.ship {
+  width: 60px;
+}
+
+@keyframes ship-move {
+  0% {
+    left: -100px;
+  }
+  100% {
+    left: calc(250% + 100px); /* Ship moves across the entire progress bar */
+  }
+}

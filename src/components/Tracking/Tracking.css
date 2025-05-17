@@ -1,0 +1,207 @@
+
+
+
+/* Tracking Form Container */
+.tracking-form-container {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 10;
+}
+
+.premium-tracking-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group {
+  display: flex;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative; 
+  box-shadow: 0 10px 30px rgba(0, 86, 214, 0.2);
+}
+
+
+/* Input Field */
+.premium-inputt {
+  flex: 1; /* Takes remaining space */
+  min-width: 0; /* Allows shrinking */
+  width: 83%; /* Base width */
+  padding: 18px 24px;
+  border: none;
+  font-size: 1rem;
+  color: var(--dark-gray);
+  background: rgba(255, 255, 255, 0.95);
+  transition: all 0.3s ease;
+}
+
+.premium-inputt:focus {
+  outline: none;
+  background: var(--white);
+}
+
+
+
+.premium-inputt::placeholder {
+  color: #718096;
+  opacity: 0.7;
+}
+
+/* Track Button */
+.premium-track-button {
+  width: 17% !important;
+  min-width: 100px;
+  flex-shrink: 0;
+  padding: 18px 10px;
+  background: linear-gradient(135deg, var(--primary), var(--primary)) !important;
+  color: black;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.5s ease;
+}
+
+.premium-track-button:hover {
+  background: linear-gradient(135deg, var(--primary), #afb3bad2) !important;
+}
+
+
+.premium-track-button:disabled {
+  background: #CBD5E0;
+  cursor: not-allowed;
+}
+
+.track-icon {
+  width: 20px;
+  height: 20px;
+  margin-top: 0px;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Loading Animation */
+.button-loader {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--white);
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Error Message */
+.premium-error-messag {
+  display: flex;
+  align-items: center;
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: rgba(229, 62, 62, 0.1);
+  color: var(--error);
+  border-radius: 12px;
+  font-size: 0.9rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.error-icon {
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+  fill: currentColor;
+}
+
+.premium-error-messag {
+  transition: opacity 0.5s ease;
+}
+.premium-error-messag.hiding {
+  opacity: 0;
+}
+
+.premium-tracking-result:focus {
+  outline: none;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+
+@media (max-width: 768px) {
+
+
+  .tracking-form-container {
+    width: 100% !important;
+    max-width: 800px !important;
+    margin: 0 auto !important;
+    position: relative !important;
+    z-index: 10 !important;
+  }
+  
+  .premium-tracking-form {
+    width: 100% !important;
+    display: initial;
+    flex-direction: initial;
+  }
+
+
+  .input-group {
+    display: flex !important;
+    width: 100% !important;
+    flex-direction: column !important;
+    box-shadow: 0 5px 15px rgba(0, 86, 214, 0.15) !important;
+    border-radius: 18px !important;
+    overflow: hidden !important;
+    position: initial;
+  }
+  
+  .premium-inputt {
+    flex: 1 !important;
+    min-width: initial;
+    width: initial;
+    border: none !important;
+    font-size: 0.9rem !important;
+    padding: 16px 20px !important;
+    transition: all 0.3s ease !important;
+  }
+
+  .premium-inputt:focus {
+    outline: none !important;
+    background: var(--white) !important;
+  }
+  
+  .premium-inputt::placeholder {
+  text-align: center;
+}
+  
+  .premium-track-button {
+    width: initial !important;
+    min-width: initial !important;
+    flex-shrink: initial !important;
+    padding: 16px !important;
+    justify-content: center !important;
+    border: none !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px;
+    transition: all 0.3s ease !important;
+  }
+}

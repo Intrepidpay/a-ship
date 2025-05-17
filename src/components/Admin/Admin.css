@@ -1,0 +1,114 @@
+button[type="submit"] {
+  width: 100%;
+  padding: 12px;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.admin-login {
+  max-width: 450px;
+  margin: 2rem auto;
+  padding: 2.5rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+.admin-login h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.formm-group {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.formm-group label {
+  display: block;
+  font-size: 0.875rem;
+  color: #6B7280;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.formm-group input {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  background: #F9FAFB;
+  transition: all 0.2s ease;
+  color: #111827;
+}
+
+.formm-group input:focus {
+  outline: none;
+  border-color: #5c9dff;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.erro-message {
+  padding: 0.875rem 1rem;
+  margin-bottom: 1.5rem;
+  background: #FEF2F2;
+  color: #B91C1C;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  border: 1px solid #FECACA;
+}
+
+.start[type="submit"] {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, var(--primary), var(--primary)) ;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 0.5rem;
+}
+
+.start[type="submit"]:hover {
+  background: linear-gradient(135deg, var(--primary), #afb3bad2) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px rgba(79, 70, 229, 0.15);
+}
+
+.start[type="submit"]:active {
+  transform: translateY(0);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .admin-login {
+    padding: 1.75rem;
+    margin: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-login {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+  
+  .admin-login h2 {
+    font-size: 1.5rem;
+  }
+}

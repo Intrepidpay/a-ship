@@ -1,0 +1,375 @@
+/* Base Styles */
+:root {
+  --primary: #73a9fb;
+  --primary-dark: #003D99;
+  --secondary: #FF6B35;
+  --white: #FFFFFF;
+  --light-gray: #F8F9FA;
+  --dark-gray: #2D3748;
+  --error: #E53E3E;
+  --warning: #F6AD55;
+  --success: #38A169;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.6;
+  color: var(--dark-gray);
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Hero Section */
+
+.hero {
+  position: relative;
+  height: 400px;
+  width: 90%;
+  display: flex;
+  align-items: center;
+  left: 5.3%;
+  border-top-left-radius: 60px;
+  border-bottom-left-radius: 60px;
+  border-top-right-radius: 60px;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--white), var(--light-gray));
+  overflow: hidden;
+  padding-bottom: 1%;
+  box-shadow: 0 20px 40px rgba(86, 109, 142, 0.333);
+}
+
+
+
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  width: 100%;
+  padding: 0 20px;
+}
+
+.hero h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 3rem;
+  line-height: 1.2;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  padding-bottom: 0.1em;
+}
+
+
+.hero p {
+  font-size: 1.3rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.9;
+}
+
+/* Tracking Results Section */
+.tracking-results-section {
+  padding: 80px 0;
+  background: var(--light-gray);
+}
+
+/* Services Section */
+.services-section {
+  padding: 100px 0;
+}
+
+.services-section h2 {
+  text-align: center;
+  font-size: 2.25rem;
+  margin-bottom: 3rem;
+  color: var(--dark-gray);
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+/* Services Section - Premium Cards */
+.services-section {
+  padding: 100px 0;
+  background: transparent;
+}
+
+.services-section h2 {
+  text-align: center;
+  font-size: 2.25rem;
+  margin-bottom: 3rem;
+  color: var(--dark-gray);
+  position: relative;
+}
+
+.services-section h2::after {
+  content: '';
+  display: block;
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(135deg, var(--primary), #afb3bad2) !important;
+  margin: 1rem auto 0;
+  border-radius: 2px;
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  padding: 0 20px;
+}
+
+.service-card {
+  background: var(--white);
+  border-radius: 17px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 61, 153, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 1px solid rgba(0, 61, 153, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.service-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 61, 153, 0.15);
+}
+
+.service-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  
+}
+
+
+.service-icon {
+  height: 80px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.placeholder-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  background: var(--light-gray);
+}
+
+.express {
+  background: linear-gradient(135deg, #38A169, #2C7A4E);
+}
+
+.refrigerated {
+  background: linear-gradient(135deg, #73a9fb, #003D99);
+}
+
+.customs {
+  background: linear-gradient(135deg, #F6AD55, #DD6B20);
+}
+
+.service-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  color: var(--dark-gray);
+}
+
+.service-card p {
+  color: #64748B;
+  margin-bottom: 20px;
+  font-size: 1rem;
+}
+
+.service-cta {
+  color: var(--primary);
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.service-card:hover .service-cta {
+  color: var(--primary-dark);
+  transform: translateX(5px);
+}
+
+.service-card:hover .service-png {
+  transform: scale(1.1); /* Subtle zoom effect on hover */
+}
+
+/* Keep all existing placeholder styles */
+.placeholder-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px; /* Creates inner spacing */
+  background: var(--light-gray); /* Default fallback */
+}
+
+/* Add these new image-specific styles */
+.service-image {
+  max-width: 85%; /* Limits image size within placeholder */
+  max-height: 85%;
+  object-fit: contain;
+  transition: all 0.3s ease;
+  filter: brightness(0) invert(1); 
+  opacity: 0.9; 
+}
+
+.service-truck{
+  max-width: 85%; /* Limits image size within placeholder */
+  max-height: 85%;
+  object-fit: contain;
+  transition: all 0.3s ease;
+  filter: brightness(0) invert(1); 
+  opacity: 0.9;
+}
+
+.service-cop{
+  max-width: 85%; /* Limits image size within placeholder */
+  max-height: 85%;
+  object-fit: contain;
+  transition: all 0.3s ease;
+  filter: brightness(0) invert(1); 
+  opacity: 0.9;
+}
+
+/* Keep your existing color classes */
+.express { background: linear-gradient(135deg, #73a9fb, #003D99); }
+.refrigerated { background: linear-gradient(135deg, #38A169, #2C7A4E); }
+.customs { background: linear-gradient(135deg, #F6AD55, #DD6B20); }
+
+/* Hover effects */
+.service-card:hover .service-image {
+  transform: scale(1.1);
+}
+
+.service-card:hover .service-truck {
+  transform: scale(1.1);
+}
+
+.service-card:hover .service-cop {
+  transform: scale(1.1);
+}
+
+
+
+/* Fallback if images fail to load */
+.service-icon {
+  background: var(--light-gray); /* Matches your color scheme */
+  border-radius: 12px;
+}
+
+@media only screen and (min-width: 377px) and (max-width: 768px) {
+  .hero {
+    height: 510px !important;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+
+ .container {
+   width: 100%;
+   max-width: 1200px;
+   margin: 0 auto;
+   padding: 0 20px;
+}
+
+  .hero {
+    height: 100%;
+    border-top-left-radius: 34px;
+    border-bottom-left-radius: 35px;
+    border-top-right-radius: 35px;
+    max-height: 650px;
+    padding: 100px 0 120px;
+    width: 100%;
+    left: 0%;
+    transform: none;
+  }
+  
+  .hero h1 {
+    font-size: 28px !important;
+  }
+  
+  .hero p {
+    font-size: 17px !important;
+  }
+  
+  .service-card h3 {
+  font-size: 1.28rem;
+  margin-bottom: 15px;
+  color: var(--dark-gray);
+}
+
+.service-card p {
+  color: #64748B;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+}
+
+  .service-card {
+    width: 110%;
+    right: 4.9%;
+  }
+
+  .services-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .service-card {
+    padding: 25px;
+  }
+}
+
+
+
+@media only screen and (max-width: 375px) {
+  .hero {
+    height: 100%;
+    max-height: 450px;
+    padding: 100px 0 120px;
+    width: 100%;
+    left: 0%;
+    transform: none;
+  }
+  
+.service-card h3 {
+  font-size: 1.08rem;
+  margin-bottom: 15px;
+  color: var(--dark-gray);
+}
+
+.service-card p {
+  color: #64748B;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+}
+
+}
+
+
+
