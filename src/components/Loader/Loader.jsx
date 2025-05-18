@@ -27,7 +27,11 @@ const Loader = () => {
         </div>
         <div className="progress-bar-container">
           <div className="ship-animation">
-            <img src="/images/ship.png" alt="" className="ship" />
+         <img 
+        src={`${process.env.PUBLIC_URL}/images/ship.png`} 
+         alt="" 
+         className="ship" 
+         />
           </div>
          
           </div>

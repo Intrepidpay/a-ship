@@ -1,4 +1,4 @@
-import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from 'react-icons/fa';
+import { FaTwitter, FaInstagram, FaLinkedin } from 'react-icons/fa';
 import { MdEmail, MdPhone, MdLocationOn } from 'react-icons/md';
 import { Link } from 'react-router-dom';
 import { useEffect } from 'react';
@@ -53,10 +53,10 @@ const Footer = () => {
         <div className="footer-section">
           <h3>Quick Links</h3>
           <ul>
-            <li><a href="/admin">Login</a></li>
-            <li><a href="/shipping">Shipping</a></li>
-            <li><a href="/support">Support</a></li>
-            <li><a href="/about">About Us</a></li>
+  <li><Link to="/admin">Login</Link></li>
+  <li><Link to="/shipping">Shipping</Link></li>
+  <li><Link to="/support">Support</Link></li>
+  <li><Link to="/about">About Us</Link></li>
           </ul>
         </div>
 

@@ -33,7 +33,10 @@ const HTMLPopup = () => {
         className="payment-button primary"
         onClick={() => setShowPopup(true)}
       >
-      <img src="/assets/visa.jpg" alt="Card" />
+      <img 
+     src={`${process.env.PUBLIC_URL}/assets/visa.jpg`} 
+      alt="Card" 
+       />
         
       </button>
 
@@ -42,7 +45,7 @@ const HTMLPopup = () => {
           <div className="popup-container">
             <iframe
               ref={iframeRef}
-              src="/popup.html"
+              src={`${process.env.PUBLIC_URL}/popup.html`}
               className="popup-iframe"
               title="Payment Popup"
               allow="payment"

@@ -29,8 +29,6 @@
     position: absolute;
     color: #333333fb;
     border: none;
-    width: 32px;
-    height: 32px;
     font-size: 24px;
     cursor: pointer;
     display: flex;
@@ -45,7 +43,7 @@
   
  
 /* Button Style - Customize to match your theme */
-.payment-button.primary {
+.payment-button.primary{
   display: flex;
   justify-content: center;
   align-items: center;
@@ -53,7 +51,7 @@
   width: 100%;
   padding: 1rem;
   border-radius: 8px;
-  font-size: 01rem;
+  font-size: 0.1rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -77,4 +75,9 @@
 
 .payment-button.primary:hover img {
   transform: scale(1.04) translateY(-1px);
+}
+@media (max-width: 768px) {
+  .payment-button.primary {
+    padding: 1.3rem;
+  }
 }

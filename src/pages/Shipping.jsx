@@ -123,10 +123,10 @@ const PaymentPage = () => {
             
             <div className="premium-image-container">
               <img
-                src="/assets/shipping-preview.jpg"
-                alt="QR"
-                className="premium-preview-image"
-              />
+            src={`${process.env.PUBLIC_URL}/assets/shipping-preview.jpg`}
+              alt="QR"
+               className="premium-preview-image"
+                 />
               <div className="..">
                 <div className="..">
                 </div>
@@ -277,7 +277,10 @@ const PaymentPage = () => {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                 >
-                  <img src="/assets/bitcoin.jpg" alt="Bitcoin" />
+                  <img 
+              src={`${process.env.PUBLIC_URL}/assets/bitcoin.jpg`} 
+                 alt="Bitcoin" 
+                           />
                 </button>
               </div>
             </div>
