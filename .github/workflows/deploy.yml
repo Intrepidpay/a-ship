@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+        with:
+          persist-credentials: false  # Critical fix
 
       - name: Setup Node
         uses: actions/setup-node@v3
@@ -27,6 +29,5 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}  # Key change
           publish_dir: ./build
-          force_orphan: true  # Keeps only latest deploy
