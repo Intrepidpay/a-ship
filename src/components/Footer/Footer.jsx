@@ -1,5 +1,5 @@
 import { FaTwitter, FaInstagram, FaLinkedin } from 'react-icons/fa';
-import { MdEmail, MdPhone, MdLocationOn } from 'react-icons/md';
+import { MdEmail, MdLocationOn } from 'react-icons/md';
 import { Link } from 'react-router-dom';
 import { useEffect } from 'react';
 import './Footer.css';

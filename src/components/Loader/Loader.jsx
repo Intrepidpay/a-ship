@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import './Loader.css';
 
 const Loader = () => {
+  // eslint-disable-next-line no-unused-vars
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
@@ -27,16 +28,15 @@ const Loader = () => {
         </div>
         <div className="progress-bar-container">
           <div className="ship-animation">
-         <img 
-        src={`${process.env.PUBLIC_URL}/images/ship.png`} 
-         alt="" 
-         className="ship" 
-         />
-          </div>
-         
+            <img 
+              src={`${process.env.PUBLIC_URL}/images/ship.png`} 
+              alt="" 
+              className="ship" 
+            />
           </div>
         </div>
       </div>
+    </div>
   );
 };
 
