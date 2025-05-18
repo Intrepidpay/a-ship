@@ -9,6 +9,7 @@
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.9.0",
+    "core-js": "^3.42.0",
     "leaflet": "^1.9.4",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
@@ -17,7 +18,9 @@
     "react-leaflet": "^5.0.0",
     "react-router-dom": "^6.30.0",
     "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.4"
+    "regenerator-runtime": "^0.14.1",
+    "web-vitals": "^2.1.4",
+    "whatwg-fetch": "^3.6.20"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -48,5 +51,8 @@
   "devDependencies": {
     "gh-pages": "^6.3.0",
     "prettier": "^3.5.3"
-  }
+  },
+  "browserslist": {
+  "production": [">0.2%", "not dead", "not op_mini all"],
+  "development": ["last 1 chrome version"]
 }
