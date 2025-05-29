@@ -8,7 +8,7 @@ on:
 jobs:
   build-deploy:
     runs-on: ubuntu-latest
-    permissions:  # Add this block!
+    permissions:
       contents: write
       pages: write
       id-token: write
@@ -28,10 +28,28 @@ jobs:
       - name: Build the project
         run: npm run build
 
-      - name: Deploy to GitHub Pages
+      # Preserve CNAME from root directory
+      - name: Copy CNAME to build
+        run: |
+          if [ -f "./CNAME" ]; then
+            cp ./CNAME ./build/CNAME
+            echo "CNAME copied to build directory."
+          else
+            echo "Error: CNAME file missing in root!"
+            exit 1
+          fi
+
+      # Create 404.html from index.html (before deployment)
+      - name: Generate 404.html
+        run: |
+          cp ./build/index.html ./build/404.html
+          echo "Created 404.html from index.html"
+
+      # Deploy to GitHub Pages
+      - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}  # Correct input name
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build
-          keep_files: false  # Clean old files
-          force_orphan: true  # Single commit history
+          keep_files: false
+          force_orphan: true
