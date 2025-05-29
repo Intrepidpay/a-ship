@@ -41,7 +41,7 @@ const Footer = () => {
           <ul>
             <li>
               <MdEmail className="icon" />
-              <a href="mailto:support@ajetship.site">support@swiftship.com</a>
+              <a href="mailto:support@ajetship.site">support@ajetship.site</a>
             </li>
             <li>
               <MdLocationOn className="icon" />
