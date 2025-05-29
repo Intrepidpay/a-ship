@@ -35,7 +35,7 @@ const About = () => {
               </div>
               <div className="premium-section-content">
                 <p>
-                AjetShip is a logistics and shipping company founded in 2017 under its parent company Ajet Co. Specializing in freight forwarding, cargo transport, and supply chain solutions, Ajet Shipping quickly established itself as a competitive player in the maritime and logistics industry. The company focuses on efficient, cost-effective shipping services, leveraging modern technology and strategic partnerships to serve global markets.
+                AjetShip is a logistics and shipping company founded in 2017 under its parent company Ajet Co. Specializing in freight forwarding, cargo transport, and supply chain solutions, Ajet Shipping quickly established itself as a competitive player in the maritime and logistics industry. Our company focuses on efficient, cost-effective shipping services, leveraging modern technology and strategic partnerships to serve global markets.
                 </p>
                 <div className="premium-timeline">
                   <div className="premium-timeline-item">
