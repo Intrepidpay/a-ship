@@ -113,7 +113,7 @@ const Support = () => {
                 <h3>Email Support</h3>
               </div>
               <div className="premium-card-content">
-                <p className="premium-contact-info">support@shipsecure.com</p>
+                <p className="premium-contact-info">support@ajetship.site</p>
                 <p className="premium-contact-hours">Response within 12 hours</p>
               </div>
             </div>
