@@ -14,15 +14,15 @@ import AdminPanel from './components/Admin/AdminPanel';
 import Loader from './components/Loader/Loader';
 import AnimatedShippingBackground from './components/AnimatedShippingBackground';
 import CookieConsent from './components/CookieConsent/CookieConsent';
-import GoogleTranslate from './components/GoogleTranslate';       // <-- added
-import LanguagePopup from './components/LanguagePopup';           // <-- added
+// Updated import paths for translation components
+import GoogleTranslate from './components/translation/GoogleTranslate';
+import LanguagePopup from './components/translation/LanguagePopup';
 import './App.css';
 
 function App() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // ===== ADDED THIS EFFECT =====
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const redirect = params.get('redirect');
@@ -31,7 +31,6 @@ function App() {
     }
   }, []);
 
-  // Your existing useEffect (unchanged)
   useEffect(() => {
     const metaThemeColor = document.querySelector("meta[name=theme-color]");
     if (metaThemeColor) {
@@ -55,8 +54,9 @@ function App() {
       </Helmet>
       
       <div className="app">
-        <GoogleTranslate />      {/* <-- added here */}
-        <LanguagePopup />        {/* <-- added here */}
+        {/* Translation components placed at the root level */}
+        <GoogleTranslate />
+        <LanguagePopup />
         
         <AnimatedShippingBackground />
         <Router basename={process.env.PUBLIC_URL}>
