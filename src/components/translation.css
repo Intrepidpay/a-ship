@@ -1,27 +1,60 @@
-/* === KILL GOOGLE'S BANNER PERMANENTLY === */
-.goog-te-banner-frame.skiptranslate { 
-  display: none !important; 
+/* Google Translate Elements */
+#google_translate_element {
+  display: none !important;
+}
+
+.goog-te-banner-frame {
+  display: none !important;
   visibility: hidden !important;
   height: 0 !important;
 }
 
-/* === FORCE OUR POPUP TO THE TOP === */
+.goog-te-menu-frame {
+  z-index: 2147483647 !important;
+}
+
+/* Language Popup */
 .language-popup-overlay {
-  z-index: 2147483647 !important; /* Maximum possible z-index */
   position: fixed;
   top: 0;
   left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2147483647;
 }
 
-/* === MAKE GOOGLE'S DROPDOWN VISIBLE WHEN NEEDED === */
-.goog-te-menu-frame {
-  display: block !important;
-  visibility: visible !important;
-  z-index: 2147483646 !important; /* Just below our popup */
+.language-popup-container {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 400px;
+  width: 90%;
 }
 
-/* === HIDE THE LANGUAGE SELECTOR (we'll control it manually) === */
-.goog-te-combo {
-  position: absolute;
-  left: -9999px;
+.language-popup-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.btn-accept {
+  background: #4285f4;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-decline {
+  background: #f1f1f1;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
 }
