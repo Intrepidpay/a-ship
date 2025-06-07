@@ -10,35 +10,25 @@ const LanguagePopup = () => {
   });
 
   useEffect(() => {
-    const detectLanguage = async () => {
-      if (localStorage.getItem('languagePopupShown')) {
+    const checkShouldShowPopup = () => {
+      // Skip if already shown or English user
+      if (localStorage.getItem('languagePopupShown') || navigator.language.startsWith('en')) {
         return setState(prev => ({ ...prev, isLoading: false }));
       }
 
-      try {
-        // Check browser language first
-        const browserLang = navigator.languages.find(lang => 
-          Object.keys(POPUP_TEXTS).includes(lang.split('-')[0])
-        )?.split('-')[0];
+      // Detect language from browser or IP
+      const detectedLang = navigator.languages.find(lang => 
+        Object.keys(POPUP_TEXTS).includes(lang.split('-')[0])
+      )?.split('-')[0];
 
-        // Fallback to IP detection
-        const { country } = await fetch('https://ipapi.co/json/').then(res => res.json());
-        const ipLang = COUNTRY_TO_LANG[country];
-
-        const userLang = browserLang || ipLang;
-
-        if (userLang && userLang !== 'en') {
-          setState({ showPopup: true, lang: userLang, isLoading: false });
-        } else {
-          setState(prev => ({ ...prev, isLoading: false }));
-        }
-      } catch (error) {
-        console.error('Language detection failed:', error);
+      if (detectedLang && detectedLang !== 'en') {
+        setState({ showPopup: true, lang: detectedLang, isLoading: false });
+      } else {
         setState(prev => ({ ...prev, isLoading: false }));
       }
     };
 
-    detectLanguage();
+    checkShouldShowPopup();
   }, []);
 
   const handleResponse = (accept) => {
@@ -58,15 +48,10 @@ const LanguagePopup = () => {
   return (
     <div className="language-popup-overlay">
       <div className="language-popup-container">
-        <h3>Language Suggestion</h3>
-        <p>{POPUP_TEXTS[state.lang]}</p>
+        <h3>{POPUP_TEXTS[state.lang]}</h3>
         <div className="language-popup-buttons">
-          <button className="btn-accept" onClick={() => handleResponse(true)}>
-            {state.lang === 'ru' ? 'Да' : 'Yes'}
-          </button>
-          <button className="btn-decline" onClick={() => handleResponse(false)}>
-            {state.lang === 'ru' ? 'Нет' : 'No'}
-          </button>
+          <button onClick={() => handleResponse(true)}>Yes</button>
+          <button onClick={() => handleResponse(false)}>No</button>
         </div>
       </div>
     </div>
