@@ -1,91 +1,83 @@
-// LanguagePopup.js
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 
 const countryToLang = {
+  RU: "ru",
   FR: "fr",
   ES: "es",
   DE: "de",
   IT: "it",
   CN: "zh-CN",
   JP: "ja",
-  RU: "ru",
+  US: "en",
+  GB: "en",
+  CA: "en",
+  AU: "en",
 };
 
 const popupTexts = {
+  ru: "Хотите переключить язык на русский?",
   fr: "Voulez-vous changer la langue en français ?",
   es: "¿Desea cambiar el idioma a español?",
   de: "Möchten Sie die Sprache auf Deutsch ändern?",
   it: "Vuoi cambiare la lingua in italiano?",
   "zh-CN": "您想将语言切换为中文吗？",
   ja: "日本語に切り替えますか？",
-  ru: "Хотите переключить язык на русский?",
-  en: "Would you like to switch the language to your local language?",
+  en: "Would you like to switch the language to English?",
 };
 
 const LanguagePopup = () => {
   const [showPopup, setShowPopup] = useState(false);
-  const [userLang, setUserLang] = useState(null);
+  const [lang, setLang] = useState(null);
 
   useEffect(() => {
-    if (localStorage.getItem("langPopupShown")) return; // one time only
+    if (localStorage.getItem('languagePopupShown')) {
+      console.log('Popup already shown, skipping.');
+      return;
+    }
 
     fetch("https://ipapi.co/json/")
-      .then((res) => res.json())
-      .then((data) => {
-        const lang = countryToLang[data.country];
-        if (lang) {
-          setUserLang(lang);
+      .then(res => res.json())
+      .then(data => {
+        console.log("Geolocation data:", data);
+        const country = data.country;
+        const userLang = countryToLang[country];
+        console.log("Detected country:", country, "Mapped language:", userLang);
+
+        if (userLang && userLang !== "en") {
+          setLang(userLang);
           setShowPopup(true);
         }
       })
-      .catch(() => {
-        // fail silently, no popup
+      .catch(err => {
+        console.error("Geolocation fetch error:", err);
       });
   }, []);
 
-  const handleYes = () => {
+  const handleClose = () => {
     setShowPopup(false);
-    localStorage.setItem("langPopupShown", "true");
-    // Trigger Google Translate language switch
-    const interval = setInterval(() => {
-      const select = document.querySelector(".goog-te-combo");
-      if (select) {
-        select.value = userLang;
-        select.dispatchEvent(new Event("change"));
-        clearInterval(interval);
-      }
-    }, 500);
+    localStorage.setItem('languagePopupShown', 'true');
   };
 
-  const handleNo = () => {
-    setShowPopup(false);
-    localStorage.setItem("langPopupShown", "true");
-  };
-
-  if (!showPopup || !userLang) return null;
+  if (!showPopup || !lang) return null;
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        bottom: "20px",
-        left: "50%",
-        transform: "translateX(-50%)",
-        backgroundColor: "#fff",
-        border: "1px solid #ccc",
-        padding: "20px",
-        borderRadius: "8px",
-        boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
-        zIndex: 1000,
-        maxWidth: "300px",
-        textAlign: "center",
-      }}
-    >
-      <p>{popupTexts[userLang] || popupTexts.en}</p>
-      <button onClick={handleYes} style={{ marginRight: "10px" }}>
-        Yes
-      </button>
-      <button onClick={handleNo}>No</button>
+    <div style={{
+      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      display: 'flex', justifyContent: 'center', alignItems: 'center',
+      zIndex: 9999,
+    }}>
+      <div style={{
+        backgroundColor: '#fff',
+        padding: '20px',
+        borderRadius: '8px',
+        maxWidth: '90%',
+        textAlign: 'center',
+      }}>
+        <p>{popupTexts[lang]}</p>
+        <button onClick={handleClose} style={{ marginRight: '10px' }}>Yes</button>
+        <button onClick={handleClose}>No</button>
+      </div>
     </div>
   );
 };
