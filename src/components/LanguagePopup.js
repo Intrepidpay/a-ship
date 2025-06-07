@@ -3,34 +3,37 @@ import { COUNTRY_TO_LANG, POPUP_TEXTS } from './constants';
 import './translation.css';
 
 const LanguagePopup = () => {
-  const [showPopup, setShowPopup] = useState(false);
-  const [detectedLang, setDetectedLang] = useState(null);
+  const [state, setState] = useState({
+    showPopup: false,
+    lang: null
+  });
 
   useEffect(() => {
     const detectLanguage = async () => {
-      // 1. Check browser language
-      const browserLang = navigator.language?.split('-')[0] || 
-                         navigator.languages?.[0]?.split('-')[0];
-      
-      // 2. Fallback to IP detection
+      // 1. Check browser languages first
+      const browserLang = navigator.languages.find(lang => 
+        Object.keys(POPUP_TEXTS).includes(lang.split('-')[0])
+      )?.split('-')[0];
+
+      // 2. Get IP-based language (fallback)
       let ipLang = null;
       try {
         const response = await fetch('https://ipapi.co/json/');
         const { country } = await response.json();
         ipLang = COUNTRY_TO_LANG[country];
       } catch (error) {
-        console.log('IP detection failed');
+        console.log('IP detection failed, using browser lang');
       }
 
-      // 3. Determine language to use
-      const userLang = (POPUP_TEXTS[browserLang] && browserLang !== 'en') ? browserLang : 
+      // 3. Determine final language (priority to browser lang)
+      const userLang = (browserLang && browserLang !== 'en') ? browserLang : 
                       (ipLang && ipLang !== 'en') ? ipLang : null;
 
+      // 4. Show popup after delay if non-English detected
       if (userLang) {
         setTimeout(() => {
-          setDetectedLang(userLang);
-          setShowPopup(true);
-        }, 5000);
+          setState({ showPopup: true, lang: userLang });
+        }, 5000); // 25 second delay
       }
     };
 
@@ -38,35 +41,28 @@ const LanguagePopup = () => {
   }, []);
 
   const handleResponse = (accept) => {
-    if (accept && detectedLang) {
-      // Use Google's API directly if available
-      if (window.google && window.google.translate) {
-        const translateInstance = new window.google.translate.TranslateElement();
-        translateInstance.selectLanguage(detectedLang);
-      } else {
-        // Fallback to DOM method
-        const select = document.querySelector('.goog-te-combo');
-        if (select) {
-          select.value = detectedLang;
-          select.dispatchEvent(new Event('change'));
-        }
+    if (accept && state.lang) {
+      const select = document.querySelector('.goog-te-combo');
+      if (select) {
+        select.value = state.lang;
+        select.dispatchEvent(new Event('change'));
       }
     }
-    setShowPopup(false);
+    setState(prev => ({ ...prev, showPopup: false }));
   };
 
-  if (!showPopup) return null;
+  if (!state.showPopup) return null;
 
   return (
     <div className="language-popup-overlay">
       <div className="language-popup-container">
-        <h3>{POPUP_TEXTS[detectedLang]}</h3>
+        <h3>{POPUP_TEXTS[state.lang]}</h3>
         <div className="language-popup-buttons">
           <button onClick={() => handleResponse(true)}>
-            {detectedLang === 'ru' ? 'Да' : 'Yes'}
+            {state.lang === 'ru' ? 'Да' : 'Yes'}
           </button>
           <button onClick={() => handleResponse(false)}>
-            {detectedLang === 'ru' ? 'Нет' : 'No'}
+            {state.lang === 'ru' ? 'Нет' : 'No'}
           </button>
         </div>
       </div>
