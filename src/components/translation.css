@@ -1,30 +1,26 @@
-/* Google Translate Elements */
-#google_translate_element {
-  display: block!important;
+/* Only hide for English users */
+html[lang="en"] #google_translate_element,
+html[lang="en-US"] #google_translate_element {
+  display: none !important;
 }
 
+/* Default Google Translate styling */
 .goog-te-banner-frame {
   display: none !important;
-  visibility: hidden !important;
-  height: 0 !important;
 }
 
-.goog-te-menu-frame {
-  z-index: 2147483647 !important;
-}
-
-/* Language Popup */
+/* Popup styling */
 .language-popup-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
+  background: rgba(0,0,0,0.5);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 2147483647;
+  z-index: 999999;
 }
 
 .language-popup-container {
@@ -32,29 +28,4 @@
   padding: 20px;
   border-radius: 8px;
   max-width: 400px;
-  width: 90%;
-}
-
-.language-popup-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin-top: 20px;
-}
-
-.btn-accept {
-  background: #4285f4;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.btn-decline {
-  background: #f1f1f1;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
 }
