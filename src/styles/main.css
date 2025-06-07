@@ -186,9 +186,4 @@ img {
   50% { transform: scale(1.05); }
   100% { transform: scale(1); }
 }
-.goog-te-banner-frame.skiptranslate {
-  display: none !important;
-}
-body {
-  top: 0 !important;
-}
+
