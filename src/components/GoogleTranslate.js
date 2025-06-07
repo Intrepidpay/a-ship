@@ -9,10 +9,19 @@ const GoogleTranslate = () => {
           new window.google.translate.TranslateElement(
             {
               ...GOOGLE_TRANSLATE_CONFIG,
-              layout: window.google.translate.TranslateElement.InlineLayout[GOOGLE_TRANSLATE_CONFIG.layout]
+              layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE // Fixed layout reference
             },
-            "google_translate_element"
+            "google_translate_element" // Fixed ID to match standard
           );
+          
+          // Add a small delay to ensure elements are created
+          setTimeout(() => {
+            const banner = document.querySelector('.goog-te-banner-frame');
+            if (banner) {
+              banner.style.display = 'none';
+              banner.style.visibility = 'hidden';
+            }
+          }, 500);
         } catch (error) {
           console.error("Google Translate initialization failed:", error);
         }
@@ -22,26 +31,27 @@ const GoogleTranslate = () => {
     };
 
     const loadGoogleTranslateScript = () => {
-      if (!document.querySelector('script[src*="translate.google.com"]')) {
+      if (!window.google || !window.google.translate) {
         const script = document.createElement("script");
-        script.src = `//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit`;
+        script.src = `https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit`;
         script.async = true;
         script.onerror = () => console.error("Failed to load Google Translate script");
         document.body.appendChild(script);
+      } else if (window.googleTranslateElementInit) {
+        window.googleTranslateElementInit();
       }
     };
 
     initializeTranslate();
 
     return () => {
-      // Cleanup function
       const script = document.querySelector('script[src*="translate.google.com"]');
       if (script) document.body.removeChild(script);
       delete window.googleTranslateElementInit;
     };
   }, []);
 
-  return <div id="google_translate_element" className="google-translate-element" />;
+  return <div id="google_translate_element" style={{ display: 'none' }} />;
 };
 
 export default GoogleTranslate;
