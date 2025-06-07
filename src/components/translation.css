@@ -1,6 +1,6 @@
 /* Google Translate Elements */
 #google_translate_element {
-  display: none !important;
+  display: block!important;
 }
 
 .goog-te-banner-frame {
