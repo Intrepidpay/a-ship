@@ -2,32 +2,18 @@ let mockPackages = [
   {
     trackingNumber: "SH87556849",
     status: "In Transit",
-    recipient: "John Doe",
-    destination: "123 Main St, New York, NY",
-    weight: "3.5 kg",
-    progress: 55,
-    createdAt: new Date("2025-05-17T10:00:00Z"),
-    estimatedDelivery: new Date("2025-05-20T18:00:00Z"),
+    recipient: "Victor",
+    destination: "4 Lesnaya St, Peski, Kolomensky, Moscow, RU",
+    weight: "3.7 kg",
+    progress: 15,
+    createdAt: new Date("2025-06-07T08:33:00Z"),
+    estimatedDelivery: new Date("2025-06-12T12:00:00Z"),
     history: [
       {
-        timestamp: new Date("2025-05-17T12:15:00Z"),
+        timestamp: new Date("2025-06-07T08:41:00Z"),
         location: "Kabul Warehouse",
-        status: "processed",
+        status: "processing",
         coordinates: { lat: 34.5255, lng: 69.1708 },
-        isCurrentLocation: false
-      },
-      {
-        timestamp: new Date("2025-05-18T15:45:00Z"),
-        location: "Istanbul Warehouse",
-        status: "shipped",
-        coordinates: { lat: 41.0082, lng: 28.9784 },
-        isCurrentLocation: false
-      },
-       {
-        timestamp: new Date("2025-05-19T11:20:00Z"),
-        location: "New York Dock",
-        status: "In Transit",
-        coordinates: { lat: 40.7128, lng: -74.0060 },
         isCurrentLocation: true
       }
     ]
