@@ -42,17 +42,16 @@ const LanguagePopup = () => {
 
   const handleResponse = (accept) => {
     if (accept && state.lang) {
-      const translateLanguage = () => {
+      const attemptTranslation = (retries = 5) => {
         const select = document.querySelector('.goog-te-combo');
         if (select) {
           select.value = state.lang;
           select.dispatchEvent(new Event('change'));
-        } else {
-          // If select not found, retry after short delay
-          setTimeout(translateLanguage, 500);
+        } else if (retries > 0) {
+          setTimeout(() => attemptTranslation(retries - 1), 500);
         }
       };
-      translateLanguage();
+      attemptTranslation();
     }
     setState(prev => ({ ...prev, showPopup: false }));
   };
