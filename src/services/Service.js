@@ -2,8 +2,8 @@
 const fakeShippingData = {
   SH87556849: {
     recipient: 'John Doe',
-    contact: '(555) 123-4567',
-    address: '123 Ocean Drive, Miami, FL',
+    contact: '+7977-797-02-28',
+    address: '4 Lesnaya St, Peski, Kolomensky, Moscow, RU',
     method: 'Express (2-3 days)',
     status: 'In Transit',
     trackingId: 'SH87556849',
