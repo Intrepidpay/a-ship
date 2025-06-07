@@ -9,8 +9,16 @@ const LanguagePopup = () => {
   });
 
   useEffect(() => {
+    // Check if translation is already active
+    const isAlreadyTranslated = () => {
+      return document.cookie.includes('googtrans=') || 
+             document.querySelector('.goog-te-combo')?.value !== 'en';
+    };
+
     const detectLanguage = async () => {
-      // Your existing detection logic...
+      // Don't show if already translated
+      if (isAlreadyTranslated()) return;
+
       const browserLang = navigator.languages.find(lang => 
         Object.keys(POPUP_TEXTS).includes(lang.split('-')[0])
       )?.split('-')[0];
@@ -21,7 +29,7 @@ const LanguagePopup = () => {
         const { country } = await response.json();
         ipLang = COUNTRY_TO_LANG[country];
       } catch (error) {
-        console.log('IP detection failed, using browser lang');
+        console.log('IP detection failed');
       }
 
       const userLang = (browserLang && browserLang !== 'en') ? browserLang : 
@@ -39,15 +47,21 @@ const LanguagePopup = () => {
 
   const handleResponse = (accept) => {
     if (accept && state.lang) {
-      // Directly trigger Google Translate
-      const googleTranslateElement = document.querySelector('.goog-te-combo');
-      if (googleTranslateElement) {
-        googleTranslateElement.value = state.lang;
-        googleTranslateElement.dispatchEvent(new Event('change'));
-      } else {
-        // Fallback: Redirect to Google Translate version
-        window.location.href = `https://translate.google.com/translate?sl=auto&tl=${state.lang}&u=${encodeURIComponent(window.location.href)}`;
-      }
+      // Set translation cookie and refresh
+      const expiryDate = new Date();
+      expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+      document.cookie = `googtrans=/en/${state.lang}; expires=${expiryDate.toUTCString()}; path=/`;
+      
+      // Remove Google Translate banner
+      const removeBanner = () => {
+        const banners = document.querySelectorAll('.goog-te-banner-frame');
+        banners.forEach(banner => banner.style.display = 'none');
+        document.body.style.top = '0';
+      };
+
+      // Refresh and check for banner
+      window.location.reload();
+      setTimeout(removeBanner, 1000);
     }
     setState(prev => ({ ...prev, showPopup: false }));
   };
