@@ -1,39 +1,37 @@
-import React, { useEffect } from 'react'; // Added missing React import
+import React, { useEffect } from 'react';
 
 const GoogleTranslate = () => {
   useEffect(() => {
-    // 1. Load Google Translate Script
-    const script = document.createElement('script');
-    script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-    script.async = true;
-    document.body.appendChild(script);
+    const loadGoogleTranslate = () => {
+      if (window.google && window.google.translate) return;
 
-    // 2. Initialize with DOM Mutation Observer
-    window.googleTranslateElementInit = () => {
-      if (window.google && window.google.translate) { // Check if google is defined
-        new window.google.translate.TranslateElement({
-          pageLanguage: 'en',
-          includedLanguages: 'en,ru,fr,es,de,it,zh-CN,ja',
-          layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
-          autoDisplay: false
-        }, 'google_translate_element');
+      const script = document.createElement('script');
+      script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+      script.async = true;
+      document.body.appendChild(script);
 
-        // 3. DOM Cleaner
-        const observer = new MutationObserver(() => {
-          const elements = document.querySelectorAll('.goog-te-banner-frame, .skiptranslate');
-          elements.forEach(el => {
-            el.style.display = 'none';
-          });
-        });
-        observer.observe(document.body, { childList: true, subtree: true });
-      }
+      window.googleTranslateElementInit = () => {
+        try {
+          new window.google.translate.TranslateElement(
+            {
+              pageLanguage: 'en',
+              includedLanguages: 'en,ru,fr,es,de,it,zh-CN,ja',
+              layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
+              autoDisplay: false
+            },
+            'google_translate_element'
+          );
+        } catch (error) {
+          console.error('Google Translate init error:', error);
+        }
+      };
     };
 
+    loadGoogleTranslate();
+
     return () => {
-      // Cleanup
-      if (script.parentNode) {
-        document.body.removeChild(script);
-      }
+      const script = document.querySelector('script[src*="translate.google.com"]');
+      if (script) document.body.removeChild(script);
       delete window.googleTranslateElementInit;
     };
   }, []);
