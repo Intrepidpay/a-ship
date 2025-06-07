@@ -2,10 +2,8 @@ import React, { useEffect } from 'react';
 
 const GoogleTranslate = () => {
   useEffect(() => {
-    let translateElement = null;
-    
     window.googleTranslateElementInit = () => {
-      translateElement = new window.google.translate.TranslateElement(
+      new window.google.translate.TranslateElement(
         {
           pageLanguage: 'en',
           includedLanguages: 'en,ru,fr,es,de,it,zh-CN,ja',
