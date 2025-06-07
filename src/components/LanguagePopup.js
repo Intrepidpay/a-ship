@@ -9,32 +9,36 @@ const LanguagePopup = () => {
   });
 
   useEffect(() => {
-    const detectLanguage = async () => {
+    const detectLanguage = () => {
       // 1. Check browser languages first
-      const browserLang = navigator.languages.find(lang => 
+      const browserLang = navigator.languages?.find(lang => 
         Object.keys(POPUP_TEXTS).includes(lang.split('-')[0])
       )?.split('-')[0];
 
       // 2. Get IP-based language (fallback)
-      let ipLang = null;
-      try {
-        const response = await fetch('https://ipapi.co/json/');
-        const { country } = await response.json();
-        ipLang = COUNTRY_TO_LANG[country];
-      } catch (error) {
-        console.log('IP detection failed, using browser lang');
-      }
+      const ipDetection = async () => {
+        try {
+          const response = await fetch('https://ipapi.co/json/');
+          const { country } = await response.json();
+          return COUNTRY_TO_LANG[country];
+        } catch (error) {
+          console.log('IP detection failed');
+          return null;
+        }
+      };
 
-      // 3. Determine final language (priority to browser lang)
-      const userLang = (browserLang && browserLang !== 'en') ? browserLang : 
-                      (ipLang && ipLang !== 'en') ? ipLang : null;
+      // 3. Determine final language
+      Promise.resolve(ipDetection()).then(ipLang => {
+        const userLang = (browserLang && browserLang !== 'en') ? browserLang : 
+                       (ipLang && ipLang !== 'en') ? ipLang : null;
 
-      // 4. Show popup after delay if non-English detected
-      if (userLang) {
-        setTimeout(() => {
-          setState({ showPopup: true, lang: userLang });
-        }, 5000); // 5 second delay
-      }
+        // 4. Show popup if non-English detected
+        if (userLang) {
+          setTimeout(() => {
+            setState({ showPopup: true, lang: userLang });
+          }, 5000);
+        }
+      });
     };
 
     detectLanguage();
@@ -42,16 +46,19 @@ const LanguagePopup = () => {
 
   const handleResponse = (accept) => {
     if (accept && state.lang) {
-      const attemptTranslation = (retries = 5) => {
-        const select = document.querySelector('.goog-te-combo');
-        if (select) {
-          select.value = state.lang;
-          select.dispatchEvent(new Event('change'));
-        } else if (retries > 0) {
-          setTimeout(() => attemptTranslation(retries - 1), 500);
+      // Wait for Google Translate to load
+      const checkTranslate = () => {
+        if (window.google && window.google.translate) {
+          const select = document.querySelector('.goog-te-combo');
+          if (select) {
+            select.value = state.lang;
+            select.dispatchEvent(new Event('change'));
+          }
+        } else {
+          setTimeout(checkTranslate, 100);
         }
       };
-      attemptTranslation();
+      checkTranslate();
     }
     setState(prev => ({ ...prev, showPopup: false }));
   };
