@@ -1,7 +1,7 @@
 
 const fakeShippingData = {
   SH87556849: {
-    recipient: 'John Doe',
+    recipient: 'Victor',
     contact: '+7977-797-02-28',
     address: '4 Lesnaya St, Peski, Kolomensky, Moscow, RU',
     method: 'Express (2-3 days)',
