@@ -42,17 +42,17 @@ const LanguagePopup = () => {
 
   const handleResponse = (accept) => {
     if (accept && state.lang) {
-      const translateLanguage = () => {
-        const select = document.querySelector('.goog-te-combo');
-        if (select) {
-          select.value = state.lang;
-          select.dispatchEvent(new Event('change'));
-        } else {
-          // If select not found, retry after short delay
-          setTimeout(translateLanguage, 500);
-        }
-      };
-      translateLanguage();
+      if (window.googleTranslateApi) {
+        window.googleTranslateApi.changeLanguage(state.lang);
+      } else {
+        // Fallback in case API isn't loaded yet
+        const interval = setInterval(() => {
+          if (window.googleTranslateApi) {
+            window.googleTranslateApi.changeLanguage(state.lang);
+            clearInterval(interval);
+          }
+        }, 100);
+      }
     }
     setState(prev => ({ ...prev, showPopup: false }));
   };
