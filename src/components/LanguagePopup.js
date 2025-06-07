@@ -1,56 +1,76 @@
 import { useState, useEffect } from 'react';
 import { COUNTRY_TO_LANG, POPUP_TEXTS } from './constants';
+import './translation.css'; // Ensure this import exists
 
 const LanguagePopup = () => {
-  const [state, setState] = useState({
-    showPopup: false,
-    lang: null,
-    isLoading: true
-  });
+  const [showPopup, setShowPopup] = useState(false);
+  const [lang, setLang] = useState(null);
 
+  // 1. SIMPLE GEOLOCATION CHECK
   useEffect(() => {
-    // TEST MODE - FORCE SPANISH (remove in production)
-    if (true) {
-      setState({ showPopup: true, lang: "es", isLoading: false });
-      return;
-    }
-
-    // Original geolocation check
     if (localStorage.getItem('languagePopupShown')) return;
+
+    // TEST HARDCODED COUNTRY - Change to test different languages
+    const testCountry = 'FR'; // Try ES, DE, CN etc
     
-    fetch("https://ipinfo.io/json?token=YOUR_TOKEN")
-      .then(res => res.json())
-      .then(data => {
-        const userLang = COUNTRY_TO_LANG[data.country];
-        if (userLang && userLang !== "en") {
-          setState({ showPopup: true, lang: userLang, isLoading: false });
-        }
-      })
-      .catch(err => console.error(err));
+    const userLang = COUNTRY_TO_LANG[testCountry]; 
+    if (userLang && userLang !== 'en') {
+      setLang(userLang);
+      setShowPopup(true);
+    }
   }, []);
 
-  const handleClose = () => {
-    setState(prev => ({ ...prev, showPopup: false }));
+  // 2. RELIABLE LANGUAGE SWITCHING
+  const handleAccept = () => {
+    if (!lang) return;
+
+    // Method 1: Use Google's native function
+    if (window.google && window.google.translate) {
+      const { TranslateElement } = window.google.translate;
+      new TranslateElement({
+        pageLanguage: 'en',
+        includedLanguages: 'es,fr,de',
+        autoDisplay: false
+      }, 'google_translate_element');
+      
+      // Force language change
+      const select = document.querySelector('.goog-te-combo');
+      if (select) {
+        select.value = lang;
+        select.dispatchEvent(new Event('change'));
+      }
+    }
+
+    // Method 2: Fallback using URL
+    window.location.hash = `#googtrans(en|${lang})`;
+    
+    setShowPopup(false);
     localStorage.setItem('languagePopupShown', 'true');
   };
 
-  if (!state.showPopup || !state.lang) return null;
+  if (!showPopup || !lang) return null;
 
   return (
-    <div className="language-popup-overlay" style={{ display: 'flex' }}>
+    <div className="language-popup-overlay">
       <div className="language-popup-container">
         <h3>Language Suggestion</h3>
-        <p>{POPUP_TEXTS[state.lang]}</p>
+        <p>{POPUP_TEXTS[lang]}</p>
         <div className="language-popup-buttons">
-          <button onClick={() => {
-            const select = document.querySelector('.goog-te-combo');
-            if (select) {
-              select.value = state.lang;
-              select.dispatchEvent(new Event('change'));
-            }
-            handleClose();
-          }}>Yes</button>
-          <button onClick={handleClose}>No</button>
+          <button 
+            className="btn-accept" 
+            onClick={handleAccept}
+          >
+            Yes
+          </button>
+          <button 
+            className="btn-decline" 
+            onClick={() => {
+              setShowPopup(false);
+              localStorage.setItem('languagePopupShown', 'true');
+            }}
+          >
+            No
+          </button>
         </div>
       </div>
     </div>
