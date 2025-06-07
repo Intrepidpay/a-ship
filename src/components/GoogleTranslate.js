@@ -2,25 +2,31 @@ import React, { useEffect } from 'react';
 
 const GoogleTranslate = () => {
   useEffect(() => {
-    // Only load once
-    if (window.googleTranslateElementInit) return;
+    const loadGoogleTranslate = () => {
+      window.googleTranslateElementInit = () => {
+        new window.google.translate.TranslateElement(
+          {
+            pageLanguage: 'en',
+            includedLanguages: 'en,ru,fr,es,de,it,zh-CN,ja',
+            layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
+            autoDisplay: false
+          },
+          'google_translate_element'
+        );
+      };
 
-    window.googleTranslateElementInit = () => {
-      new window.google.translate.TranslateElement({
-        pageLanguage: 'en',
-        includedLanguages: 'en,ru,fr,es,de,it,zh-CN,ja',
-        layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
-        autoDisplay: false
-      }, 'google_translate_element');
+      const script = document.createElement('script');
+      script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+      script.async = true;
+      document.body.appendChild(script);
     };
 
-    const script = document.createElement('script');
-    script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-    script.async = true;
-    document.body.appendChild(script);
+    // Load after popup might appear
+    setTimeout(loadGoogleTranslate, 6000); // 30 second delay
 
     return () => {
-      document.body.removeChild(script);
+      const script = document.querySelector('script[src*="translate.google.com"]');
+      if (script) document.body.removeChild(script);
       delete window.googleTranslateElementInit;
     };
   }, []);
