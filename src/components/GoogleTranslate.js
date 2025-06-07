@@ -3,6 +3,9 @@ import React, { useEffect } from 'react';
 const GoogleTranslate = () => {
   useEffect(() => {
     const loadGoogleTranslate = () => {
+      // Make sure we don't load it multiple times
+      if (window.google && window.google.translate) return;
+
       window.googleTranslateElementInit = () => {
         new window.google.translate.TranslateElement(
           {
@@ -13,6 +16,9 @@ const GoogleTranslate = () => {
           },
           'google_translate_element'
         );
+        
+        // Make the element visible after initialization
+        document.getElementById('google_translate_element').style.display = 'block';
       };
 
       const script = document.createElement('script');
@@ -21,8 +27,8 @@ const GoogleTranslate = () => {
       document.body.appendChild(script);
     };
 
-    // Load after popup might appear
-    setTimeout(loadGoogleTranslate, 6000); // 30 second delay
+    // Load immediately instead of after delay
+    loadGoogleTranslate();
 
     return () => {
       const script = document.querySelector('script[src*="translate.google.com"]');
