@@ -15,8 +15,8 @@ import Loader from './components/Loader/Loader';
 import AnimatedShippingBackground from './components/AnimatedShippingBackground';
 import CookieConsent from './components/CookieConsent/CookieConsent';
 // Updated import paths for translation components
-import GoogleTranslate from './components/translation/GoogleTranslate';
-import LanguagePopup from './components/translation/LanguagePopup';
+import GoogleTranslate from './components/GoogleTranslate';
+import LanguagePopup from './components/LanguagePopup';
 import './App.css';
 
 function App() {
