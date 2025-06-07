@@ -14,6 +14,8 @@ import AdminPanel from './components/Admin/AdminPanel';
 import Loader from './components/Loader/Loader';
 import AnimatedShippingBackground from './components/AnimatedShippingBackground';
 import CookieConsent from './components/CookieConsent/CookieConsent';
+import GoogleTranslate from './components/GoogleTranslate';       // <-- added
+import LanguagePopup from './components/LanguagePopup';           // <-- added
 import './App.css';
 
 function App() {
@@ -53,6 +55,9 @@ function App() {
       </Helmet>
       
       <div className="app">
+        <GoogleTranslate />      {/* <-- added here */}
+        <LanguagePopup />        {/* <-- added here */}
+        
         <AnimatedShippingBackground />
         <Router basename={process.env.PUBLIC_URL}>
           {loading && <Loader />}
