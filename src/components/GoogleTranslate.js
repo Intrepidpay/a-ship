@@ -1,49 +1,29 @@
-import { useEffect } from "react";
-import { GOOGLE_TRANSLATE_CONFIG } from "./constants";
+useEffect(() => {
+  // 1. Load Google Translate Script
+  const script = document.createElement('script');
+  script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+  script.async = true;
+  document.body.appendChild(script);
 
-const GoogleTranslate = () => {
-  useEffect(() => {
-    const initializeTranslate = () => {
-      window.googleTranslateElementInit = () => {
-        try {
-          new window.google.translate.TranslateElement(
-            {
-              ...GOOGLE_TRANSLATE_CONFIG,
-              layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
-              autoDisplay: false // We control visibility manually
-            },
-            "google_translate_element"
-          );
-          
-          // Set up mutation observer to handle dynamic elements
-          const observer = new MutationObserver(() => {
-            document.querySelectorAll('.goog-te-banner-frame, .goog-te-menu-frame')
-              .forEach(el => el.style.display = 'none');
-          });
-          observer.observe(document.body, { childList: true, subtree: true });
-        } catch (error) {
-          console.error("Google Translate initialization failed:", error);
-        }
-      };
-      loadGoogleTranslateScript();
-    };
+  // 2. Initialize with DOM Mutation Observer
+  window.googleTranslateElementInit = () => {
+    new google.translate.TranslateElement({
+      pageLanguage: 'en',
+      includedLanguages: 'en,ru,fr,es,de,it,zh-CN,ja', // Add more as needed
+      layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+      autoDisplay: false
+    }, 'google_translate_element');
 
-    const loadGoogleTranslateScript = () => {
-      if (!window.google?.translate) {
-        const script = document.createElement("script");
-        script.src = `https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit`;
-        script.async = true;
-        document.body.appendChild(script);
-      }
-    };
+    // 3. Nuclear DOM Cleaner - Runs every 100ms to nuke Google's elements
+    const observer = new MutationObserver(() => {
+      document.querySelectorAll('.goog-te-banner-frame, .skiptranslate')
+        .forEach(el => el.style.display = 'none');
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  };
 
-    initializeTranslate();
-    return () => {
-      document.querySelectorAll('script[src*="translate.google.com"]').forEach(s => s.remove());
-      delete window.googleTranslateElementInit;
-    };
-  }, []);
-
-  return <div id="google_translate_element" style={{ display: 'none' }} />;
-};
-export default GoogleTranslate;
+  return () => {
+    document.body.removeChild(script);
+    delete window.googleTranslateElementInit;
+  };
+}, []);
