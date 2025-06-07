@@ -10,11 +10,6 @@ const GoogleTranslate = () => {
           layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
           autoDisplay: false
         }, 'google_translate_element');
-        
-        // Hide banner immediately
-        const banner = document.querySelector('.goog-te-banner-frame');
-        if (banner) banner.style.display = 'none';
-        document.body.style.top = '0';
       };
 
       if (!document.querySelector('script[src*="translate.google.com"]')) {
@@ -30,10 +25,26 @@ const GoogleTranslate = () => {
       loadGoogleTranslate();
     }
 
+    // Hide Google Translate banner
+    const hideBanner = () => {
+      const banner = document.querySelector('.goog-te-banner-frame');
+      if (banner) {
+        banner.style.display = 'none';
+        document.body.style.top = '0';
+      }
+    };
+
+    // Initial hide attempt
+    hideBanner();
+    
+    // Set interval to keep hiding it
+    const bannerInterval = setInterval(hideBanner, 1000);
+    
     return () => {
       const script = document.querySelector('script[src*="translate.google.com"]');
       if (script) document.body.removeChild(script);
       delete window.googleTranslateElementInit;
+      clearInterval(bannerInterval);
     };
   }, []);
 
