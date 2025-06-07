@@ -33,7 +33,7 @@ const LanguagePopup = () => {
       if (userLang) {
         setTimeout(() => {
           setState({ showPopup: true, lang: userLang });
-        }, 25000); // 25 second delay
+        }, 5000); // 25 second delay
       }
     };
 
