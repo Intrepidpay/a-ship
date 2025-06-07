@@ -1,35 +1,27 @@
-/* Google Translate Elements */
-#google_translate_element, 
-.goog-te-banner-frame {
-  display: block !important;
+/* === KILL GOOGLE'S BANNER PERMANENTLY === */
+.goog-te-banner-frame.skiptranslate { 
+  display: none !important; 
+  visibility: hidden !important;
+  height: 0 !important;
 }
 
-.goog-te-menu-frame {
-  z-index: 2147483647 !important;
-  min-width: 160px !important;
-}
-
-/* Language Popup - Universal RTL/LTR Support */
+/* === FORCE OUR POPUP TO THE TOP === */
 .language-popup-overlay {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 
-              Helvetica, Arial, sans-serif, 'Apple Color Emoji';
+  z-index: 2147483647 !important; /* Maximum possible z-index */
+  position: fixed;
+  top: 0;
+  left: 0;
 }
 
-.language-popup-container {
-  direction: ltr; /* Base direction */
+/* === MAKE GOOGLE'S DROPDOWN VISIBLE WHEN NEEDED === */
+.goog-te-menu-frame {
+  display: block !important;
+  visibility: visible !important;
+  z-index: 2147483646 !important; /* Just below our popup */
 }
 
-[lang="ar"] .language-popup-container,
-[lang="he"] .language-popup-container {
-  direction: rtl;
-}
-
-/* Responsive Buttons */
-.btn-accept {
-  background-color: #4285f4 !important; /* Google blue */
-}
-
-/* Right-to-Left specific styles */
-.rtl-layout .language-popup-buttons {
-  flex-direction: row-reverse;
+/* === HIDE THE LANGUAGE SELECTOR (we'll control it manually) === */
+.goog-te-combo {
+  position: absolute;
+  left: -9999px;
 }
