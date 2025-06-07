@@ -11,8 +11,7 @@ const LanguagePopup = () => {
   useEffect(() => {
     // Check if translation is already active
     const isAlreadyTranslated = () => {
-      return document.cookie.includes('googtrans=') || 
-             document.querySelector('.goog-te-combo')?.value !== 'en';
+      return document.cookie.includes('googtrans=');
     };
 
     const detectLanguage = async () => {
@@ -51,17 +50,7 @@ const LanguagePopup = () => {
       const expiryDate = new Date();
       expiryDate.setFullYear(expiryDate.getFullYear() + 1);
       document.cookie = `googtrans=/en/${state.lang}; expires=${expiryDate.toUTCString()}; path=/`;
-      
-      // Remove Google Translate banner
-      const removeBanner = () => {
-        const banners = document.querySelectorAll('.goog-te-banner-frame');
-        banners.forEach(banner => banner.style.display = 'none');
-        document.body.style.top = '0';
-      };
-
-      // Refresh and check for banner
       window.location.reload();
-      setTimeout(removeBanner, 1000);
     }
     setState(prev => ({ ...prev, showPopup: false }));
   };
