@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { COUNTRY_TO_LANG, POPUP_TEXTS } from './constants';
+import { POPUP_TEXTS } from './constants'; // Removed unused COUNTRY_TO_LANG
 import './translation.css';
 
 const LanguagePopup = () => {
@@ -16,7 +16,7 @@ const LanguagePopup = () => {
         return setState(prev => ({ ...prev, isLoading: false }));
       }
 
-      // Detect language from browser or IP
+      // Detect language from browser preferences
       const detectedLang = navigator.languages.find(lang => 
         Object.keys(POPUP_TEXTS).includes(lang.split('-')[0])
       )?.split('-')[0];
@@ -50,8 +50,14 @@ const LanguagePopup = () => {
       <div className="language-popup-container">
         <h3>{POPUP_TEXTS[state.lang]}</h3>
         <div className="language-popup-buttons">
-          <button onClick={() => handleResponse(true)}>Yes</button>
-          <button onClick={() => handleResponse(false)}>No</button>
+          <button onClick={() => handleResponse(true)}>
+            {state.lang === 'ru' ? 'Да' : 
+             state.lang === 'zh-CN' ? '是' : 'Yes'}
+          </button>
+          <button onClick={() => handleResponse(false)}>
+            {state.lang === 'ru' ? 'Нет' : 
+             state.lang === 'zh-CN' ? '否' : 'No'}
+          </button>
         </div>
       </div>
     </div>
