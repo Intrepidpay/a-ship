@@ -33,7 +33,7 @@ const LanguagePopup = () => {
       if (userLang) {
         setTimeout(() => {
           setState({ showPopup: true, lang: userLang });
-        }, 5000); // 25 second delay
+        }, 5000); // 5 second delay
       }
     };
 
@@ -42,11 +42,17 @@ const LanguagePopup = () => {
 
   const handleResponse = (accept) => {
     if (accept && state.lang) {
-      const select = document.querySelector('.goog-te-combo');
-      if (select) {
-        select.value = state.lang;
-        select.dispatchEvent(new Event('change'));
-      }
+      const translateLanguage = () => {
+        const select = document.querySelector('.goog-te-combo');
+        if (select) {
+          select.value = state.lang;
+          select.dispatchEvent(new Event('change'));
+        } else {
+          // If select not found, retry after short delay
+          setTimeout(translateLanguage, 500);
+        }
+      };
+      translateLanguage();
     }
     setState(prev => ({ ...prev, showPopup: false }));
   };
