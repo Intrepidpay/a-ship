@@ -22,7 +22,7 @@ const GoogleTranslate = () => {
     };
 
     // Load after popup might appear
-    setTimeout(loadGoogleTranslate, 30000); // 30 second delay
+    setTimeout(loadGoogleTranslate, 6000); // 30 second delay
 
     return () => {
       const script = document.querySelector('script[src*="translate.google.com"]');
