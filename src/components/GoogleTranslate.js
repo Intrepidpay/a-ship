@@ -9,49 +9,41 @@ const GoogleTranslate = () => {
           new window.google.translate.TranslateElement(
             {
               ...GOOGLE_TRANSLATE_CONFIG,
-              layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE // Fixed layout reference
+              layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
+              autoDisplay: false // We control visibility manually
             },
-            "google_translate_element" // Fixed ID to match standard
+            "google_translate_element"
           );
           
-          // Add a small delay to ensure elements are created
-          setTimeout(() => {
-            const banner = document.querySelector('.goog-te-banner-frame');
-            if (banner) {
-              banner.style.display = 'none';
-              banner.style.visibility = 'hidden';
-            }
-          }, 500);
+          // Set up mutation observer to handle dynamic elements
+          const observer = new MutationObserver(() => {
+            document.querySelectorAll('.goog-te-banner-frame, .goog-te-menu-frame')
+              .forEach(el => el.style.display = 'none');
+          });
+          observer.observe(document.body, { childList: true, subtree: true });
         } catch (error) {
           console.error("Google Translate initialization failed:", error);
         }
       };
-
       loadGoogleTranslateScript();
     };
 
     const loadGoogleTranslateScript = () => {
-      if (!window.google || !window.google.translate) {
+      if (!window.google?.translate) {
         const script = document.createElement("script");
         script.src = `https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit`;
         script.async = true;
-        script.onerror = () => console.error("Failed to load Google Translate script");
         document.body.appendChild(script);
-      } else if (window.googleTranslateElementInit) {
-        window.googleTranslateElementInit();
       }
     };
 
     initializeTranslate();
-
     return () => {
-      const script = document.querySelector('script[src*="translate.google.com"]');
-      if (script) document.body.removeChild(script);
+      document.querySelectorAll('script[src*="translate.google.com"]').forEach(s => s.remove());
       delete window.googleTranslateElementInit;
     };
   }, []);
 
   return <div id="google_translate_element" style={{ display: 'none' }} />;
 };
-
 export default GoogleTranslate;
