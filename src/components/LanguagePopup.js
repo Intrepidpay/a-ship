@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { COUNTRY_TO_LANG, POPUP_TEXTS } from './constants';
-import './components/translation.css';
+import './translation.css';
 
 const LanguagePopup = () => {
   const [state, setState] = useState({
