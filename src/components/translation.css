@@ -1,31 +1,57 @@
-/* Only hide for English users */
-html[lang="en"] #google_translate_element,
-html[lang="en-US"] #google_translate_element {
-  display: none !important;
-}
-
-/* Default Google Translate styling */
-.goog-te-banner-frame {
-  display: none !important;
-}
-
-/* Popup styling */
+/* Premium Popup Styling */
 .language-popup-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0,0,0,0.5);
+  background-color: rgba(92, 157, 255, 0.9); /* #5c9dff with transparency */
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 999999;
+  z-index: 2147483647; /* Maximum possible */
+  backdrop-filter: blur(5px);
 }
 
 .language-popup-container {
   background: white;
-  padding: 20px;
-  border-radius: 8px;
+  padding: 30px;
+  border-radius: 12px;
   max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  animation: fadeIn 0.5s ease-out;
+}
+
+.language-popup-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 25px;
+}
+
+.language-popup-buttons button {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.language-popup-buttons button:first-child {
+  background: #5c9dff;
+  color: white;
+}
+
+.language-popup-buttons button:last-child {
+  background: white;
+  color: #5c9dff;
+  border: 1px solid #5c9dff;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
