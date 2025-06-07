@@ -1,7 +1,7 @@
 /* Google Translate Elements */
 #google_translate_element, 
 .goog-te-banner-frame {
-  display: none !important;
+  display: block !important;
 }
 
 .goog-te-menu-frame {
