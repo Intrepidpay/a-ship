@@ -10,12 +10,11 @@ const LanguagePopup = () => {
 
   useEffect(() => {
     const detectLanguage = async () => {
-      // 1. Check browser languages first
+      // Your existing detection logic...
       const browserLang = navigator.languages.find(lang => 
         Object.keys(POPUP_TEXTS).includes(lang.split('-')[0])
       )?.split('-')[0];
 
-      // 2. Get IP-based language (fallback)
       let ipLang = null;
       try {
         const response = await fetch('https://ipapi.co/json/');
@@ -25,15 +24,13 @@ const LanguagePopup = () => {
         console.log('IP detection failed, using browser lang');
       }
 
-      // 3. Determine final language (priority to browser lang)
       const userLang = (browserLang && browserLang !== 'en') ? browserLang : 
                       (ipLang && ipLang !== 'en') ? ipLang : null;
 
-      // 4. Show popup after delay if non-English detected
       if (userLang) {
         setTimeout(() => {
           setState({ showPopup: true, lang: userLang });
-        }, 5000); // 5 second delay
+        }, 5000);
       }
     };
 
@@ -42,16 +39,14 @@ const LanguagePopup = () => {
 
   const handleResponse = (accept) => {
     if (accept && state.lang) {
-      if (window.googleTranslateApi) {
-        window.googleTranslateApi.changeLanguage(state.lang);
+      // Directly trigger Google Translate
+      const googleTranslateElement = document.querySelector('.goog-te-combo');
+      if (googleTranslateElement) {
+        googleTranslateElement.value = state.lang;
+        googleTranslateElement.dispatchEvent(new Event('change'));
       } else {
-        // Fallback in case API isn't loaded yet
-        const interval = setInterval(() => {
-          if (window.googleTranslateApi) {
-            window.googleTranslateApi.changeLanguage(state.lang);
-            clearInterval(interval);
-          }
-        }, 100);
+        // Fallback: Redirect to Google Translate version
+        window.location.href = `https://translate.google.com/translate?sl=auto&tl=${state.lang}&u=${encodeURIComponent(window.location.href)}`;
       }
     }
     setState(prev => ({ ...prev, showPopup: false }));
