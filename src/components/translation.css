@@ -5,7 +5,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(92, 157, 255, 0.02); /* #5c9dff with transparency */
+  background-color: rgba(92, 157, 255, 0.008); /* #5c9dff with transparency */
   display: flex;
   justify-content: center;
   align-items: center;
