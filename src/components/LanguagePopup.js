@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { COUNTRY_TO_LANG, POPUP_TEXTS } from './constants';
 import './translation.css';
 
@@ -7,13 +7,12 @@ const LanguagePopup = () => {
     showPopup: false,
     lang: null
   });
+  const timeoutRef = useRef(null);
 
   useEffect(() => {
     const detectLanguage = async () => {
-      // Check if user already dismissed popup
-      if (localStorage.getItem('langPopupDismissed')) return; // Added line 1
+      if (localStorage.getItem('langPopupDismissed')) return;
 
-      // Your existing detection logic...
       const browserLang = navigator.languages.find(lang => 
         Object.keys(POPUP_TEXTS).includes(lang.split('-')[0])
       )?.split('-')[0];
@@ -31,27 +30,30 @@ const LanguagePopup = () => {
                       (ipLang && ipLang !== 'en') ? ipLang : null;
 
       if (userLang) {
-        setTimeout(() => {
+        timeoutRef.current = setTimeout(() => {
           setState({ showPopup: true, lang: userLang });
         }, 5000);
       }
     };
 
     detectLanguage();
+    
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
   }, []);
 
   const handleResponse = (accept) => {
-    // Remember user dismissed popup
-    localStorage.setItem('langPopupDismissed', 'true'); // Added line 2
+    localStorage.setItem('langPopupDismissed', 'true');
     
     if (accept && state.lang) {
-      // Directly trigger Google Translate
       const googleTranslateElement = document.querySelector('.goog-te-combo');
       if (googleTranslateElement) {
         googleTranslateElement.value = state.lang;
         googleTranslateElement.dispatchEvent(new Event('change'));
       } else {
-        // Fallback: Redirect to Google Translate version
         window.location.href = `https://translate.google.com/translate?sl=auto&tl=${state.lang}&u=${encodeURIComponent(window.location.href)}`;
       }
     }
