@@ -1,73 +1,79 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { COUNTRY_TO_LANG, POPUP_TEXTS } from './constants';
+import React, { useState, useEffect } from 'react';
+import { 
+  COUNTRY_TO_LANG, 
+  POPUP_TEXTS, 
+  SELECT_BUTTON_TEXTS, 
+  LANGUAGE_NAMES,
+  SUPPORTED_LANGUAGES
+} from './constants';
+import { applySavedLanguage } from '../services/translationService';
 import './translation.css';
 
 const LanguagePopup = () => {
   const [state, setState] = useState({
     showPopup: false,
-    lang: null
+    userLang: 'en',
+    stage: 'initial' // 'initial' or 'language-selection'
   });
-  const timeoutRef = useRef(null);
 
   useEffect(() => {
-    // Check URL for translation parameter
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('translated')) {
-      localStorage.setItem('langPopupDismissed', 'true');
-    }
+    const initialize = async () => {
+      const savedLang = await applySavedLanguage();
+      const showPopup = !savedLang || savedLang === 'en';
+      
+      // Only show popup if no language is selected
+      if (showPopup) {
+        const detectLanguage = async () => {
+          const browserLang = navigator.languages.find(lang => 
+            SUPPORTED_LANGUAGES.includes(lang.split('-')[0])
+          )?.split('-')[0];
 
-    const detectLanguage = async () => {
-      if (localStorage.getItem('langPopupDismissed')) return;
+          let ipLang = null;
+          try {
+            const response = await fetch('https://ipapi.co/json/');
+            const { country } = await response.json();
+            ipLang = COUNTRY_TO_LANG[country];
+          } catch (error) {
+            console.log('IP detection failed, using browser lang');
+          }
 
-      const browserLang = navigator.languages.find(lang => 
-        Object.keys(POPUP_TEXTS).includes(lang.split('-')[0])
-      )?.split('-')[0];
+          const userLang = (browserLang && browserLang !== 'en') ? browserLang : 
+                          (ipLang && ipLang !== 'en') ? ipLang : 'en';
 
-      let ipLang = null;
-      try {
-        const response = await fetch('https://ipapi.co/json/');
-        const { country } = await response.json();
-        ipLang = COUNTRY_TO_LANG[country];
-      } catch (error) {
-        console.log('IP detection failed, using browser lang');
-      }
+          setTimeout(() => {
+            setState(prev => ({ 
+              ...prev, 
+              showPopup: true, 
+              userLang: SUPPORTED_LANGUAGES.includes(userLang) ? userLang : 'en'
+            }));
+          }, 3000);
+        };
 
-      const userLang = (browserLang && browserLang !== 'en') ? browserLang : 
-                      (ipLang && ipLang !== 'en') ? ipLang : null;
-
-      if (userLang) {
-        timeoutRef.current = setTimeout(() => {
-          setState({ showPopup: true, lang: userLang });
-        }, 5000);
-      }
-    };
-
-    detectLanguage();
-    
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+        detectLanguage();
       }
     };
+
+    initialize();
   }, []);
 
-  const handleResponse = (accept) => {
-    localStorage.setItem('langPopupDismissed', 'true');
+  const handleOpenLanguageSelection = () => {
+    setState(prev => ({ ...prev, stage: 'language-selection' }));
+  };
+
+  const handleLanguageSelect = async (langCode) => {
+    setState(prev => ({ ...prev, showPopup: false }));
+    localStorage.setItem('selectedLanguage', langCode);
     
-    if (accept && state.lang) {
-      const googleTranslateElement = document.querySelector('.goog-te-combo');
-      if (googleTranslateElement) {
-        googleTranslateElement.value = state.lang;
-        googleTranslateElement.dispatchEvent(new Event('change'));
-      } else {
-        // Add 'translated' parameter to URL
-        const currentUrl = new URL(window.location.href);
-        currentUrl.searchParams.set('translated', 'true');
-        
-        window.location.href = `https://translate.google.com/translate?sl=auto&tl=${state.lang}&u=${encodeURIComponent(currentUrl.toString())}`;
+    if (langCode !== 'en') {
+      // Show loading indicator
+      document.body.classList.add('translating');
+      
+      try {
+        await translatePage(langCode);
+      } finally {
+        document.body.classList.remove('translating');
       }
     }
-    setState(prev => ({ ...prev, showPopup: false }));
   };
 
   if (!state.showPopup) return null;
@@ -75,15 +81,34 @@ const LanguagePopup = () => {
   return (
     <div className="language-popup-overlay">
       <div className="language-popup-container">
-        <h3>{POPUP_TEXTS[state.lang]}</h3>
-        <div className="language-popup-buttons">
-          <button onClick={() => handleResponse(true)}>
-            {state.lang === 'ru' ? 'Да' : 'Yes'}
-          </button>
-          <button onClick={() => handleResponse(false)}>
-            {state.lang === 'ru' ? 'Нет' : 'No'}
-          </button>
-        </div>
+        {state.stage === 'initial' ? (
+          <>
+            <h3>{POPUP_TEXTS[state.userLang]}</h3>
+            <div className="language-popup-buttons">
+              <button 
+                className="select-button"
+                onClick={handleOpenLanguageSelection}
+              >
+                {SELECT_BUTTON_TEXTS[state.userLang]}
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <h3>{POPUP_TEXTS[state.userLang]}</h3>
+            <div className="language-list">
+              {SUPPORTED_LANGUAGES.map(langCode => (
+                <button
+                  key={langCode}
+                  className="language-option"
+                  onClick={() => handleLanguageSelect(langCode)}
+                >
+                  {LANGUAGE_NAMES[langCode]}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
