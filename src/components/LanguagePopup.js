@@ -8,10 +8,13 @@ const LanguagePopup = () => {
     lang: null
   });
   const timeoutRef = useRef(null);
+  const sessionChecked = useRef(false); // Added session tracking
 
   useEffect(() => {
     const detectLanguage = async () => {
-      if (localStorage.getItem('langPopupDismissed')) return;
+      // Prevent multiple checks in same session
+      if (sessionChecked.current || localStorage.getItem('langPopupDismissed')) return;
+      sessionChecked.current = true;
 
       const browserLang = navigator.languages.find(lang => 
         Object.keys(POPUP_TEXTS).includes(lang.split('-')[0])
@@ -46,7 +49,9 @@ const LanguagePopup = () => {
   }, []);
 
   const handleResponse = (accept) => {
+    // Store in both localStorage and session
     localStorage.setItem('langPopupDismissed', 'true');
+    sessionStorage.setItem('langPopupDismissed', 'true'); // Added session storage
     
     if (accept && state.lang) {
       const googleTranslateElement = document.querySelector('.goog-te-combo');
