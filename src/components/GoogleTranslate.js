@@ -24,7 +24,7 @@ const GoogleTranslate = () => {
     // Load immediately
     loadGoogleTranslate();
 
-    // Hide Google Translate banner on load
+    // Hide Google Translate banner
     const hideBanner = () => {
       const banner = document.querySelector('.goog-te-banner-frame');
       if (banner) {
