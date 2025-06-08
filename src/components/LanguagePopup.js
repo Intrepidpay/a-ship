@@ -11,11 +11,12 @@ const LanguagePopup = () => {
   useEffect(() => {
     // Check if we should show the popup
     const shouldShowPopup = () => {
-      // Don't show if user already dismissed or accepted
+      // Don't show if user already dismissed
       if (localStorage.getItem('langPopupDismissed')) return false;
       
       // Don't show if already translated
-      if (document.querySelector('.goog-te-combo')?.value !== 'en') return false;
+      const select = document.querySelector('.goog-te-combo');
+      if (select && select.value !== 'en') return false;
       
       return true;
     };
@@ -51,10 +52,10 @@ const LanguagePopup = () => {
   }, []);
 
   const handleResponse = (accept) => {
-    // Remember user's choice
-    localStorage.setItem('langPopupDismissed', 'true');
-    
     if (accept && state.lang) {
+      // Remember user accepted translation
+      localStorage.setItem('langPopupAccepted', state.lang);
+      
       // Directly trigger Google Translate
       const tryTranslation = () => {
         const select = document.querySelector('.goog-te-combo');
@@ -74,6 +75,9 @@ const LanguagePopup = () => {
         }
       };
       tryTranslation();
+    } else {
+      // Remember user dismissed the popup
+      localStorage.setItem('langPopupDismissed', 'true');
     }
     
     setState(prev => ({ ...prev, showPopup: false }));
