@@ -9,21 +9,9 @@ const LanguagePopup = () => {
   });
 
   useEffect(() => {
-    // Check if we should show the popup
-    const shouldShowPopup = () => {
-      // Don't show if user already dismissed
-      if (localStorage.getItem('langPopupDismissed')) return false;
-      
-      // Don't show if already translated
-      const select = document.querySelector('.goog-te-combo');
-      if (select && select.value !== 'en') return false;
-      
-      return true;
-    };
-
     const detectLanguage = async () => {
-      // Don't show if we shouldn't
-      if (!shouldShowPopup()) return;
+      // Only show once per session
+      if (sessionStorage.getItem('popupShown')) return;
 
       const browserLang = navigator.languages.find(lang => 
         Object.keys(POPUP_TEXTS).includes(lang.split('-')[0])
@@ -44,6 +32,7 @@ const LanguagePopup = () => {
       if (userLang) {
         setTimeout(() => {
           setState({ showPopup: true, lang: userLang });
+          sessionStorage.setItem('popupShown', 'true');
         }, 5000);
       }
     };
@@ -53,33 +42,10 @@ const LanguagePopup = () => {
 
   const handleResponse = (accept) => {
     if (accept && state.lang) {
-      // Remember user accepted translation
-      localStorage.setItem('langPopupAccepted', state.lang);
-      
-      // Directly trigger Google Translate
-      const tryTranslation = () => {
-        const select = document.querySelector('.goog-te-combo');
-        if (select) {
-          select.value = state.lang;
-          select.dispatchEvent(new Event('change'));
-          
-          // Hide Google banner after translation
-          setTimeout(() => {
-            const banner = document.querySelector('.goog-te-banner-frame');
-            if (banner) banner.style.display = 'none';
-            document.body.style.top = '0';
-          }, 1000);
-        } else {
-          // Keep trying until translator is ready
-          setTimeout(tryTranslation, 100);
-        }
-      };
-      tryTranslation();
-    } else {
-      // Remember user dismissed the popup
-      localStorage.setItem('langPopupDismissed', 'true');
+      // DIRECT TRANSLATION TRIGGER
+      const event = new CustomEvent('translatePage', { detail: state.lang });
+      window.dispatchEvent(event);
     }
-    
     setState(prev => ({ ...prev, showPopup: false }));
   };
 
