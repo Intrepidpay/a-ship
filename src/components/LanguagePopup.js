@@ -10,9 +10,7 @@ const LanguagePopup = () => {
 
   useEffect(() => {
     const detectLanguage = async () => {
-      // Only show once per session
-      if (sessionStorage.getItem('popupShown')) return;
-
+      // Your existing detection logic...
       const browserLang = navigator.languages.find(lang => 
         Object.keys(POPUP_TEXTS).includes(lang.split('-')[0])
       )?.split('-')[0];
@@ -23,7 +21,7 @@ const LanguagePopup = () => {
         const { country } = await response.json();
         ipLang = COUNTRY_TO_LANG[country];
       } catch (error) {
-        console.log('IP detection failed');
+        console.log('IP detection failed, using browser lang');
       }
 
       const userLang = (browserLang && browserLang !== 'en') ? browserLang : 
@@ -32,7 +30,6 @@ const LanguagePopup = () => {
       if (userLang) {
         setTimeout(() => {
           setState({ showPopup: true, lang: userLang });
-          sessionStorage.setItem('popupShown', 'true');
         }, 5000);
       }
     };
@@ -42,9 +39,15 @@ const LanguagePopup = () => {
 
   const handleResponse = (accept) => {
     if (accept && state.lang) {
-      // DIRECT TRANSLATION TRIGGER
-      const event = new CustomEvent('translatePage', { detail: state.lang });
-      window.dispatchEvent(event);
+      // Directly trigger Google Translate
+      const googleTranslateElement = document.querySelector('.goog-te-combo');
+      if (googleTranslateElement) {
+        googleTranslateElement.value = state.lang;
+        googleTranslateElement.dispatchEvent(new Event('change'));
+      } else {
+        // Fallback: Redirect to Google Translate version
+        window.location.href = `https://translate.google.com/translate?sl=auto&tl=${state.lang}&u=${encodeURIComponent(window.location.href)}`;
+      }
     }
     setState(prev => ({ ...prev, showPopup: false }));
   };
