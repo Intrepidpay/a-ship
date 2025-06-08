@@ -5,11 +5,11 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(92, 157, 255, 0.008); /* #5c9dff with transparency */
+  background-color: rgba(92, 157, 255, 0.1);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 2147483647; /* Maximum possible */
+  z-index: 2147483647;
   backdrop-filter: blur(5px);
 }
 
@@ -31,27 +31,68 @@
   margin-top: 25px;
 }
 
-.language-popup-buttons button {
+.select-button {
   padding: 12px 25px;
   border: none;
   border-radius: 6px;
+  background: #5c9dff;
+  color: white;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
 }
 
-.language-popup-buttons button:first-child {
-  background: #5c9dff;
-  color: white;
+.select-button:hover {
+  background: #4a8cff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(92, 157, 255, 0.3);
 }
 
-.language-popup-buttons button:last-child {
+.language-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.language-option {
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
   background: white;
-  color: #5c9dff;
-  border: 1px solid #5c9dff;
+  color: #333;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.language-option:hover {
+  background: #f0f7ff;
+  border-color: #5c9dff;
+  transform: translateY(-1px);
 }
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* Loading indicator during translation */
+body.translating::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #5c9dff, #6a7bff);
+  z-index: 2147483647;
+  animation: translating 2s infinite;
+}
+
+@keyframes translating {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
