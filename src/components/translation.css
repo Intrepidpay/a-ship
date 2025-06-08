@@ -5,7 +5,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(92, 157, 255, 0.1); /* #5c9dff with transparency */
+  background-color: rgba(92, 157, 255, 0.02); /* #5c9dff with transparency */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -54,38 +54,4 @@
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
-}
-
-/* Hide Google Translate banners and warnings */
-.goog-te-banner-frame, .goog-te-spinner-pos, .goog-te-ftab, .goog-te-gadget-simple {
-  display: none !important;
-  visibility: hidden !important;
-  height: 0 !important;
-  width: 0 !important;
-  overflow: hidden !important;
-}
-
-/* Hide security warning */
-.skiptranslate {
-  display: none !important;
-}
-
-/* Force hide all Google Translate elements */
-.goog-te-banner-frame, 
-.goog-te-spinner-pos, 
-.goog-te-ftab, 
-.goog-te-gadget-simple, 
-.skiptranslate, 
-.goog-tooltip, 
-.goog-te-combo, 
-.goog-te-balloon-frame, 
-.goog-text-highlight {
-  display: none !important;
-  visibility: hidden !important;
-  height: 0 !important;
-  width: 0 !important;
-  overflow: hidden !important;
-  position: absolute !important;
-  top: -9999px !important;
-  left: -9999px !important;
 }
