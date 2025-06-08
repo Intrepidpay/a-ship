@@ -69,3 +69,23 @@
 .skiptranslate {
   display: none !important;
 }
+
+/* Force hide all Google Translate elements */
+.goog-te-banner-frame, 
+.goog-te-spinner-pos, 
+.goog-te-ftab, 
+.goog-te-gadget-simple, 
+.skiptranslate, 
+.goog-tooltip, 
+.goog-te-combo, 
+.goog-te-balloon-frame, 
+.goog-text-highlight {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  top: -9999px !important;
+  left: -9999px !important;
+}
