@@ -12,6 +12,7 @@ const GoogleTranslate = () => {
         }, 'google_translate_element');
       };
 
+      // Only load if not already loaded
       if (!document.querySelector('script[src*="translate.google.com"]')) {
         const script = document.createElement('script');
         script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
@@ -20,12 +21,10 @@ const GoogleTranslate = () => {
       }
     };
 
-    // Only load if translation cookie doesn't exist
-    if (!document.cookie.includes('googtrans=')) {
-      loadGoogleTranslate();
-    }
+    // Load immediately
+    loadGoogleTranslate();
 
-    // Hide Google Translate banner
+    // Hide Google Translate banner on load
     const hideBanner = () => {
       const banner = document.querySelector('.goog-te-banner-frame');
       if (banner) {
@@ -37,14 +36,14 @@ const GoogleTranslate = () => {
     // Initial hide attempt
     hideBanner();
     
-    // Set interval to keep hiding it
+    // Keep trying to hide it periodically
     const bannerInterval = setInterval(hideBanner, 1000);
     
     return () => {
+      clearInterval(bannerInterval);
       const script = document.querySelector('script[src*="translate.google.com"]');
       if (script) document.body.removeChild(script);
       delete window.googleTranslateElementInit;
-      clearInterval(bannerInterval);
     };
   }, []);
 
