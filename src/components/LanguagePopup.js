@@ -10,6 +10,9 @@ const LanguagePopup = () => {
 
   useEffect(() => {
     const detectLanguage = async () => {
+      // Check if user already dismissed popup
+      if (localStorage.getItem('langPopupDismissed')) return; // Added line 1
+
       // Your existing detection logic...
       const browserLang = navigator.languages.find(lang => 
         Object.keys(POPUP_TEXTS).includes(lang.split('-')[0])
@@ -38,6 +41,9 @@ const LanguagePopup = () => {
   }, []);
 
   const handleResponse = (accept) => {
+    // Remember user dismissed popup
+    localStorage.setItem('langPopupDismissed', 'true'); // Added line 2
+    
     if (accept && state.lang) {
       // Directly trigger Google Translate
       const googleTranslateElement = document.querySelector('.goog-te-combo');
