@@ -2,6 +2,40 @@ import React, { useEffect } from 'react';
 
 const GoogleTranslate = () => {
   useEffect(() => {
+    // Mutation Observer to hide banners in real-time
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach(() => {
+        const banners = [
+          '.goog-te-banner-frame',
+          '.goog-te-spinner-pos',
+          '.goog-te-ftab',
+          '.goog-te-gadget-simple',
+          '.skiptranslate',
+          '.goog-tooltip',
+          '.goog-te-combo'
+        ];
+        
+        banners.forEach(selector => {
+          const elements = document.querySelectorAll(selector);
+          elements.forEach(el => {
+            el.style.display = 'none';
+            el.style.visibility = 'hidden';
+            el.style.height = '0';
+            el.style.width = '0';
+            el.style.overflow = 'hidden';
+          });
+        });
+      });
+    });
+
+    // Start observing the document body
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: false,
+      characterData: false
+    });
+
     const loadGoogleTranslate = () => {
       window.googleTranslateElementInit = () => {
         new window.google.translate.TranslateElement({
@@ -10,34 +44,6 @@ const GoogleTranslate = () => {
           layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
           autoDisplay: false
         }, 'google_translate_element');
-        
-        // Start banner removal process
-        let attempts = 0;
-        const removeBanners = () => {
-          const banners = [
-            '.goog-te-banner-frame',
-            '.goog-te-spinner-pos',
-            '.goog-te-ftab',
-            '.goog-te-gadget-simple',
-            '.skiptranslate'
-          ];
-          
-          banners.forEach(selector => {
-            const el = document.querySelector(selector);
-            if (el) {
-              el.style.display = 'none';
-              el.style.visibility = 'hidden';
-              el.style.height = '0';
-            }
-          });
-          
-          attempts++;
-          if (attempts < 10) {
-            setTimeout(removeBanners, 500);
-          }
-        };
-        
-        removeBanners();
       };
 
       if (!document.querySelector('script[src*="translate.google.com"]')) {
@@ -50,7 +56,9 @@ const GoogleTranslate = () => {
 
     loadGoogleTranslate();
 
+    // Cleanup function
     return () => {
+      observer.disconnect();
       const script = document.querySelector('script[src*="translate.google.com"]');
       if (script) document.body.removeChild(script);
       delete window.googleTranslateElementInit;
