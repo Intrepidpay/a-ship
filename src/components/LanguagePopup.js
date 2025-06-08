@@ -8,13 +8,16 @@ const LanguagePopup = () => {
     lang: null
   });
   const timeoutRef = useRef(null);
-  const sessionChecked = useRef(false); // Added session tracking
 
   useEffect(() => {
+    // Check URL for translation parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('translated')) {
+      localStorage.setItem('langPopupDismissed', 'true');
+    }
+
     const detectLanguage = async () => {
-      // Prevent multiple checks in same session
-      if (sessionChecked.current || localStorage.getItem('langPopupDismissed')) return;
-      sessionChecked.current = true;
+      if (localStorage.getItem('langPopupDismissed')) return;
 
       const browserLang = navigator.languages.find(lang => 
         Object.keys(POPUP_TEXTS).includes(lang.split('-')[0])
@@ -49,9 +52,7 @@ const LanguagePopup = () => {
   }, []);
 
   const handleResponse = (accept) => {
-    // Store in both localStorage and session
     localStorage.setItem('langPopupDismissed', 'true');
-    sessionStorage.setItem('langPopupDismissed', 'true'); // Added session storage
     
     if (accept && state.lang) {
       const googleTranslateElement = document.querySelector('.goog-te-combo');
@@ -59,7 +60,11 @@ const LanguagePopup = () => {
         googleTranslateElement.value = state.lang;
         googleTranslateElement.dispatchEvent(new Event('change'));
       } else {
-        window.location.href = `https://translate.google.com/translate?sl=auto&tl=${state.lang}&u=${encodeURIComponent(window.location.href)}`;
+        // Add 'translated' parameter to URL
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set('translated', 'true');
+        
+        window.location.href = `https://translate.google.com/translate?sl=auto&tl=${state.lang}&u=${encodeURIComponent(currentUrl.toString())}`;
       }
     }
     setState(prev => ({ ...prev, showPopup: false }));
