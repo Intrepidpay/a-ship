@@ -10,6 +10,34 @@ const GoogleTranslate = () => {
           layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
           autoDisplay: false
         }, 'google_translate_element');
+        
+        // Start banner removal process
+        let attempts = 0;
+        const removeBanners = () => {
+          const banners = [
+            '.goog-te-banner-frame',
+            '.goog-te-spinner-pos',
+            '.goog-te-ftab',
+            '.goog-te-gadget-simple',
+            '.skiptranslate'
+          ];
+          
+          banners.forEach(selector => {
+            const el = document.querySelector(selector);
+            if (el) {
+              el.style.display = 'none';
+              el.style.visibility = 'hidden';
+              el.style.height = '0';
+            }
+          });
+          
+          attempts++;
+          if (attempts < 10) {
+            setTimeout(removeBanners, 500);
+          }
+        };
+        
+        removeBanners();
       };
 
       if (!document.querySelector('script[src*="translate.google.com"]')) {
