@@ -9,14 +9,20 @@ const LanguagePopup = () => {
   });
 
   useEffect(() => {
-    // Check if translation is already active
-    const isAlreadyTranslated = () => {
-      return document.cookie.includes('googtrans=');
+    // Check if we should show the popup
+    const shouldShowPopup = () => {
+      // Don't show if user already dismissed or accepted
+      if (localStorage.getItem('langPopupDismissed')) return false;
+      
+      // Don't show if already translated
+      if (document.querySelector('.goog-te-combo')?.value !== 'en') return false;
+      
+      return true;
     };
 
     const detectLanguage = async () => {
-      // Don't show if already translated
-      if (isAlreadyTranslated()) return;
+      // Don't show if we shouldn't
+      if (!shouldShowPopup()) return;
 
       const browserLang = navigator.languages.find(lang => 
         Object.keys(POPUP_TEXTS).includes(lang.split('-')[0])
@@ -45,13 +51,31 @@ const LanguagePopup = () => {
   }, []);
 
   const handleResponse = (accept) => {
+    // Remember user's choice
+    localStorage.setItem('langPopupDismissed', 'true');
+    
     if (accept && state.lang) {
-      // Set translation cookie and refresh
-      const expiryDate = new Date();
-      expiryDate.setFullYear(expiryDate.getFullYear() + 1);
-      document.cookie = `googtrans=/en/${state.lang}; expires=${expiryDate.toUTCString()}; path=/`;
-      window.location.reload();
+      // Directly trigger Google Translate
+      const tryTranslation = () => {
+        const select = document.querySelector('.goog-te-combo');
+        if (select) {
+          select.value = state.lang;
+          select.dispatchEvent(new Event('change'));
+          
+          // Hide Google banner after translation
+          setTimeout(() => {
+            const banner = document.querySelector('.goog-te-banner-frame');
+            if (banner) banner.style.display = 'none';
+            document.body.style.top = '0';
+          }, 1000);
+        } else {
+          // Keep trying until translator is ready
+          setTimeout(tryTranslation, 100);
+        }
+      };
+      tryTranslation();
     }
+    
     setState(prev => ({ ...prev, showPopup: false }));
   };
 
