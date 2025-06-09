@@ -1,79 +1,128 @@
-import { translationCache } from '../utils/cache';
+// Translation cache implementation built into the service
+class TranslationCache {
+  constructor() {
+    this.cache = new Map();
+    this.restore();
+  }
 
-const DEEPL_API_KEY = process.env.REACT_APP_DEEPL_API_KEY;
-const API_ENDPOINT = 'https://api-free.deepl.com/v2/translate';
+  getKey(text, targetLang) {
+    return `${targetLang}:${text}`;
+  }
 
-// Translate text using DeepL API
+  get(text, targetLang) {
+    const key = this.getKey(text, targetLang);
+    return this.cache.get(key);
+  }
+
+  set(text, targetLang, translation) {
+    const key = this.getKey(text, targetLang);
+    this.cache.set(key, translation);
+    this.persist();
+  }
+
+  persist() {
+    try {
+      const cacheArray = Array.from(this.cache.entries());
+      localStorage.setItem('translationCache', JSON.stringify(cacheArray));
+    } catch (error) {
+      console.error('Cache persistence error:', error);
+    }
+  }
+
+  restore() {
+    try {
+      const cacheData = localStorage.getItem('translationCache');
+      if (cacheData) {
+        const cacheArray = JSON.parse(cacheData);
+        this.cache = new Map(cacheArray);
+      }
+    } catch (error) {
+      console.error('Cache restoration error:', error);
+    }
+  }
+}
+
+const translationCache = new TranslationCache();
+
+const API_ENDPOINT = 'https://libretranslate.com/translate';
+
 export const translateText = async (text, targetLang) => {
   if (!text.trim()) return text;
-  
+
   // Check cache first
   const cached = translationCache.get(text, targetLang);
   if (cached) return cached;
-  
+
   try {
     const response = await fetch(API_ENDPOINT, {
       method: 'POST',
       headers: {
-        'Authorization': `DeepL-Auth-Key ${DEEPL_API_KEY}`,
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        text: [text],
-        target_lang: targetLang.toUpperCase(),
-        preserve_formatting: true,
-        formality: 'prefer_more',
-      }),
+        q: text,
+        source: 'en',
+        target: targetLang,
+        format: 'text'
+      })
     });
-    
+
     if (!response.ok) {
-      throw new Error(`DeepL API error: ${response.status}`);
+      const errorText = await response.text();
+      throw new Error(`LibreTranslate API error ${response.status}: ${errorText}`);
     }
-    
+
     const data = await response.json();
-    const translation = data.translations[0].text;
-    
+    const translation = data.translatedText;
+
     // Cache the result
     translationCache.set(text, targetLang, translation);
     return translation;
   } catch (error) {
     console.error('Translation error:', error);
-    return text; // Return original text on failure
+    return text;
   }
 };
 
-// Translate all translatable elements on the page
+// Translate all text content on the page
 export const translatePage = async (targetLang) => {
-  const elements = document.querySelectorAll('[data-translate="true"]');
-  
-  // Store translations in localStorage
+  // Store selected language
   localStorage.setItem('selectedLanguage', targetLang);
   document.documentElement.lang = targetLang;
-  
-  const translations = [];
-  
-  for (const element of elements) {
+
+  // Get all elements with text content
+  const elements = Array.from(document.querySelectorAll('body *'))
+    .filter(el =>
+      el.childNodes.length === 1 &&
+      el.childNodes[0].nodeType === Node.TEXT_NODE &&
+      !el.classList.contains('no-translate') &&
+      el.textContent.trim() !== ''
+    );
+
+  // Batch translations for performance
+  const translationPromises = elements.map(async element => {
     const text = element.textContent.trim();
-    if (text) {
-      translations.push({
-        element,
-        text,
-        promise: translateText(text, targetLang)
-      });
+    try {
+      const translation = await translateText(text, targetLang);
+      element.textContent = translation;
+    } catch (error) {
+      console.error('Element translation error:', error);
     }
-  }
-  
-  // Process translations as they complete
-  for (const { element, promise } of translations) {
-    element.textContent = await promise;
-  }
+  });
+
+  await Promise.all(translationPromises);
 };
 
 // Apply saved language on page load
 export const applySavedLanguage = async () => {
   const savedLang = localStorage.getItem('selectedLanguage');
   if (savedLang && savedLang !== 'en') {
-    await translatePage(savedLang);
+    try {
+      await translatePage(savedLang);
+    } catch (error) {
+      console.error('Error applying saved language:', error);
+    }
+    return savedLang;
   }
-  return savedLang || 'en';
+  return 'en';
 };
