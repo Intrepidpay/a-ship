@@ -45,7 +45,7 @@ class TranslationCache {
 const translationCache = new TranslationCache();
 
 // LibreTranslate API configuration
-const LIBRETRANSLATE_API_URL = "https://translate.argosopentech.com/translate";
+const LIBRETRANSLATE_API_URL = "https://libretranslate.p.rapidapi.com/translate";
 // Note: Public instances may have rate limits. For production, consider self-hosting.
 
 export const translateText = async (text, targetLang) => {
