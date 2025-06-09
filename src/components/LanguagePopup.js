@@ -5,21 +5,36 @@ import {
   LANGUAGE_NAMES,
   SUPPORTED_LANGUAGES
 } from './constants';
-import { applySavedLanguage, translatePage } from '../services/translationService';
+import { 
+  applySavedLanguage, 
+  translatePage,
+  preloadCommonTranslations
+} from '../services/translationService';
 import './translation.css';
 
 const LanguagePopup = () => {
   const [state, setState] = useState({
     showPopup: false,
     userLang: 'en',
-    stage: 'initial'
+    stage: 'initial',
+    isTranslating: false
   });
 
   useEffect(() => {
     const initialize = async () => {
-      // Check if we've shown the popup before
+      // Preload common translations before anything else
+      await preloadCommonTranslations();
+      
+      // Apply saved language if exists
+      const savedLang = localStorage.getItem('selectedLanguage');
       const hasShownPopup = localStorage.getItem('hasShownPopup') === 'true';
-      const savedLang = await applySavedLanguage();
+      
+      if (savedLang && savedLang !== 'en') {
+        setState(prev => ({ ...prev, isTranslating: true }));
+        await applySavedLanguage(savedLang);
+        setState(prev => ({ ...prev, isTranslating: false }));
+        return;
+      }
       
       // Only show popup if we haven't shown it before
       if (!hasShownPopup) {
@@ -41,17 +56,31 @@ const LanguagePopup = () => {
   };
 
   const handleLanguageSelect = async (langCode) => {
-    setState(prev => ({ ...prev, showPopup: false }));
+    setState(prev => ({ ...prev, isTranslating: true, showPopup: false }));
     
-    // Mark that we've shown the popup
-    localStorage.setItem('hasShownPopup', 'true');
-    localStorage.setItem('selectedLanguage', langCode);
-    
-    // Translate immediately
-    document.body.classList.add('translating');
-    await translatePage(langCode);
-    document.body.classList.remove('translating');
+    try {
+      // Mark that we've shown the popup
+      localStorage.setItem('hasShownPopup', 'true');
+      localStorage.setItem('selectedLanguage', langCode);
+      
+      // Translate immediately
+      document.body.classList.add('translating');
+      await translatePage(langCode);
+    } catch (error) {
+      console.error('Translation failed:', error);
+    } finally {
+      document.body.classList.remove('translating');
+      setState(prev => ({ ...prev, isTranslating: false }));
+    }
   };
+
+  if (state.isTranslating) {
+    return (
+      <div className="global-translating-overlay">
+        <div className="translating-message">Translating your experience...</div>
+      </div>
+    );
+  }
 
   if (!state.showPopup) return null;
 
