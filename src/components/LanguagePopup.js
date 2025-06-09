@@ -1,55 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  COUNTRY_TO_LANG, 
   POPUP_TEXTS, 
   SELECT_BUTTON_TEXTS, 
   LANGUAGE_NAMES,
   SUPPORTED_LANGUAGES
 } from './constants';
-import { applySavedLanguage } from '../services/translationService';
+import { applySavedLanguage, translatePage } from '../services/translationService';
 import './translation.css';
 
 const LanguagePopup = () => {
   const [state, setState] = useState({
     showPopup: false,
     userLang: 'en',
-    stage: 'initial' // 'initial' or 'language-selection'
+    stage: 'initial'
   });
 
   useEffect(() => {
     const initialize = async () => {
+      // Check if we've shown the popup before
+      const hasShownPopup = localStorage.getItem('hasShownPopup') === 'true';
       const savedLang = await applySavedLanguage();
-      const showPopup = !savedLang || savedLang === 'en';
       
-      // Only show popup if no language is selected
-      if (showPopup) {
-        const detectLanguage = async () => {
-          const browserLang = navigator.languages.find(lang => 
-            SUPPORTED_LANGUAGES.includes(lang.split('-')[0])
-          )?.split('-')[0];
-
-          let ipLang = null;
-          try {
-            const response = await fetch('https://ipapi.co/json/');
-            const { country } = await response.json();
-            ipLang = COUNTRY_TO_LANG[country];
-          } catch (error) {
-            console.log('IP detection failed, using browser lang');
-          }
-
-          const userLang = (browserLang && browserLang !== 'en') ? browserLang : 
-                          (ipLang && ipLang !== 'en') ? ipLang : 'en';
-
-          setTimeout(() => {
-            setState(prev => ({ 
-              ...prev, 
-              showPopup: true, 
-              userLang: SUPPORTED_LANGUAGES.includes(userLang) ? userLang : 'en'
-            }));
-          }, 3000);
-        };
-
-        detectLanguage();
+      // Only show popup if we haven't shown it before
+      if (!hasShownPopup) {
+        setTimeout(() => {
+          setState({ 
+            showPopup: true, 
+            userLang: savedLang || 'en',
+            stage: 'initial'
+          });
+        }, 4000);
       }
     };
 
@@ -62,18 +42,15 @@ const LanguagePopup = () => {
 
   const handleLanguageSelect = async (langCode) => {
     setState(prev => ({ ...prev, showPopup: false }));
+    
+    // Mark that we've shown the popup
+    localStorage.setItem('hasShownPopup', 'true');
     localStorage.setItem('selectedLanguage', langCode);
     
-    if (langCode !== 'en') {
-      // Show loading indicator
-      document.body.classList.add('translating');
-      
-      try {
-        await translatePage(langCode);
-      } finally {
-        document.body.classList.remove('translating');
-      }
-    }
+    // Translate immediately
+    document.body.classList.add('translating');
+    await translatePage(langCode);
+    document.body.classList.remove('translating');
   };
 
   if (!state.showPopup) return null;
@@ -88,6 +65,7 @@ const LanguagePopup = () => {
               <button 
                 className="select-button"
                 onClick={handleOpenLanguageSelection}
+                aria-label={SELECT_BUTTON_TEXTS[state.userLang]}
               >
                 {SELECT_BUTTON_TEXTS[state.userLang]}
               </button>
@@ -102,6 +80,7 @@ const LanguagePopup = () => {
                   key={langCode}
                   className="language-option"
                   onClick={() => handleLanguageSelect(langCode)}
+                  aria-label={LANGUAGE_NAMES[langCode]}
                 >
                   {LANGUAGE_NAMES[langCode]}
                 </button>
