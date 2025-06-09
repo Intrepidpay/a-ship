@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Helmet } from "react-helmet";
 import ScrollToTop from './components/ScrollToTop';
 import Header from './components/Header/Header';
@@ -15,8 +15,23 @@ import Loader from './components/Loader/Loader';
 import AnimatedShippingBackground from './components/AnimatedShippingBackground';
 import CookieConsent from './components/CookieConsent/CookieConsent';
 import LanguagePopup from './components/LanguagePopup';
+import { applySavedLanguage } from './services/translationService';
 import './components/translation.css';
 import './App.css';
+
+// Component to handle translation on route changes
+function RouteTranslator() {
+  const location = useLocation();
+
+  useEffect(() => {
+    const savedLang = localStorage.getItem('selectedLanguage');
+    if (savedLang && savedLang !== 'en') {
+      applySavedLanguage(savedLang);
+    }
+  }, [location.pathname]);
+
+  return null;
+}
 
 function App() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -53,11 +68,10 @@ function App() {
       </Helmet>
       
       <div className="app">
-        {/* Translation components placed at the root level */}
         <LanguagePopup />
-        
         <AnimatedShippingBackground />
         <Router basename={process.env.PUBLIC_URL}>
+          <RouteTranslator />
           {loading && <Loader />}
           <Header isAdmin={isAdmin} />
           <main className="main-content">
