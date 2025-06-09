@@ -1,8 +1,3 @@
-export const COUNTRY_TO_LANG = {
-  RU: 'ru', FR: 'fr', ES: 'es', DE: 'de', IT: 'it',
-  CN: 'zh', JP: 'ja', US: 'en', GB: 'en', CA: 'en'
-};
-
 export const LANGUAGE_NAMES = {
   en: 'English',
   ru: 'Русский',
