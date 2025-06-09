@@ -5,11 +5,6 @@ import {
   LANGUAGE_NAMES,
   SUPPORTED_LANGUAGES
 } from './constants';
-import { 
-  applySavedLanguage, 
-  translatePage,
-  preloadCommonTranslations
-} from '../services/translationService';
 import './translation.css';
 
 const LanguagePopup = () => {
@@ -21,43 +16,28 @@ const LanguagePopup = () => {
   });
 
   useEffect(() => {
-    const getLangByIP = async () => {
-      try {
-        const response = await fetch('https://ipapi.co/json');
-        const data = await response.json();
-        const ipLang = data.languages?.split(',')[0]?.slice(0, 2);
-        return SUPPORTED_LANGUAGES.includes(ipLang) ? ipLang : 'en';
-      } catch (err) {
-        console.error('IP language detection failed:', err);
-        return 'en';
-      }
-    };
-
     const initialize = async () => {
+      // Preload common translations before anything else
       await preloadCommonTranslations();
-
+      
+      // Apply saved language if exists
       const savedLang = localStorage.getItem('selectedLanguage');
       const hasShownPopup = localStorage.getItem('hasShownPopup') === 'true';
-
+      
       if (savedLang && savedLang !== 'en') {
         setState(prev => ({ ...prev, isTranslating: true }));
         await applySavedLanguage(savedLang);
         setState(prev => ({ ...prev, isTranslating: false }));
         return;
       }
-
-      let browserLang = navigator.language?.slice(0, 2) || 'en';
-      if (!SUPPORTED_LANGUAGES.includes(browserLang)) {
-        browserLang = await getLangByIP();
-      }
-
+      
+      // Only show popup if we haven't shown it before
       if (!hasShownPopup) {
         setTimeout(() => {
           setState({ 
             showPopup: true, 
-            userLang: savedLang || browserLang,
-            stage: 'initial',
-            isTranslating: false
+            userLang: savedLang || 'en',
+            stage: 'initial'
           });
         }, 3000);
       }
@@ -72,10 +52,13 @@ const LanguagePopup = () => {
 
   const handleLanguageSelect = async (langCode) => {
     setState(prev => ({ ...prev, isTranslating: true, showPopup: false }));
-
+    
     try {
+      // Mark that we've shown the popup
       localStorage.setItem('hasShownPopup', 'true');
       localStorage.setItem('selectedLanguage', langCode);
+      
+      // Translate immediately
       document.body.classList.add('translating');
       await translatePage(langCode);
     } catch (error) {
