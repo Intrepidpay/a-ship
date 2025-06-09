@@ -6,8 +6,6 @@ import {
   SUPPORTED_LANGUAGES
 } from './constants';
 import { 
-  applySavedLanguage, 
-  translatePage,
   preloadCommonTranslations
 } from '../services/translationService';
 import './translation.css';
@@ -39,13 +37,6 @@ const LanguagePopup = () => {
       const savedLang = localStorage.getItem('selectedLanguage');
       const hasShownPopup = localStorage.getItem('hasShownPopup') === 'true';
 
-      if (savedLang && savedLang !== 'en') {
-        setState(prev => ({ ...prev, isTranslating: true }));
-        await applySavedLanguage(savedLang);
-        setState(prev => ({ ...prev, isTranslating: false }));
-        return;
-      }
-
       let browserLang = navigator.language?.slice(0, 2) || 'en';
       if (!SUPPORTED_LANGUAGES.includes(browserLang)) {
         browserLang = await getLangByIP();
@@ -70,20 +61,16 @@ const LanguagePopup = () => {
     setState(prev => ({ ...prev, stage: 'language-selection' }));
   };
 
-  const handleLanguageSelect = async (langCode) => {
-    setState(prev => ({ ...prev, isTranslating: true, showPopup: false }));
+  const handleLanguageSelect = (langCode) => {
+    setState(prev => ({ 
+      ...prev, 
+      isTranslating: true,
+      showPopup: false,
+      userLang: langCode
+    }));
 
-    try {
-      localStorage.setItem('hasShownPopup', 'true');
-      localStorage.setItem('selectedLanguage', langCode);
-      document.body.classList.add('translating');
-      await translatePage(langCode);
-    } catch (error) {
-      console.error('Translation failed:', error);
-    } finally {
-      document.body.classList.remove('translating');
-      setState(prev => ({ ...prev, isTranslating: false }));
-    }
+    localStorage.setItem('hasShownPopup', 'true');
+    localStorage.setItem('selectedLanguage', langCode);
   };
 
   if (state.isTranslating) {
@@ -101,20 +88,20 @@ const LanguagePopup = () => {
       <div className="language-popup-container">
         {state.stage === 'initial' ? (
           <>
-            <h3>{POPUP_TEXTS[state.userLang]}</h3>
+            <h3>{POPUP_TEXTS[state.userLang] || POPUP_TEXTS.en}</h3>
             <div className="language-popup-buttons">
               <button 
                 className="select-button"
                 onClick={handleOpenLanguageSelection}
-                aria-label={SELECT_BUTTON_TEXTS[state.userLang]}
+                aria-label={SELECT_BUTTON_TEXTS[state.userLang] || SELECT_BUTTON_TEXTS.en}
               >
-                {SELECT_BUTTON_TEXTS[state.userLang]}
+                {SELECT_BUTTON_TEXTS[state.userLang] || SELECT_BUTTON_TEXTS.en}
               </button>
             </div>
           </>
         ) : (
           <>
-            <h3>{POPUP_TEXTS[state.userLang]}</h3>
+            <h3>{POPUP_TEXTS[state.userLang] || POPUP_TEXTS.en}</h3>
             <div className="language-list">
               {SUPPORTED_LANGUAGES.map(langCode => (
                 <button
