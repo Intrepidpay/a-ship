@@ -12,7 +12,9 @@ restore() { try { const cacheData = localStorage.getItem('translationCache'); if
 
 const translationCache = new TranslationCache();
 
-const API_ENDPOINT = 'https://api.deepseek.com/v1/chat/completions'; // Example endpoint const API_KEY = 'sk-eed0db1fdf0247b588201374c9396728';
+const API_ENDPOINT = 'https://api.deepseek.com/v1/chat/completions'; // Example
+
+const API_KEY = 'sk-eed0db1fdf0247b588201374c9396728';
 
 export const translateText = async (text, targetLang) => { if (!text.trim()) return text;
 
