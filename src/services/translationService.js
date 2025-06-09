@@ -51,7 +51,10 @@ export const translateText = async (text, targetLang) => {
 
   // Check cache first
   const cached = translationCache.get(text, targetLang);
-  if (cached) return cached;
+  if (cached) {
+    // console.log(`Cache hit for "${text}" => "${cached}"`);
+    return cached;
+  }
 
   try {
     const response = await fetch(API_ENDPOINT, {
@@ -90,7 +93,7 @@ export const translatePage = async (targetLang) => {
   localStorage.setItem('selectedLanguage', targetLang);
   document.documentElement.lang = targetLang;
 
-  // Get all elements with text content
+  // Get all elements with text content - only single text node children
   const elements = Array.from(document.querySelectorAll('body *'))
     .filter(el =>
       el.childNodes.length === 1 &&
@@ -99,7 +102,7 @@ export const translatePage = async (targetLang) => {
       el.textContent.trim() !== ''
     );
 
-  // Batch translations for performance
+  // Translate all texts concurrently
   const translationPromises = elements.map(async element => {
     const text = element.textContent.trim();
     try {
