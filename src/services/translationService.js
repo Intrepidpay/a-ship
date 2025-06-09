@@ -1,131 +1,90 @@
-// Translation cache implementation
-class TranslationCache {
-  constructor() {
-    this.cache = new Map();
-    this.restore();
-  }
+import { SUPPORTED_LANGUAGES } from '../components/constants';
 
-  getKey(text, targetLang) {
-    return `${targetLang}:${text}`;
-  }
+class TranslationCache { constructor() { this.cache = new Map(); this.restore(); this.preloaded = false; }
 
-  get(text, targetLang) {
-    const key = this.getKey(text, targetLang);
-    return this.cache.get(key);
-  }
+getKey(text, targetLang) { return ${targetLang}:${text}; }
 
-  set(text, targetLang, translation) {
-    const key = this.getKey(text, targetLang);
-    this.cache.set(key, translation);
-    this.persist();
-  }
+get(text, targetLang) { const key = this.getKey(text, targetLang); return this.cache.get(key); }
 
-  persist() {
-    try {
-      const cacheArray = Array.from(this.cache.entries());
-      localStorage.setItem('translationCache', JSON.stringify(cacheArray));
-    } catch (error) {
-      console.error('Cache persistence error:', error);
-    }
-  }
+set(text, targetLang, translation) { const key = this.getKey(text, targetLang); this.cache.set(key, translation); this.persist(); }
 
-  restore() {
-    try {
-      const cacheData = localStorage.getItem('translationCache');
-      if (cacheData) {
-        const cacheArray = JSON.parse(cacheData);
-        this.cache = new Map(cacheArray);
-      }
-    } catch (error) {
-      console.error('Cache restoration error:', error);
+persist() { try { const cacheArray = Array.from(this.cache.entries()); localStorage.setItem('translationCache', JSON.stringify(cacheArray)); } catch (error) { console.error('Cache persistence error:', error); } }
+
+restore() { try { const cacheData = localStorage.getItem('translationCache'); if (cacheData) { const cacheArray = JSON.parse(cacheData); this.cache = new Map(cacheArray); } } catch (error) { console.error('Cache restoration error:', error); this.cache = new Map(); } }
+
+preloadCommonTranslations(targetLang = 'en') { if (this.preloaded) return;
+
+const commonPhrases = [
+  "Home", "About", "Contact", "Services", "Products",
+  "Welcome", "Login", "Sign Up", "Search", "Read More"
+];
+
+for (const phrase of commonPhrases) {
+  for (const lang of SUPPORTED_LANGUAGES) {
+    if (lang === 'en') continue;
+    const key = this.getKey(phrase, lang);
+    if (!this.cache.has(key)) {
+      this.cache.set(key, phrase);
     }
   }
 }
 
-const translationCache = new TranslationCache();
+this.preloaded = true;
 
-// LibreTranslate API configuration
-const LIBRETRANSLATE_API_URL = "https://libretranslate.de/translate";
-// Note: Public instances may have rate limits. For production, consider self-hosting.
+} }
 
-export const translateText = async (text, targetLang) => {
-  if (!text.trim()) return text;
-  
-  // Check cache first
-  const cached = translationCache.get(text, targetLang);
-  if (cached) return cached;
-  
-  try {
-    const response = await fetch(LIBRETRANSLATE_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        q: text,
-        source: "en",
-        target: targetLang,
-        format: "text",
-        api_key: "" // Add API key if required
-      }),
-    });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`LibreTranslate API error ${response.status}: ${errorText}`);
-    }
-    
-    const data = await response.json();
-    const translation = data.translatedText;
-    
-    // Cache the result
-    translationCache.set(text, targetLang, translation);
-    return translation;
-  } catch (error) {
-    console.error('Translation error:', error);
-    return text;
+const translationCache = new TranslationCache(); const LIBRETRANSLATE_API_URL = "https://libretranslate.de/translate"; const failedTranslations = new Set(); const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+export const translateText = async (text, targetLang) => { if (!text.trim()) return text;
+
+const failKey = ${targetLang}:${text}; if (failedTranslations.has(failKey)) return text;
+
+const cached = translationCache.get(text, targetLang); if (cached && cached !== text) { console.log(Cache hit for '${text}' in ${targetLang}:, cached); return cached; }
+
+console.log(Translating '${text}' to ${targetLang}...);
+
+try { const response = await fetch(LIBRETRANSLATE_API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ q: text, source: "en", target: targetLang, format: "text" }) });
+
+if (!response.ok) {
+  const errorText = await response.text();
+  throw new Error(`API error ${response.status}: ${errorText}`);
+}
+
+const data = await response.json();
+const translation = data.translatedText;
+
+translationCache.set(text, targetLang, translation);
+return translation;
+
+} catch (error) { console.error('Translation error:', error); failedTranslations.add(failKey); return text; } };
+
+export const preloadCommonTranslations = async () => { translationCache.preloadCommonTranslations(); };
+
+export const translatePage = async (targetLang) => { console.time("TranslationTime"); localStorage.setItem('selectedLanguage', targetLang); document.documentElement.lang = targetLang;
+
+const highPrioritySelectors = [ 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'li', 'span', 'a', 'button' ]; const mediumPrioritySelectors = [ 'div', 'section', 'article', 'main' ]; const lowPrioritySelectors = [ 'footer', 'aside', 'blockquote' ];
+
+await translateBySelectors(highPrioritySelectors, targetLang); await translateBySelectors(mediumPrioritySelectors, targetLang); await translateBySelectors(lowPrioritySelectors, targetLang); console.timeEnd("TranslationTime"); };
+
+const translateBySelectors = async (selectors, targetLang) => { const selectorString = selectors.join(', '); const elements = document.querySelectorAll(selectorString);
+
+for (const element of elements) { if (element.classList.contains('no-translate')) continue; if (element.children.length > 0) continue;
+
+const text = element.textContent.trim();
+if (!text || text.length < 2) continue;
+
+try {
+  await delay(100); // Prevent rate limit
+  const translation = await translateText(text, targetLang);
+  if (translation && translation !== text) {
+    element.textContent = translation;
   }
-};
+} catch (error) {
+  console.error('Element translation error:', error);
+}
 
-// Translate all text content on the page
-export const translatePage = async (targetLang) => {
-  // Store selected language
-  localStorage.setItem('selectedLanguage', targetLang);
-  document.documentElement.lang = targetLang;
-  
-  // Get all elements with text content
-  const elements = Array.from(document.querySelectorAll('body *'))
-    .filter(el => 
-      el.childNodes.length === 1 && 
-      el.childNodes[0].nodeType === Node.TEXT_NODE &&
-      !el.classList.contains('no-translate') &&
-      el.textContent.trim() !== ''
-    );
-  
-  // Batch translations for performance
-  const translationPromises = elements.map(async element => {
-    const text = element.textContent.trim();
-    try {
-      const translation = await translateText(text, targetLang);
-      element.textContent = translation;
-    } catch (error) {
-      console.error('Element translation error:', error);
-    }
-  });
+} };
 
-  await Promise.all(translationPromises);
-};
+export const applySavedLanguage = async (lang) => { try { await translatePage(lang); return lang; } catch (error) { console.error('Error applying saved language:', error); return 'en'; } };
 
-// Apply saved language on page load
-export const applySavedLanguage = async () => {
-  const savedLang = localStorage.getItem('selectedLanguage');
-  if (savedLang && savedLang !== 'en') {
-    try {
-      await translatePage(savedLang);
-    } catch (error) {
-      console.error('Error applying saved language:', error);
-    }
-    return savedLang;
-  }
-  return 'en';
-};
+                                                          
