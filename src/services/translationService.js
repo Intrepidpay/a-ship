@@ -1,3 +1,4 @@
+import { preloadCommonTranslations } from '../services/translationService';
 // Replace with your actual Hugging Face API key
 const HUGGINGFACE_API_KEY = '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';
 
