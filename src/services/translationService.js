@@ -1,8 +1,9 @@
-// Translation cache implementation
+// Robust Translation Cache with Preloading
 class TranslationCache {
   constructor() {
     this.cache = new Map();
     this.restore();
+    this.preloaded = false;
   }
 
   getKey(text, targetLang) {
@@ -38,190 +39,143 @@ class TranslationCache {
       }
     } catch (error) {
       console.error('Cache restoration error:', error);
+      this.cache = new Map();
     }
+  }
+  
+  preloadCommonTranslations(targetLang = 'en') {
+    if (this.preloaded) return;
+    
+    const commonPhrases = [
+      "Home", "About", "Contact", "Services", "Products",
+      "Welcome", "Login", "Sign Up", "Search", "Read More"
+    ];
+    
+    for (const phrase of commonPhrases) {
+      for (const lang of SUPPORTED_LANGUAGES) {
+        if (lang === 'en') continue;
+        const key = this.getKey(phrase, lang);
+        if (!this.cache.has(key)) {
+          // Set placeholder to prevent repeated API calls
+          this.cache.set(key, phrase);
+        }
+      }
+    }
+    
+    this.preloaded = true;
   }
 }
 
 const translationCache = new TranslationCache();
 
-// DeepSeek API configuration
-const DEEPSEEK_API_KEY = "sk-eed0db1fdf0247b588201374c9396728"; // Get from https://platform.deepseek.com/
-const DEEPSEEK_API_URL = "https://api.deepseek.com/chat/completions";
+// Using LibreTranslate (free public API)
+const LIBRETRANSLATE_API_URL = "https://libretranslate.de/translate";
 
-// Track usage in localStorage
-const trackUsage = (characters) => {
-  const today = new Date().toISOString().split('T')[0];
-  const usage = JSON.parse(localStorage.getItem('translationUsage') || '{}');
-  
-  if (!usage[today]) {
-    usage[today] = { characters: 0, date: today };
-  }
-  
-  usage[today].characters += characters;
-  localStorage.setItem('translationUsage', JSON.stringify(usage));
-};
+// Track failed translations to prevent infinite loops
+const failedTranslations = new Set();
 
 export const translateText = async (text, targetLang) => {
   if (!text.trim()) return text;
   
+  // Check if this translation previously failed
+  const failKey = `${targetLang}:${text}`;
+  if (failedTranslations.has(failKey)) return text;
+  
   // Check cache first
   const cached = translationCache.get(text, targetLang);
-  if (cached) return cached;
+  if (cached && cached !== text) return cached;
   
   try {
-    // Check usage before making API call
-    const usage = JSON.parse(localStorage.getItem('translationUsage') || '{}');
-    const today = new Date().toISOString().split('T')[0];
-    const todayUsage = usage[today]?.characters || 0;
-    
-    if (todayUsage > 900000) { // 900k of 1M free limit
-      console.warn('Approaching DeepSeek free limit');
-      return text; // Fallback to original text
-    }
-    
-    const response = await fetch(DEEPSEEK_API_URL, {
+    const response = await fetch(LIBRETRANSLATE_API_URL, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: "deepseek-chat",
-        messages: [
-          {
-            role: "system",
-            content: `You are a professional translator. Translate the following text to ${targetLang} without adding any extra content. Preserve all formatting, special characters, and placeholders.`
-          },
-          {
-            role: "user",
-            content: text
-          }
-        ],
-        temperature: 0.3,
-        max_tokens: 2000
+        q: text,
+        source: "en",
+        target: targetLang,
+        format: "text"
       })
     });
     
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`DeepSeek API error ${response.status}: ${errorText}`);
+      throw new Error(`API error ${response.status}: ${errorText}`);
     }
     
     const data = await response.json();
-    const translation = data.choices[0].message.content;
-    
-    // Track usage
-    trackUsage(text.length);
+    const translation = data.translatedText;
     
     // Cache the result
     translationCache.set(text, targetLang, translation);
     return translation;
   } catch (error) {
     console.error('Translation error:', error);
+    // Mark as failed to prevent retries
+    failedTranslations.add(failKey);
     return text;
   }
 };
 
-// Translate all text content on the page
+// Preload common translations before user interaction
+export const preloadCommonTranslations = async () => {
+  translationCache.preloadCommonTranslations();
+};
+
+// Priority-based translation system
 export const translatePage = async (targetLang) => {
   // Store selected language
   localStorage.setItem('selectedLanguage', targetLang);
   document.documentElement.lang = targetLang;
   
-  // Get all text nodes in the document
-  const textNodes = getTextNodes(document.body);
+  // Define translation priorities
+  const highPrioritySelectors = [
+    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'p', 'li', 'span', 'a', 'button'
+  ];
   
-  // Filter out nodes that should not be translated
-  const translatableNodes = textNodes.filter(node => {
-    const parentElement = node.parentElement;
-    
-    // Skip nodes inside elements with 'no-translate' class
-    if (parentElement.classList.contains('no-translate')) return false;
-    
-    // Skip script, style, and code elements
-    if (['SCRIPT', 'STYLE', 'CODE'].includes(parentElement.tagName)) return false;
-    
-    // Skip empty text nodes
-    return node.textContent.trim() !== '';
-  });
+  const mediumPrioritySelectors = [
+    'div', 'section', 'article', 'main'
+  ];
   
-  // Group text by parent element to reduce API calls
-  const textGroups = groupTextByParent(translatableNodes);
+  const lowPrioritySelectors = [
+    'footer', 'aside', 'blockquote'
+  ];
   
-  // Translate each group
-  for (const group of textGroups) {
-    const originalText = group.text;
+  // Translate in priority order
+  await translateBySelectors(highPrioritySelectors, targetLang);
+  await translateBySelectors(mediumPrioritySelectors, targetLang);
+  await translateBySelectors(lowPrioritySelectors, targetLang);
+};
+
+const translateBySelectors = async (selectors, targetLang) => {
+  const selectorString = selectors.join(', ');
+  const elements = document.querySelectorAll(selectorString);
+  
+  for (const element of elements) {
+    // Skip elements that shouldn't be translated
+    if (element.classList.contains('no-translate')) continue;
+    
+    const text = element.textContent.trim();
+    if (!text) continue;
+    
     try {
-      const translation = await translateText(originalText, targetLang);
-      
-      // Create a new text node with the translated text
-      const newNode = document.createTextNode(translation);
-      
-      // Replace the original text node
-      group.nodes[0].parentNode.replaceChild(newNode, group.nodes[0]);
-      
-      // Remove the other nodes in this group since we've replaced the parent's content
-      for (let i = 1; i < group.nodes.length; i++) {
-        group.nodes[i].parentNode.removeChild(group.nodes[i]);
+      const translation = await translateText(text, targetLang);
+      if (translation && translation !== text) {
+        element.textContent = translation;
       }
     } catch (error) {
-      console.error('Translation error:', error);
+      console.error('Element translation error:', error);
     }
   }
-};
-
-// Get all text nodes in an element
-const getTextNodes = (element) => {
-  const walker = document.createTreeWalker(
-    element,
-    NodeFilter.SHOW_TEXT,
-    null,
-    false
-  );
-  
-  const textNodes = [];
-  let node;
-  while ((node = walker.nextNode())) {
-    textNodes.push(node);
-  }
-  
-  return textNodes;
-};
-
-// Group adjacent text nodes by their parent element
-const groupTextByParent = (nodes) => {
-  const groups = [];
-  let currentParent = null;
-  let currentGroup = null;
-  
-  for (const node of nodes) {
-    if (node.parentElement !== currentParent) {
-      currentParent = node.parentElement;
-      currentGroup = {
-        parent: currentParent,
-        text: '',
-        nodes: []
-      };
-      groups.push(currentGroup);
-    }
-    
-    currentGroup.text += node.textContent;
-    currentGroup.nodes.push(node);
-  }
-  
-  return groups;
 };
 
 // Apply saved language on page load
-export const applySavedLanguage = async () => {
-  const savedLang = localStorage.getItem('selectedLanguage');
-  if (savedLang && savedLang !== 'en') {
-    try {
-      await translatePage(savedLang);
-    } catch (error) {
-      console.error('Error applying saved language:', error);
-    }
-    return savedLang;
+export const applySavedLanguage = async (lang) => {
+  try {
+    await translatePage(lang);
+    return lang;
+  } catch (error) {
+    console.error('Error applying saved language:', error);
+    return 'en';
   }
-  return 'en';
 };
