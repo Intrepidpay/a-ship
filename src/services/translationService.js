@@ -1,10 +1,8 @@
-// Robust Translation Cache with Preloading
-import { SUPPORTED_LANGUAGES } from '../components/constants';
+// Translation cache implementation
 class TranslationCache {
   constructor() {
     this.cache = new Map();
     this.restore();
-    this.preloaded = false;
   }
 
   getKey(text, targetLang) {
@@ -40,67 +38,41 @@ class TranslationCache {
       }
     } catch (error) {
       console.error('Cache restoration error:', error);
-      this.cache = new Map();
     }
-  }
-  
-  preloadCommonTranslations(targetLang = 'en') {
-    if (this.preloaded) return;
-    
-    const commonPhrases = [
-      "Home", "About", "Contact", "Services", "Products",
-      "Welcome", "Login", "Sign Up", "Search", "Read More"
-    ];
-    
-    for (const phrase of commonPhrases) {
-      for (const lang of SUPPORTED_LANGUAGES) {
-        if (lang === 'en') continue;
-        const key = this.getKey(phrase, lang);
-        if (!this.cache.has(key)) {
-          // Set placeholder to prevent repeated API calls
-          this.cache.set(key, phrase);
-        }
-      }
-    }
-    
-    this.preloaded = true;
   }
 }
 
 const translationCache = new TranslationCache();
 
-// Using LibreTranslate (free public API)
+// LibreTranslate API configuration
 const LIBRETRANSLATE_API_URL = "https://libretranslate.de/translate";
-
-// Track failed translations to prevent infinite loops
-const failedTranslations = new Set();
+// Note: Public instances may have rate limits. For production, consider self-hosting.
 
 export const translateText = async (text, targetLang) => {
   if (!text.trim()) return text;
   
-  // Check if this translation previously failed
-  const failKey = `${targetLang}:${text}`;
-  if (failedTranslations.has(failKey)) return text;
-  
   // Check cache first
   const cached = translationCache.get(text, targetLang);
-  if (cached && cached !== text) return cached;
+  if (cached) return cached;
   
   try {
     const response = await fetch(LIBRETRANSLATE_API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({
         q: text,
         source: "en",
         target: targetLang,
-        format: "text"
-      })
+        format: "text",
+        api_key: "" // Add API key if required
+      }),
     });
     
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`API error ${response.status}: ${errorText}`);
+      throw new Error(`LibreTranslate API error ${response.status}: ${errorText}`);
     }
     
     const data = await response.json();
@@ -111,72 +83,49 @@ export const translateText = async (text, targetLang) => {
     return translation;
   } catch (error) {
     console.error('Translation error:', error);
-    // Mark as failed to prevent retries
-    failedTranslations.add(failKey);
     return text;
   }
 };
 
-// Preload common translations before user interaction
-export const preloadCommonTranslations = async () => {
-  translationCache.preloadCommonTranslations();
-};
-
-// Priority-based translation system
+// Translate all text content on the page
 export const translatePage = async (targetLang) => {
   // Store selected language
   localStorage.setItem('selectedLanguage', targetLang);
   document.documentElement.lang = targetLang;
   
-  // Define translation priorities
-  const highPrioritySelectors = [
-    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-    'p', 'li', 'span', 'a', 'button'
-  ];
+  // Get all elements with text content
+  const elements = Array.from(document.querySelectorAll('body *'))
+    .filter(el => 
+      el.childNodes.length === 1 && 
+      el.childNodes[0].nodeType === Node.TEXT_NODE &&
+      !el.classList.contains('no-translate') &&
+      el.textContent.trim() !== ''
+    );
   
-  const mediumPrioritySelectors = [
-    'div', 'section', 'article', 'main'
-  ];
-  
-  const lowPrioritySelectors = [
-    'footer', 'aside', 'blockquote'
-  ];
-  
-  // Translate in priority order
-  await translateBySelectors(highPrioritySelectors, targetLang);
-  await translateBySelectors(mediumPrioritySelectors, targetLang);
-  await translateBySelectors(lowPrioritySelectors, targetLang);
-};
-
-const translateBySelectors = async (selectors, targetLang) => {
-  const selectorString = selectors.join(', ');
-  const elements = document.querySelectorAll(selectorString);
-  
-  for (const element of elements) {
-    // Skip elements that shouldn't be translated
-    if (element.classList.contains('no-translate')) continue;
-    
+  // Batch translations for performance
+  const translationPromises = elements.map(async element => {
     const text = element.textContent.trim();
-    if (!text) continue;
-    
     try {
       const translation = await translateText(text, targetLang);
-      if (translation && translation !== text) {
-        element.textContent = translation;
-      }
+      element.textContent = translation;
     } catch (error) {
       console.error('Element translation error:', error);
     }
-  }
+  });
+
+  await Promise.all(translationPromises);
 };
 
 // Apply saved language on page load
-export const applySavedLanguage = async (lang) => {
-  try {
-    await translatePage(lang);
-    return lang;
-  } catch (error) {
-    console.error('Error applying saved language:', error);
-    return 'en';
+export const applySavedLanguage = async () => {
+  const savedLang = localStorage.getItem('selectedLanguage');
+  if (savedLang && savedLang !== 'en') {
+    try {
+      await translatePage(savedLang);
+    } catch (error) {
+      console.error('Error applying saved language:', error);
+    }
+    return savedLang;
   }
+  return 'en';
 };
