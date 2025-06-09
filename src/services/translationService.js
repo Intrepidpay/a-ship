@@ -1,6 +1,4 @@
-import { SUPPORTED_LANGUAGES } from '../components/constants';
-
-// Changed to multilingual model
+// Removed unused SUPPORTED_LANGUAGES import
 const HUGGINGFACE_API_URL = 'https://api-inference.huggingface.co/models/facebook/m2m100_418M';
 const HUGGINGFACE_API_KEY = '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';
 
@@ -49,7 +47,6 @@ class TranslationCache {
   }
 
   preloadCommonTranslations() {
-    // Simplified preloading
     this.preloaded = true;
   }
 }
