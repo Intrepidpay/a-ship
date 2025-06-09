@@ -1,8 +1,7 @@
 import { SUPPORTED_LANGUAGES } from '../components/constants';
 
-// Replace with your chosen Hugging Face model
-const HUGGINGFACE_API_URL = 'https://api-inference.huggingface.co/models/Helsinki-NLP/opus-mt-en-ROMANCE';
-// Replace with your actual Hugging Face API key
+// Changed to multilingual model
+const HUGGINGFACE_API_URL = 'https://api-inference.huggingface.co/models/facebook/m2m100_418M';
 const HUGGINGFACE_API_KEY = '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';
 
 class TranslationCache {
@@ -49,24 +48,8 @@ class TranslationCache {
     }
   }
 
-  preloadCommonTranslations(targetLang = 'en') {
-    if (this.preloaded) return;
-
-    const commonPhrases = [
-      'Home', 'About', 'Contact', 'Services', 'Products',
-      'Welcome', 'Login', 'Sign Up', 'Search', 'Read More'
-    ];
-
-    for (const phrase of commonPhrases) {
-      for (const lang of SUPPORTED_LANGUAGES) {
-        if (lang === 'en') continue;
-        const key = this.getKey(phrase, lang);
-        if (!this.cache.has(key)) {
-          this.cache.set(key, phrase); // Placeholder
-        }
-      }
-    }
-
+  preloadCommonTranslations() {
+    // Simplified preloading
     this.preloaded = true;
   }
 }
@@ -75,7 +58,7 @@ const translationCache = new TranslationCache();
 const failedTranslations = new Set();
 
 export const translateText = async (text, targetLang) => {
-  if (!text.trim()) return text;
+  if (!text.trim() || targetLang === 'en') return text;
 
   const failKey = `${targetLang}:${text}`;
   if (failedTranslations.has(failKey)) return text;
@@ -91,7 +74,11 @@ export const translateText = async (text, targetLang) => {
         Authorization: `Bearer ${HUGGINGFACE_API_KEY}`
       },
       body: JSON.stringify({
-        inputs: text
+        inputs: text,
+        parameters: {
+          src_lang: "en",
+          tgt_lang: targetLang
+        }
       })
     });
 
@@ -101,10 +88,8 @@ export const translateText = async (text, targetLang) => {
     }
 
     const data = await response.json();
-
-    // Hugging Face might return an array of translations
-    const translation = Array.isArray(data) && data[0]?.translation_text
-      ? data[0].translation_text
+    const translation = Array.isArray(data) && data[0]?.generated_text
+      ? data[0].generated_text
       : text;
 
     translationCache.set(text, targetLang, translation);
@@ -124,36 +109,46 @@ export const preloadCommonTranslations = async () => {
 export const translatePage = async (targetLang) => {
   localStorage.setItem('selectedLanguage', targetLang);
   document.documentElement.lang = targetLang;
-
-  const highPriority = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'li', 'span', 'a', 'button'];
-  const mediumPriority = ['div', 'section', 'article', 'main'];
-  const lowPriority = ['footer', 'aside', 'blockquote'];
-
-  await translateBySelectors(highPriority, targetLang);
-  await translateBySelectors(mediumPriority, targetLang);
-  await translateBySelectors(lowPriority, targetLang);
-};
-
-const translateBySelectors = async (selectors, targetLang) => {
-  const selectorString = selectors.join(', ');
-  const elements = document.querySelectorAll(selectorString);
-
-  for (const element of elements) {
-    if (element.classList.contains('no-translate')) continue;
-
-    const text = element.textContent.trim();
-    if (!text || text.length < 2 || element.children.length > 0) continue;
-
-    try {
-      const translation = await translateText(text, targetLang);
-      if (translation && translation !== text) {
-        element.textContent = translation;
+  
+  // Create a tree walker to process all text nodes
+  const walker = document.createTreeWalker(
+    document.body,
+    NodeFilter.SHOW_TEXT,
+    {
+      acceptNode: function(node) {
+        // Skip if parent element has no-translate class
+        if (node.parentElement.closest('.no-translate')) {
+          return NodeFilter.FILTER_REJECT;
+        }
+        // Skip empty text nodes
+        return node.textContent.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
       }
-    } catch (error) {
-      console.error('Element translation error:', error);
-    }
-
-    await new Promise(res => setTimeout(res, 50)); // avoid rate-limiting
+    },
+    false
+  );
+  
+  const textNodes = [];
+  while (walker.nextNode()) {
+    textNodes.push(walker.currentNode);
+  }
+  
+  // Translate in batches
+  const BATCH_SIZE = 5;
+  for (let i = 0; i < textNodes.length; i += BATCH_SIZE) {
+    const batch = textNodes.slice(i, i + BATCH_SIZE);
+    await Promise.all(batch.map(node => {
+      return new Promise(async (resolve) => {
+        const originalText = node.textContent;
+        const translation = await translateText(originalText, targetLang);
+        if (translation && translation !== originalText) {
+          node.textContent = translation;
+        }
+        resolve();
+      });
+    }));
+    
+    // Add slight delay between batches
+    await new Promise(res => setTimeout(res, 50));
   }
 };
 
