@@ -14,8 +14,6 @@ import AdminPanel from './components/Admin/AdminPanel';
 import Loader from './components/Loader/Loader';
 import AnimatedShippingBackground from './components/AnimatedShippingBackground';
 import CookieConsent from './components/CookieConsent/CookieConsent';
-// Updated import paths for translation components
-import GoogleTranslate from './components/GoogleTranslate';
 import LanguagePopup from './components/LanguagePopup';
 import './components/translation.css';
 import './App.css';
@@ -56,7 +54,6 @@ function App() {
       
       <div className="app">
         {/* Translation components placed at the root level */}
-        <GoogleTranslate />
         <LanguagePopup />
         
         <AnimatedShippingBackground />
