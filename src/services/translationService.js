@@ -1,7 +1,3 @@
-// Removed unused SUPPORTED_LANGUAGES import
-const HUGGINGFACE_API_URL = 'https://api-inference.huggingface.co/models/facebook/m2m100_418M';
-const HUGGINGFACE_API_KEY = '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';
-
 class TranslationCache {
   constructor() {
     this.cache = new Map();
@@ -47,6 +43,25 @@ class TranslationCache {
   }
 
   preloadCommonTranslations() {
+    if (this.preloaded) return;
+
+    // Preload common UI phrases
+    const commonPhrases = [
+      'Home', 'About', 'Contact', 'Services', 'Products',
+      'Welcome', 'Login', 'Sign Up', 'Search', 'Read More',
+      'Submit', 'Loading...', 'Please wait', 'Error', 'Success',
+      'Add to cart', 'Checkout', 'Price', 'Quantity', 'Total'
+    ];
+
+    // Cache placeholders - actual translations will be fetched when needed
+    commonPhrases.forEach(phrase => {
+      this.set(phrase, 'fr', phrase);
+      this.set(phrase, 'es', phrase);
+      this.set(phrase, 'ru', phrase);
+      this.set(phrase, 'de', phrase);
+      this.set(phrase, 'ja', phrase);
+    });
+
     this.preloaded = true;
   }
 }
@@ -64,30 +79,30 @@ export const translateText = async (text, targetLang) => {
   if (cached && cached !== text) return cached;
 
   try {
-    const response = await fetch(HUGGINGFACE_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${HUGGINGFACE_API_KEY}`
-      },
-      body: JSON.stringify({
-        inputs: text,
-        parameters: {
-          src_lang: "en",
-          tgt_lang: targetLang
-        }
-      })
-    });
-
+    // Google Translate proxy API
+    const API_URL = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
+    
+    const response = await fetch(API_URL);
+    
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`API error ${response.status}: ${errorText}`);
+      throw new Error(`Google API error ${response.status}`);
     }
 
     const data = await response.json();
-    const translation = Array.isArray(data) && data[0]?.generated_text
-      ? data[0].generated_text
-      : text;
+    
+    // Parse Google's response format
+    let translation = '';
+    if (Array.isArray(data) && data[0]) {
+      data[0].forEach(segment => {
+        if (segment[0]) {
+          translation += segment[0];
+        }
+      });
+    }
+    
+    if (!translation) {
+      throw new Error('No translation found in response');
+    }
 
     translationCache.set(text, targetLang, translation);
     return translation;
@@ -104,6 +119,8 @@ export const preloadCommonTranslations = async () => {
 };
 
 export const translatePage = async (targetLang) => {
+  if (document.documentElement.lang === targetLang) return;
+  
   localStorage.setItem('selectedLanguage', targetLang);
   document.documentElement.lang = targetLang;
   
@@ -144,8 +161,8 @@ export const translatePage = async (targetLang) => {
       });
     }));
     
-    // Add slight delay between batches
-    await new Promise(res => setTimeout(res, 50));
+    // Add slight delay between batches to avoid rate limiting
+    await new Promise(res => setTimeout(res, 100));
   }
 };
 
