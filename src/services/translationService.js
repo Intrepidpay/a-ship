@@ -10,7 +10,7 @@ persist() { try { const cacheArray = Array.from(this.cache.entries()); localStor
 
 restore() { try { const data = localStorage.getItem('translationCache'); if (data) { this.cache = new Map(JSON.parse(data)); } } catch (err) { console.error('Failed to restore translation cache:', err); } } }
 
-const translationCache = new TranslationCache(); const DEEPSEEK_API_KEY = 'YOUR_DEEPSEEK_API_KEY'; const API_URL = 'https://api.deepseek.com/v1/chat/completions';
+const translationCache = new TranslationCache(); const DEEPSEEK_API_KEY = 'sk-eed0db1fdf0247b588201374c9396728'; const API_URL = 'https://api.deepseek.com/v1/chat/completions';
 
 export const translateTextWithCache = async (text, targetLang) => { if (!text.trim()) return text;
 
