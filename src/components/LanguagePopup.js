@@ -8,6 +8,12 @@ import {
 import { applySavedLanguage, translatePage } from '../services/translationService';
 import './translation.css';
 
+// Helper: get browser lang or fallback to 'en'
+const getBrowserLanguage = () => {
+  const navLang = (navigator.language || 'en').split('-')[0];
+  return SUPPORTED_LANGUAGES.includes(navLang) ? navLang : 'en';
+};
+
 const LanguagePopup = () => {
   const [state, setState] = useState({
     showPopup: false,
@@ -17,19 +23,25 @@ const LanguagePopup = () => {
 
   useEffect(() => {
     const initialize = async () => {
-      // Check if we've shown the popup before
       const hasShownPopup = localStorage.getItem('hasShownPopup') === 'true';
       const savedLang = await applySavedLanguage();
-      
-      // Only show popup if we haven't shown it before
+
+      // Determine initial language: saved > browser > default
+      const userLang = savedLang || getBrowserLanguage();
+
       if (!hasShownPopup) {
         setTimeout(() => {
           setState({ 
             showPopup: true, 
-            userLang: savedLang || 'en',
+            userLang,
             stage: 'initial'
           });
         }, 4000);
+      } else {
+        // If popup shown before, make sure page is translated
+        if (savedLang && savedLang !== 'en') {
+          await translatePage(savedLang);
+        }
       }
     };
 
@@ -41,16 +53,19 @@ const LanguagePopup = () => {
   };
 
   const handleLanguageSelect = async (langCode) => {
+    console.log('User selected language:', langCode);
+
     setState(prev => ({ ...prev, showPopup: false }));
     
-    // Mark that we've shown the popup
     localStorage.setItem('hasShownPopup', 'true');
     localStorage.setItem('selectedLanguage', langCode);
     
-    // Translate immediately
     document.body.classList.add('translating');
     await translatePage(langCode);
     document.body.classList.remove('translating');
+    
+    // Update popup language for any future openings (if any)
+    setState(prev => ({ ...prev, userLang: langCode }));
   };
 
   if (!state.showPopup) return null;
