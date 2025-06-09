@@ -1,4 +1,5 @@
 // Robust Translation Cache with Preloading
+import { SUPPORTED_LANGUAGES } from '../components/constants';
 class TranslationCache {
   constructor() {
     this.cache = new Map();
