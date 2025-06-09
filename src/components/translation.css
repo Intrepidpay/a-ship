@@ -101,3 +101,29 @@ body.translating::before {
 .no-translate {
   /* Add any specific styling for non-translated elements */
 }
+
+/* Add to your existing CSS */
+.global-translating-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2147483647;
+  backdrop-filter: blur(5px);
+}
+
+.translating-message {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #5c9dff;
+  text-align: center;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
