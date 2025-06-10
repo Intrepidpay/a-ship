@@ -7,8 +7,7 @@ import {
   TRANSLATING_MESSAGE
 } from './constants';
 import { 
-  preloadCommonTranslations,
-  translatePage // NEW: Import translatePage directly
+  translatePage // Only import translatePage
 } from '../services/translationService';
 import './translation.css';
 
@@ -34,8 +33,6 @@ const LanguagePopup = () => {
     };
 
     const initialize = async () => {
-      await preloadCommonTranslations();
-
       const savedLang = localStorage.getItem('selectedLanguage');
       const hasShownPopup = localStorage.getItem('hasShownPopup') === 'true';
 
