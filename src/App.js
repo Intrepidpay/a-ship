@@ -15,57 +15,66 @@ import Loader from './components/Loader/Loader';
 import AnimatedShippingBackground from './components/AnimatedShippingBackground';
 import CookieConsent from './components/CookieConsent/CookieConsent';
 import LanguagePopup from './components/LanguagePopup';
-import { applySavedLanguage } from './services/translationService';
+import { applySavedLanguage, setupTranslationObserver } from './services/translationService';
 import './components/translation.css';
 import './App.css';
 
-// Fixed route translation handler
-function RouteTranslator() {
+// New robust route translation handler
+function RouteTranslationHandler() {
   const location = useLocation();
-  const prevPathRef = useRef('');
-  const translationPendingRef = useRef(false);
-  const frameRef = useRef(null);
+  const initialRender = useRef(true);
+  const observerRef = useRef(null);
+  const retryTimerRef = useRef(null);
+  const attemptRef = useRef(0);
 
   useEffect(() => {
     const savedLang = localStorage.getItem('selectedLanguage') || 'en';
-
+    
     // Skip initial render
-    if (prevPathRef.current === '') {
-      prevPathRef.current = location.pathname;
+    if (initialRender.current) {
+      initialRender.current = false;
       return;
     }
 
-    // Clear any pending animation frames
-    if (frameRef.current) {
-      cancelAnimationFrame(frameRef.current);
+    // Cleanup previous attempts
+    if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+      observerRef.current = null;
     }
 
-    // Skip if translation is already pending
-    if (translationPendingRef.current) return;
-
-    translationPendingRef.current = true;
-
-    const translateCurrentPage = async () => {
+    // Main translation function with retry logic
+    const attemptTranslation = async () => {
       try {
         await applySavedLanguage(savedLang);
       } catch (error) {
-        console.error('Navigation translation error:', error);
-      } finally {
-        translationPendingRef.current = false;
+        console.error('Translation attempt failed:', error);
+        
+        // Setup observer if first attempt fails
+        if (attemptRef.current === 0) {
+          observerRef.current = setupTranslationObserver(savedLang);
+        }
+        
+        // Retry up to 3 times
+        if (attemptRef.current < 3) {
+          attemptRef.current++;
+          retryTimerRef.current = setTimeout(attemptTranslation, 300 * attemptRef.current);
+        } else {
+          attemptRef.current = 0;
+        }
       }
     };
 
-    // Wait for two animation frames to ensure DOM is ready
-    const firstFrame = requestAnimationFrame(() => {
-      frameRef.current = requestAnimationFrame(translateCurrentPage);
-    });
+    // Reset attempt counter
+    attemptRef.current = 0;
     
-    frameRef.current = firstFrame;
-    prevPathRef.current = location.pathname;
-
+    // First translation attempt
+    attemptTranslation();
+    
     return () => {
-      if (frameRef.current) {
-        cancelAnimationFrame(frameRef.current);
+      if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+      if (observerRef.current) {
+        observerRef.current.disconnect();
       }
     };
   }, [location]);
@@ -121,7 +130,7 @@ function App() {
         <LanguagePopup />  
         <AnimatedShippingBackground />  
         <Router basename={process.env.PUBLIC_URL}>  
-          <RouteTranslator />  
+          <RouteTranslationHandler />  
           {loading && <Loader />}  
           <Header isAdmin={isAdmin} />  
           <main className="main-content">  
