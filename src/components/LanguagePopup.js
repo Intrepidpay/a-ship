@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+weimport React, { useState, useEffect } from 'react';
 import { 
   POPUP_TEXTS, 
   SELECT_BUTTON_TEXTS, 
@@ -6,10 +6,6 @@ import {
   SUPPORTED_LANGUAGES,
   TRANSLATING_MESSAGE
 } from './constants';
-import { 
-  preloadCommonTranslations,
-  translatePage // NEW: Import translatePage directly
-} from '../services/translationService';
 import './translation.css';
 
 const LanguagePopup = () => {
