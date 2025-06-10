@@ -15,61 +15,18 @@ import Loader from './components/Loader/Loader';
 import AnimatedShippingBackground from './components/AnimatedShippingBackground';
 import CookieConsent from './components/CookieConsent/CookieConsent';
 import LanguagePopup from './components/LanguagePopup';
-import { applySavedLanguage } from './services/translationService';
+import { applyLanguage } from './services/translationService';
 import './components/translation.css';
 import './App.css';
 
-// Enhanced route translation handler
+// Simplified route translation handler
 function RouteTranslator() {
   const location = useLocation();
-  const prevPathRef = useRef('');
-  const translationPendingRef = useRef(false);
-  const translationTimerRef = useRef(null);
+  const savedLang = localStorage.getItem('selectedLanguage') || 'en';
 
   useEffect(() => {
-    const savedLang = localStorage.getItem('selectedLanguage') || 'en';
-    
-    // Skip initial render
-    if (prevPathRef.current === '') {
-      prevPathRef.current = location.pathname;
-      return;
-    }
-
-    // Clear any pending translation
-    if (translationTimerRef.current) {
-      clearTimeout(translationTimerRef.current);
-    }
-
-    // Skip if translation is already pending
-    if (translationPendingRef.current) return;
-
-    translationPendingRef.current = true;
-
-    const translateCurrentPage = async () => {
-      try {
-        // Wait for React to update the DOM
-        await new Promise(resolve => setTimeout(resolve, 50));
-        
-        // Apply translation
-        await applySavedLanguage(savedLang);
-      } catch (error) {
-        console.error('Navigation translation error:', error);
-      } finally {
-        translationPendingRef.current = false;
-      }
-    };
-
-    // Start translation after a short delay to ensure DOM is ready
-    translationTimerRef.current = setTimeout(translateCurrentPage, 100);
-    
-    prevPathRef.current = location.pathname;
-
-    return () => {
-      if (translationTimerRef.current) {
-        clearTimeout(translationTimerRef.current);
-      }
-    };
-  }, [location]);
+    applyLanguage(savedLang);
+  }, [location, savedLang]);
 
   return null;
 }
@@ -84,7 +41,7 @@ function App() {
     if (!initialLangApplied.current) {
       const savedLang = localStorage.getItem('selectedLanguage') || 'en';
       if (savedLang && savedLang !== 'en') {
-        applySavedLanguage(savedLang);
+        applyLanguage(savedLang);
       }
       initialLangApplied.current = true;
     }
