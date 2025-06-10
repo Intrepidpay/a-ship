@@ -1,82 +1,8 @@
-class TranslationCache {
-  constructor() {
-    this.cache = new Map();
-    this.restore();
-    this.preloaded = false;
-  }
+// Removed all caching logic - direct translation only
 
-  getKey(text, targetLang) {
-    return `${targetLang}:${text}`;
-  }
-
-  get(text, targetLang) {
-    const key = this.getKey(text, targetLang);
-    return this.cache.get(key);
-  }
-
-  set(text, targetLang, translation) {
-    const key = this.getKey(text, targetLang);
-    this.cache.set(key, translation);
-    this.persist();
-  }
-
-  persist() {
-    try {
-      const cacheArray = Array.from(this.cache.entries());
-      localStorage.setItem('translationCache', JSON.stringify(cacheArray));
-    } catch (error) {
-      console.error('Cache persistence error:', error);
-    }
-  }
-
-  restore() {
-    try {
-      const cacheData = localStorage.getItem('translationCache');
-      if (cacheData) {
-        const cacheArray = JSON.parse(cacheData);
-        this.cache = new Map(cacheArray);
-      }
-    } catch (error) {
-      console.error('Cache restoration error:', error);
-      this.cache = new Map();
-    }
-  }
-
-  preloadCommonTranslations() {
-    if (this.preloaded) return;
-
-    const commonPhrases = [
-      'Home', 'About', 'Contact', 'Services', 'Products',
-      'Welcome', 'Login', 'Sign Up', 'Search', 'Read More',
-      'Submit', 'Loading...', 'Please wait', 'Error', 'Success',
-      'Add to cart', 'Checkout', 'Price', 'Quantity', 'Total',
-      'Yes', 'No', 'Accept', 'Decline', 'Cookies', 'Privacy Policy',
-      'Terms of Service', 'Continue', 'Back', 'Next', 'Previous'
-    ];
-
-    commonPhrases.forEach(phrase => {
-      this.set(phrase, 'fr', phrase);
-      this.set(phrase, 'es', phrase);
-      this.set(phrase, 'ru', phrase);
-      this.set(phrase, 'de', phrase);
-      this.set(phrase, 'ja', phrase);
-    });
-
-    this.preloaded = true;
-  }
-}
-
-const translationCache = new TranslationCache();
-const failedTranslations = new Set();
-
-export const translateText = async (text, targetLang) => {
+// Google Translate API call
+const translateText = async (text, targetLang) => {
   if (!text.trim() || targetLang === 'en') return text;
-
-  const failKey = `${targetLang}:${text}`;
-  if (failedTranslations.has(failKey)) return text;
-
-  const cached = translationCache.get(text, targetLang);
-  if (cached && cached !== text) return cached;
 
   try {
     const API_URL = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
@@ -102,18 +28,12 @@ export const translateText = async (text, targetLang) => {
       throw new Error('No translation found in response');
     }
 
-    translationCache.set(text, targetLang, translation);
     return translation;
 
   } catch (error) {
     console.error('Translation error:', error);
-    failedTranslations.add(failKey);
     return text;
   }
-};
-
-export const preloadCommonTranslations = async () => {
-  translationCache.preloadCommonTranslations();
 };
 
 // Enhanced node filtering for complete coverage
@@ -173,7 +93,7 @@ export const translatePage = async (targetLang) => {
   const allTextNodes = [...bodyTextNodes, ...headTextNodes];
   
   // Batch processing for performance
-  const BATCH_SIZE = 25;
+  const BATCH_SIZE = 15; // Reduced for better responsiveness
   const batches = Math.ceil(allTextNodes.length / BATCH_SIZE);
   
   for (let i = 0; i < batches; i++) {
@@ -241,33 +161,6 @@ export const translatePage = async (targetLang) => {
       element.setAttribute('aria-label', translatedAriaLabel);
     }
   }
-};
-
-// NEW: MutationObserver setup for dynamic content
-export const setupTranslationObserver = (targetLang) => {
-  const observer = new MutationObserver((mutations) => {
-    const shouldRetranslate = mutations.some(mutation => {
-      // Only react to meaningful DOM changes
-      return mutation.addedNodes.length > 0 || 
-             mutation.type === 'characterData' ||
-             (mutation.attributeName === 'class' && 
-              mutation.target.classList.contains('translated'));
-    });
-    
-    if (shouldRetranslate) {
-      applySavedLanguage(targetLang).catch(console.error);
-    }
-  });
-
-  observer.observe(document.documentElement, {
-    childList: true,
-    subtree: true,
-    characterData: true,
-    attributes: true,
-    attributeFilter: ['class']
-  });
-
-  return observer;
 };
 
 export const applySavedLanguage = async (lang) => {
