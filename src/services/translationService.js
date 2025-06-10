@@ -1,23 +1,94 @@
-// Direct translation without caching
-const translateText = async (text, targetLang) => {
+class TranslationCache {
+  constructor() {
+    this.cache = new Map();
+    this.restore();
+    this.preloaded = false;
+  }
+
+  getKey(text, targetLang) {
+    return `${targetLang}:${text}`;
+  }
+
+  get(text, targetLang) {
+    const key = this.getKey(text, targetLang);
+    return this.cache.get(key);
+  }
+
+  set(text, targetLang, translation) {
+    const key = this.getKey(text, targetLang);
+    this.cache.set(key, translation);
+    this.persist();
+  }
+
+  persist() {
+    try {
+      const cacheArray = Array.from(this.cache.entries());
+      localStorage.setItem('translationCache', JSON.stringify(cacheArray));
+    } catch (error) {
+      console.error('Cache persistence error:', error);
+    }
+  }
+
+  restore() {
+    try {
+      const cacheData = localStorage.getItem('translationCache');
+      if (cacheData) {
+        const cacheArray = JSON.parse(cacheData);
+        this.cache = new Map(cacheArray);
+      }
+    } catch (error) {
+      console.error('Cache restoration error:', error);
+      this.cache = new Map();
+    }
+  }
+
+  preloadCommonTranslations() {
+    if (this.preloaded) return;
+
+    const commonPhrases = [
+      'Home', 'About', 'Contact', 'Services', 'Products',
+      'Welcome', 'Login', 'Sign Up', 'Search', 'Read More',
+      'Submit', 'Loading...', 'Please wait', 'Error', 'Success',
+      'Add to cart', 'Checkout', 'Price', 'Quantity', 'Total',
+      'Yes', 'No', 'Accept', 'Decline', 'Cookies', 'Privacy Policy',
+      'Terms of Service', 'Continue', 'Back', 'Next', 'Previous'
+    ];
+
+    commonPhrases.forEach(phrase => {
+      this.set(phrase, 'fr', phrase);
+      this.set(phrase, 'es', phrase);
+      this.set(phrase, 'ru', phrase);
+      this.set(phrase, 'de', phrase);
+      this.set(phrase, 'ja', phrase);
+    });
+
+    this.preloaded = true;
+  }
+}
+
+const translationCache = new TranslationCache();
+const failedTranslations = new Set();
+
+export const translateText = async (text, targetLang) => {
   if (!text.trim() || targetLang === 'en') return text;
 
-  const API_URL = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
+  const failKey = `${targetLang}:${text}`;
+  if (failedTranslations.has(failKey)) return text;
+
+  const cached = translationCache.get(text, targetLang);
+  if (cached && cached !== text) return cached;
 
   try {
-    // Optional: Add a 5-second timeout
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
-
-    const response = await fetch(API_URL, { signal: controller.signal });
-    clearTimeout(timeout);
-
+    const API_URL = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
+    
+    const response = await fetch(API_URL);
+    
     if (!response.ok) {
       throw new Error(`Google API error ${response.status}`);
     }
 
     const data = await response.json();
-
+    
     let translation = '';
     if (Array.isArray(data) && data[0]) {
       data[0].forEach(segment => {
@@ -26,152 +97,148 @@ const translateText = async (text, targetLang) => {
         }
       });
     }
+    
+    if (!translation) {
+      throw new Error('No translation found in response');
+    }
 
-    return translation || text;
+    translationCache.set(text, targetLang, translation);
+    return translation;
+
   } catch (error) {
-    console.error('Translation error:', error.message);
+    console.error('Translation error:', error);
+    failedTranslations.add(failKey);
     return text;
   }
 };
 
+export const preloadCommonTranslations = async () => {
+  translationCache.preloadCommonTranslations();
+};
+
 // Enhanced node filtering for complete coverage
 const shouldTranslateNode = (node) => {
-  if (!node?.parentNode || !node.parentElement) return NodeFilter.FILTER_REJECT;
-
-  const tagName = node.parentNode.tagName?.toUpperCase();
-
-  if (
-    ['SCRIPT', 'STYLE', 'TEXTAREA', 'NOSCRIPT', 'OPTION'].includes(tagName) ||
-    node.parentElement.closest('.no-translate') ||
-    node.parentElement.closest('code') ||
-    node.parentElement.closest('pre') ||
-    node.parentElement.closest('svg') ||
-    node.parentElement.closest('canvas') ||
-    node.parentElement.closest('iframe') ||
-    node.parentElement.closest('video') ||
-    node.parentElement.closest('audio')
-  ) {
+  // Skip script/style elements and textareas
+  if (node.parentNode.tagName === 'SCRIPT' || 
+      node.parentNode.tagName === 'STYLE' ||
+      node.parentNode.tagName === 'TEXTAREA') {
     return NodeFilter.FILTER_REJECT;
   }
-
+  
+  // Skip translation for elements with no-translate class
+  if (node.parentElement.closest('.no-translate')) {
+    return NodeFilter.FILTER_REJECT;
+  }
+  
+  // Skip translation for code blocks
+  if (node.parentElement.closest('code') || node.parentElement.closest('pre')) {
+    return NodeFilter.FILTER_REJECT;
+  }
+  
   return node.textContent.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
 };
 
 // Enhanced translation engine for full coverage
 export const translatePage = async (targetLang) => {
   if (document.documentElement.lang === targetLang) return;
-
+  
   localStorage.setItem('selectedLanguage', targetLang);
   document.documentElement.lang = targetLang;
-
-  const walker = document.createTreeWalker(
-    document.documentElement,
+  
+  // Create optimized tree walker for document body
+  const bodyWalker = document.createTreeWalker(
+    document.body,
     NodeFilter.SHOW_TEXT,
     { acceptNode: shouldTranslateNode }
   );
-
-  const textNodes = [];
-  while (walker.nextNode()) {
-    textNodes.push(walker.currentNode);
+  
+  const bodyTextNodes = [];
+  while (bodyWalker.nextNode()) {
+    bodyTextNodes.push(bodyWalker.currentNode);
   }
-
-  const BATCH_SIZE = 15;
-  const CONCURRENCY_LIMIT = 5;
-
-  const batchTranslate = async (nodesBatch) => {
-    await Promise.all(
-      nodesBatch.map(async (node) => {
-        const originalText = node.textContent.trim();
-        if (originalText) {
-          try {
-            const translation = await translateText(originalText, targetLang);
-            if (translation && translation !== originalText) {
-              node.textContent = translation;
-            }
-          } catch (error) {
-            console.error('Node translation error:', error.message);
+  
+  // Create tree walker for head elements (title, meta, etc.)
+  const headWalker = document.createTreeWalker(
+    document.head,
+    NodeFilter.SHOW_TEXT,
+    { acceptNode: shouldTranslateNode }
+  );
+  
+  const headTextNodes = [];
+  while (headWalker.nextNode()) {
+    headTextNodes.push(headWalker.currentNode);
+  }
+  
+  // Combine all text nodes
+  const allTextNodes = [...bodyTextNodes, ...headTextNodes];
+  
+  // Batch processing for performance
+  const BATCH_SIZE = 25;
+  const batches = Math.ceil(allTextNodes.length / BATCH_SIZE);
+  
+  for (let i = 0; i < batches; i++) {
+    const start = i * BATCH_SIZE;
+    const end = start + BATCH_SIZE;
+    const batchNodes = allTextNodes.slice(start, end);
+    
+    await Promise.all(batchNodes.map(node => {
+      return new Promise(async (resolve) => {
+        const originalText = node.textContent;
+        
+        // Only translate if needed
+        if (originalText.trim() && !node.parentElement.closest('.no-translate')) {
+          const translation = await translateText(originalText, targetLang);
+          if (translation && translation !== originalText) {
+            node.textContent = translation;
           }
         }
-      })
-    );
-  };
-
-  for (let i = 0; i < textNodes.length; i += BATCH_SIZE) {
-    const batch = textNodes.slice(i, i + BATCH_SIZE);
-    const chunks = [];
-
-    // split batch into chunks of concurrency limit
-    for (let j = 0; j < batch.length; j += CONCURRENCY_LIMIT) {
-      chunks.push(batch.slice(j, j + CONCURRENCY_LIMIT));
-    }
-
-    for (const chunk of chunks) {
-      await batchTranslate(chunk);
-    }
+        resolve();
+      });
+    }));
   }
-
-  // Special handling for <title>
+  
+  // Special handling for title tag
   const title = document.querySelector('title');
   if (title && !title.classList.contains('no-translate')) {
-    try {
-      const translatedTitle = await translateText(title.textContent, targetLang);
-      if (translatedTitle && translatedTitle !== title.textContent) {
-        title.textContent = translatedTitle;
-      }
-    } catch (error) {
-      console.error('Title translation error:', error.message);
+    const translatedTitle = await translateText(title.textContent, targetLang);
+    if (translatedTitle && translatedTitle !== title.textContent) {
+      title.textContent = translatedTitle;
     }
   }
-
+  
   // Special handling for meta description
   const metaDescription = document.querySelector('meta[name="description"]');
   if (metaDescription && !metaDescription.classList.contains('no-translate')) {
-    try {
-      const translatedDescription = await translateText(metaDescription.content, targetLang);
-      if (translatedDescription && translatedDescription !== metaDescription.content) {
-        metaDescription.content = translatedDescription;
-      }
-    } catch (error) {
-      console.error('Meta description translation error:', error.message);
+    const translatedDescription = await translateText(metaDescription.content, targetLang);
+    if (translatedDescription && translatedDescription !== metaDescription.content) {
+      metaDescription.content = translatedDescription;
     }
   }
-
+  
   // Special handling for input placeholders
   const inputElements = document.querySelectorAll('input[placeholder]:not(.no-translate)');
   for (const input of inputElements) {
-    try {
-      const translatedPlaceholder = await translateText(input.placeholder, targetLang);
-      if (translatedPlaceholder && translatedPlaceholder !== input.placeholder) {
-        input.placeholder = translatedPlaceholder;
-      }
-    } catch (error) {
-      console.error('Input placeholder translation error:', error.message);
+    const translatedPlaceholder = await translateText(input.placeholder, targetLang);
+    if (translatedPlaceholder && translatedPlaceholder !== input.placeholder) {
+      input.placeholder = translatedPlaceholder;
     }
   }
-
-  // Special handling for img alt
+  
+  // Special handling for alt text
   const imgElements = document.querySelectorAll('img[alt]:not(.no-translate)');
   for (const img of imgElements) {
-    try {
-      const translatedAlt = await translateText(img.alt, targetLang);
-      if (translatedAlt && translatedAlt !== img.alt) {
-        img.alt = translatedAlt;
-      }
-    } catch (error) {
-      console.error('Image alt translation error:', error.message);
+    const translatedAlt = await translateText(img.alt, targetLang);
+    if (translatedAlt && translatedAlt !== img.alt) {
+      img.alt = translatedAlt;
     }
   }
-
-  // Special handling for aria-label
+  
+  // Special handling for aria labels
   const ariaElements = document.querySelectorAll('[aria-label]:not(.no-translate)');
   for (const element of ariaElements) {
-    try {
-      const translatedAriaLabel = await translateText(element.getAttribute('aria-label'), targetLang);
-      if (translatedAriaLabel && translatedAriaLabel !== element.getAttribute('aria-label')) {
-        element.setAttribute('aria-label', translatedAriaLabel);
-      }
-    } catch (error) {
-      console.error('Aria-label translation error:', error.message);
+    const translatedAriaLabel = await translateText(element.getAttribute('aria-label'), targetLang);
+    if (translatedAriaLabel && translatedAriaLabel !== element.getAttribute('aria-label')) {
+      element.setAttribute('aria-label', translatedAriaLabel);
     }
   }
 };
@@ -181,7 +248,7 @@ export const applySavedLanguage = async (lang) => {
     await translatePage(lang);
     return lang;
   } catch (error) {
-    console.error('Error applying saved language:', error.message);
+    console.error('Error applying saved language:', error);
     return 'en';
   }
 };
