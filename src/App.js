@@ -19,21 +19,28 @@ import { applySavedLanguage } from './services/translationService';
 import './components/translation.css';
 import './App.css';
 
-// FIXED: Route translation handler
+// Enhanced route translation handler
 function RouteTranslator() {
   const location = useLocation();
   const [prevPath, setPrevPath] = useState('');
+  const [prevLang, setPrevLang] = useState('');
 
   useEffect(() => {
-    // Only translate if path actually changed
-    if (location.pathname !== prevPath) {
-      const savedLang = localStorage.getItem('selectedLanguage') || 'en';
-      if (savedLang && savedLang !== 'en') {
-        applySavedLanguage(savedLang);
-      }
+    const savedLang = localStorage.getItem('selectedLanguage') || 'en';
+    
+    // Only translate if path or language changed
+    if (location.pathname !== prevPath || savedLang !== prevLang) {
+      // Use RAF to ensure DOM is ready
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          applySavedLanguage(savedLang);
+        }, 50);
+      });
+      
       setPrevPath(location.pathname);
+      setPrevLang(savedLang);
     }
-  }, [location, prevPath]); // ✅ added 'prevPath' to the dependency array
+  }, [location, prevPath, prevLang]);
 
   return null;
 }
@@ -43,6 +50,12 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Apply saved language on initial load
+    const savedLang = localStorage.getItem('selectedLanguage') || 'en';
+    if (savedLang && savedLang !== 'en') {
+      applySavedLanguage(savedLang);
+    }
+
     const params = new URLSearchParams(window.location.search);
     const redirect = params.get('redirect');
     if (redirect) {
