@@ -1,8 +1,18 @@
-// Removed all caching logic - direct translation only
+// Simple session cache to avoid duplicate API calls
+const sessionCache = new Map();
 
-// Google Translate API call
+const getCacheKey = (text, targetLang) => `${targetLang}:${text}`;
+
+// Google Translate API call with simple caching
 const translateText = async (text, targetLang) => {
   if (!text.trim() || targetLang === 'en') return text;
+
+  const cacheKey = getCacheKey(text, targetLang);
+  
+  // Check session cache
+  if (sessionCache.has(cacheKey)) {
+    return sessionCache.get(cacheKey);
+  }
 
   try {
     const API_URL = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
@@ -28,6 +38,8 @@ const translateText = async (text, targetLang) => {
       throw new Error('No translation found in response');
     }
 
+    // Cache result for current session
+    sessionCache.set(cacheKey, translation);
     return translation;
 
   } catch (error) {
@@ -161,6 +173,9 @@ export const translatePage = async (targetLang) => {
       element.setAttribute('aria-label', translatedAriaLabel);
     }
   }
+  
+  // Clear session cache after translation to prevent memory bloat
+  sessionCache.clear();
 };
 
 export const applySavedLanguage = async (lang) => {
