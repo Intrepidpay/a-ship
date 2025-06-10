@@ -1,18 +1,6 @@
-// Simple session cache to avoid duplicate API calls
-const sessionCache = new Map();
-
-const getCacheKey = (text, targetLang) => `${targetLang}:${text}`;
-
-// Google Translate API call with simple caching
+// Direct translation without caching
 const translateText = async (text, targetLang) => {
   if (!text.trim() || targetLang === 'en') return text;
-
-  const cacheKey = getCacheKey(text, targetLang);
-  
-  // Check session cache
-  if (sessionCache.has(cacheKey)) {
-    return sessionCache.get(cacheKey);
-  }
 
   try {
     const API_URL = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
@@ -34,13 +22,7 @@ const translateText = async (text, targetLang) => {
       });
     }
     
-    if (!translation) {
-      throw new Error('No translation found in response');
-    }
-
-    // Cache result for current session
-    sessionCache.set(cacheKey, translation);
-    return translation;
+    return translation || text;
 
   } catch (error) {
     console.error('Translation error:', error);
@@ -77,48 +59,42 @@ export const translatePage = async (targetLang) => {
   localStorage.setItem('selectedLanguage', targetLang);
   document.documentElement.lang = targetLang;
   
-  // Create optimized tree walker for document body
-  const bodyWalker = document.createTreeWalker(
-    document.body,
+  // Create optimized tree walker for the entire document
+  const walker = document.createTreeWalker(
+    document.documentElement,
     NodeFilter.SHOW_TEXT,
-    { acceptNode: shouldTranslateNode }
+    { 
+      acceptNode: (node) => {
+        if (node.parentNode.tagName === 'SCRIPT' || 
+            node.parentNode.tagName === 'STYLE' ||
+            node.parentNode.tagName === 'TEXTAREA' ||
+            node.parentElement?.closest('.no-translate')) {
+          return NodeFilter.FILTER_REJECT;
+        }
+        return node.textContent.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      }
+    }
   );
   
-  const bodyTextNodes = [];
-  while (bodyWalker.nextNode()) {
-    bodyTextNodes.push(bodyWalker.currentNode);
+  const textNodes = [];
+  while (walker.nextNode()) {
+    textNodes.push(walker.currentNode);
   }
-  
-  // Create tree walker for head elements (title, meta, etc.)
-  const headWalker = document.createTreeWalker(
-    document.head,
-    NodeFilter.SHOW_TEXT,
-    { acceptNode: shouldTranslateNode }
-  );
-  
-  const headTextNodes = [];
-  while (headWalker.nextNode()) {
-    headTextNodes.push(headWalker.currentNode);
-  }
-  
-  // Combine all text nodes
-  const allTextNodes = [...bodyTextNodes, ...headTextNodes];
   
   // Batch processing for performance
-  const BATCH_SIZE = 15;
-  const batches = Math.ceil(allTextNodes.length / BATCH_SIZE);
+  const BATCH_SIZE = 20;
+  const batches = Math.ceil(textNodes.length / BATCH_SIZE);
   
   for (let i = 0; i < batches; i++) {
     const start = i * BATCH_SIZE;
     const end = start + BATCH_SIZE;
-    const batchNodes = allTextNodes.slice(start, end);
+    const batchNodes = textNodes.slice(start, end);
     
     await Promise.all(batchNodes.map(node => {
       return new Promise(async (resolve) => {
         const originalText = node.textContent;
         
-        // Only translate if needed
-        if (originalText.trim() && !node.parentElement.closest('.no-translate')) {
+        if (originalText.trim()) {
           const translation = await translateText(originalText, targetLang);
           if (translation && translation !== originalText) {
             node.textContent = translation;
@@ -173,9 +149,6 @@ export const translatePage = async (targetLang) => {
       element.setAttribute('aria-label', translatedAriaLabel);
     }
   }
-  
-  // Clear session cache after translation to prevent memory bloat
-  sessionCache.clear();
 };
 
 export const applySavedLanguage = async (lang) => {
