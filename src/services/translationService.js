@@ -1,51 +1,65 @@
-// translationService.js
+/**
+ * Applies the saved language to the entire page.
+ */
 export const applySavedLanguage = async (langCode) => {
   if (!langCode || langCode === 'en') return;
-  await applyLanguage(langCode);
+  await translatePage(langCode);
 };
 
-export const applyLanguage = async (targetLang) => {
+/**
+ * Translates the entire page by updating the document's lang attribute
+ * and replacing body text and title.
+ */
+export const translatePage = async (targetLang) => {
   if (!targetLang || targetLang === 'en') return;
 
   document.documentElement.lang = targetLang;
 
-  injectGoogleTranslate(targetLang);
+  try {
+    // Translate the entire body text as a single string.
+    const bodyText = document.body.innerText;
+    if (bodyText) {
+      const translatedText = await translateText(bodyText, targetLang);
+      document.body.innerText = translatedText;
+    }
+
+    // Translate the document title.
+    const titleElement = document.querySelector('title');
+    if (titleElement && titleElement.textContent) {
+      const translatedTitle = await translateText(titleElement.textContent, targetLang);
+      titleElement.textContent = translatedTitle;
+    }
+  } catch (error) {
+    console.error('Translation error:', error);
+  }
 };
 
-const injectGoogleTranslate = (targetLang) => {
-  // Remove any existing Google Translate script
-  const existingScript = document.getElementById('google-translate-script');
-  if (existingScript) {
-    existingScript.remove();
+/**
+ * Uses Google Translate API to translate a given text.
+ */
+export const translateText = async (text, targetLang) => {
+  if (!text || targetLang === 'en') return text;
+
+  try {
+    const apiUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(
+      text
+    )}`;
+    const response = await fetch(apiUrl);
+
+    if (!response.ok) {
+      console.error(`Translation API error: ${response.status}`);
+      return text;
+    }
+
+    const data = await response.json();
+
+    if (Array.isArray(data) && data[0]) {
+      return data[0].map((segment) => segment[0]).join('');
+    }
+
+    return text;
+  } catch (error) {
+    console.error('Translation error:', error);
+    return text;
   }
-
-  // Remove any previous translate elements
-  const existingTranslateElement = document.getElementById('google_translate_element');
-  if (existingTranslateElement) {
-    existingTranslateElement.innerHTML = '';
-  } else {
-    // Create container if it doesn't exist
-    const container = document.createElement('div');
-    container.id = 'google_translate_element';
-    container.style.display = 'none'; // Hide the widget UI
-    document.body.appendChild(container);
-  }
-
-  // Define the Google Translate callback
-  window.googleTranslateElementInit = () => {
-    new window.google.translate.TranslateElement(
-      {
-        pageLanguage: 'en',
-        includedLanguages: targetLang,
-        layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE
-      },
-      'google_translate_element'
-    );
-  };
-
-  // Inject Google Translate script
-  const script = document.createElement('script');
-  script.id = 'google-translate-script';
-  script.src = `https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit`;
-  document.head.appendChild(script);
 };
