@@ -21,37 +21,53 @@ import './App.css';
 
 function RouteTranslationHandler() {
   const location = useLocation();
-  const initialRender = useRef(true);
-  const translationTimer = useRef(null);
+  const savedLang = useRef(localStorage.getItem('selectedLanguage') || 'en');
+  const observerRef = useRef(null);
+  const translationAttemptsRef = useRef(0);
 
   useEffect(() => {
-    if (initialRender.current) {
-      initialRender.current = false;
-      return;
-    }
-
-    // Clear any pending translations
-    if (translationTimer.current) clearTimeout(translationTimer.current);
-    
-    const savedLang = localStorage.getItem('selectedLanguage') || 'en';
-    
-    // Triple-attempt translation strategy
-    translationTimer.current = setTimeout(() => {
-      applySavedLanguage(savedLang);
+    // Setup MutationObserver to watch for DOM changes
+    const observer = new MutationObserver((mutations) => {
+      const contentAdded = mutations.some(mutation => 
+        mutation.addedNodes.length > 0 || 
+        mutation.type === 'characterData'
+      );
       
-      translationTimer.current = setTimeout(() => {
-        applySavedLanguage(savedLang);
-        
-        translationTimer.current = setTimeout(() => {
-          applySavedLanguage(savedLang);
-        }, 300);
-      }, 200);
-    }, 100);
+      if (contentAdded && translationAttemptsRef.current < 3) {
+        translationAttemptsRef.current++;
+        applySavedLanguage(savedLang.current);
+      }
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: false
+    });
+
+    observerRef.current = observer;
+
+    // Reset attempt counter
+    translationAttemptsRef.current = 0;
+    
+    // Initial translation attempts
+    const translate = () => {
+      applySavedLanguage(savedLang.current)
+        .catch(error => console.error('Translation error:', error));
+    };
+
+    // Triple-phase translation
+    setTimeout(translate, 50);   // Phase 1 - After initial paint
+    setTimeout(translate, 200);  // Phase 2 - After potential state updates
+    setTimeout(translate, 400);  // Phase 3 - Final catch-all
 
     return () => {
-      if (translationTimer.current) clearTimeout(translationTimer.current);
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
     };
-  }, [location]);
+  }, [location.pathname]); // Only re-run when path changes
 
   return null;
 }
