@@ -45,7 +45,6 @@ class TranslationCache {
   preloadCommonTranslations() {
     if (this.preloaded) return;
 
-    // Preload common UI phrases
     const commonPhrases = [
       'Home', 'About', 'Contact', 'Services', 'Products',
       'Welcome', 'Login', 'Sign Up', 'Search', 'Read More',
@@ -53,7 +52,6 @@ class TranslationCache {
       'Add to cart', 'Checkout', 'Price', 'Quantity', 'Total'
     ];
 
-    // Cache placeholders - actual translations will be fetched when needed
     commonPhrases.forEach(phrase => {
       this.set(phrase, 'fr', phrase);
       this.set(phrase, 'es', phrase);
@@ -79,7 +77,6 @@ export const translateText = async (text, targetLang) => {
   if (cached && cached !== text) return cached;
 
   try {
-    // Google Translate proxy API
     const API_URL = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
     
     const response = await fetch(API_URL);
@@ -90,7 +87,6 @@ export const translateText = async (text, targetLang) => {
 
     const data = await response.json();
     
-    // Parse Google's response format
     let translation = '';
     if (Array.isArray(data) && data[0]) {
       data[0].forEach(segment => {
@@ -118,27 +114,34 @@ export const preloadCommonTranslations = async () => {
   translationCache.preloadCommonTranslations();
 };
 
+// NEW: Optimized node filtering
+const shouldTranslateNode = (node) => {
+  // Skip script/style elements
+  if (node.parentNode.tagName === 'SCRIPT' || 
+      node.parentNode.tagName === 'STYLE' ||
+      node.parentNode.tagName === 'TEXTAREA') {
+    return NodeFilter.FILTER_REJECT;
+  }
+  
+  // Skip translation for elements with no-translate class
+  if (node.parentElement.closest('.no-translate')) {
+    return NodeFilter.FILTER_REJECT;
+  }
+  
+  return node.textContent.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+};
+
 export const translatePage = async (targetLang) => {
   if (document.documentElement.lang === targetLang) return;
   
   localStorage.setItem('selectedLanguage', targetLang);
   document.documentElement.lang = targetLang;
   
-  // Create a tree walker to process all text nodes
+  // Create optimized tree walker
   const walker = document.createTreeWalker(
     document.body,
     NodeFilter.SHOW_TEXT,
-    {
-      acceptNode: function(node) {
-        // Skip if parent element has no-translate class
-        if (node.parentElement.closest('.no-translate')) {
-          return NodeFilter.FILTER_REJECT;
-        }
-        // Skip empty text nodes
-        return node.textContent.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
-      }
-    },
-    false
+    { acceptNode: shouldTranslateNode }
   );
   
   const textNodes = [];
@@ -146,23 +149,29 @@ export const translatePage = async (targetLang) => {
     textNodes.push(walker.currentNode);
   }
   
-  // Translate in batches
-  const BATCH_SIZE = 5;
-  for (let i = 0; i < textNodes.length; i += BATCH_SIZE) {
-    const batch = textNodes.slice(i, i + BATCH_SIZE);
-    await Promise.all(batch.map(node => {
+  // Use faster batch processing
+  const BATCH_SIZE = 20;
+  const batches = Math.ceil(textNodes.length / BATCH_SIZE);
+  
+  for (let i = 0; i < batches; i++) {
+    const start = i * BATCH_SIZE;
+    const end = start + BATCH_SIZE;
+    const batchNodes = textNodes.slice(start, end);
+    
+    await Promise.all(batchNodes.map(node => {
       return new Promise(async (resolve) => {
         const originalText = node.textContent;
-        const translation = await translateText(originalText, targetLang);
-        if (translation && translation !== originalText) {
-          node.textContent = translation;
+        
+        // Only translate if needed
+        if (originalText.trim() && !node.parentElement.closest('.no-translate')) {
+          const translation = await translateText(originalText, targetLang);
+          if (translation && translation !== originalText) {
+            node.textContent = translation;
+          }
         }
         resolve();
       });
     }));
-    
-    // Add slight delay between batches to avoid rate limiting
-    await new Promise(res => setTimeout(res, 100));
   }
 };
 
