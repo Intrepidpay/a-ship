@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Helmet } from "react-helmet";
 import ScrollToTop from './components/ScrollToTop';
@@ -22,25 +22,54 @@ import './App.css';
 // Enhanced route translation handler
 function RouteTranslator() {
   const location = useLocation();
-  const [prevPath, setPrevPath] = useState('');
-  const [prevLang, setPrevLang] = useState('');
+  const prevPathRef = useRef('');
+  const translationPendingRef = useRef(false);
+  const translationTimerRef = useRef(null);
 
   useEffect(() => {
     const savedLang = localStorage.getItem('selectedLanguage') || 'en';
     
-    // Only translate if path or language changed
-    if (location.pathname !== prevPath || savedLang !== prevLang) {
-      // Use RAF to ensure DOM is ready
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          applySavedLanguage(savedLang);
-        }, 50);
-      });
-      
-      setPrevPath(location.pathname);
-      setPrevLang(savedLang);
+    // Skip initial render
+    if (prevPathRef.current === '') {
+      prevPathRef.current = location.pathname;
+      return;
     }
-  }, [location, prevPath, prevLang]);
+
+    // Clear any pending translation
+    if (translationTimerRef.current) {
+      clearTimeout(translationTimerRef.current);
+    }
+
+    // Skip if translation is already pending
+    if (translationPendingRef.current) return;
+
+    translationPendingRef.current = true;
+
+    const translateCurrentPage = async () => {
+      try {
+        // Wait for React to update the DOM
+        await new Promise(resolve => setTimeout(resolve, 50));
+        
+        // Apply translation
+        await applySavedLanguage(savedLang);
+      } catch (error) {
+        console.error('Navigation translation error:', error);
+      } finally {
+        translationPendingRef.current = false;
+      }
+    };
+
+    // Start translation after a short delay to ensure DOM is ready
+    translationTimerRef.current = setTimeout(translateCurrentPage, 100);
+    
+    prevPathRef.current = location.pathname;
+
+    return () => {
+      if (translationTimerRef.current) {
+        clearTimeout(translationTimerRef.current);
+      }
+    };
+  }, [location]);
 
   return null;
 }
@@ -48,12 +77,16 @@ function RouteTranslator() {
 function App() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const initialLangApplied = useRef(false);
 
   useEffect(() => {
     // Apply saved language on initial load
-    const savedLang = localStorage.getItem('selectedLanguage') || 'en';
-    if (savedLang && savedLang !== 'en') {
-      applySavedLanguage(savedLang);
+    if (!initialLangApplied.current) {
+      const savedLang = localStorage.getItem('selectedLanguage') || 'en';
+      if (savedLang && savedLang !== 'en') {
+        applySavedLanguage(savedLang);
+      }
+      initialLangApplied.current = true;
     }
 
     const params = new URLSearchParams(window.location.search);
