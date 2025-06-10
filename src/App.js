@@ -35,14 +35,17 @@ function RouteTranslationHandler() {
     
     const savedLang = localStorage.getItem('selectedLanguage') || 'en';
     
-    // First attempt after React completes rendering
+    // Triple-attempt translation strategy
     translationTimer.current = setTimeout(() => {
       applySavedLanguage(savedLang);
       
-      // Second attempt for async components
       translationTimer.current = setTimeout(() => {
         applySavedLanguage(savedLang);
-      }, 300);
+        
+        translationTimer.current = setTimeout(() => {
+          applySavedLanguage(savedLang);
+        }, 300);
+      }, 200);
     }, 100);
 
     return () => {
