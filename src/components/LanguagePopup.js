@@ -3,7 +3,8 @@ import {
   POPUP_TEXTS, 
   SELECT_BUTTON_TEXTS, 
   LANGUAGE_NAMES,
-  SUPPORTED_LANGUAGES
+  SUPPORTED_LANGUAGES,
+  TRANSLATING_MESSAGE // NEW IMPORT
 } from './constants';
 import { 
   preloadCommonTranslations
@@ -65,18 +66,28 @@ const LanguagePopup = () => {
     setState(prev => ({ 
       ...prev, 
       isTranslating: true,
-      showPopup: false,
       userLang: langCode
     }));
-
+    
     localStorage.setItem('hasShownPopup', 'true');
     localStorage.setItem('selectedLanguage', langCode);
+    
+    // Hide popup but keep translating overlay visible
+    setState(prev => ({ ...prev, showPopup: false }));
+    
+    // Hide overlay after 1s (translation continues in background)
+    setTimeout(() => {
+      setState(prev => ({ ...prev, isTranslating: false }));
+    }, 1000);
   };
 
   if (state.isTranslating) {
     return (
       <div className="global-translating-overlay">
-        <div className="translating-message">Translating your experience...</div>
+        {/* Use translated message */}
+        <div className="translating-message">
+          {TRANSLATING_MESSAGE[state.userLang] || TRANSLATING_MESSAGE.en}
+        </div>
       </div>
     );
   }
