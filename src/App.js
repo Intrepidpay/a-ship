@@ -19,58 +19,43 @@ import { applySavedLanguage } from './services/translationService';
 import './components/translation.css';
 import './App.css';
 
-// Enhanced route translation handler with DOM change detection
+// Enhanced route translation handler
 function RouteTranslator() {
   const location = useLocation();
-  const prevPathRef = useRef('');
-  const translationPendingRef = useRef(false);
   const observerRef = useRef(null);
 
   useEffect(() => {
     const savedLang = localStorage.getItem('selectedLanguage') || 'en';
-
-    // Skip initial render
-    if (prevPathRef.current === '') {
-      prevPathRef.current = location.pathname;
-      return;
-    }
-
-    // Disconnect any existing observer
-    if (observerRef.current) {
-      observerRef.current.disconnect();
-    }
-
-    translationPendingRef.current = true;
 
     const translateCurrentPage = async () => {
       try {
         await applySavedLanguage(savedLang);
       } catch (error) {
         console.error('Navigation translation error:', error);
-      } finally {
-        translationPendingRef.current = false;
       }
     };
 
-    // Set up MutationObserver to detect DOM changes after route change
-    observerRef.current = new MutationObserver((mutationsList, observer) => {
-      if (!translationPendingRef.current) {
-        translationPendingRef.current = true;
-        // Wait for the next animation frame to ensure React has fully committed changes
-        requestAnimationFrame(async () => {
-          await translateCurrentPage();
-          translationPendingRef.current = false;
-        });
-      }
+    // Translate immediately after route change
+    requestAnimationFrame(() => {
+      translateCurrentPage();
     });
 
-    // Start observing the entire document body for subtree and childList changes
+    // Disconnect any existing observer
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+
+    // Observe DOM changes
+    observerRef.current = new MutationObserver(() => {
+      requestAnimationFrame(() => {
+        translateCurrentPage();
+      });
+    });
+
     observerRef.current.observe(document.body, {
       childList: true,
       subtree: true,
     });
-
-    prevPathRef.current = location.pathname;
 
     return () => {
       if (observerRef.current) {
@@ -88,7 +73,6 @@ function App() {
   const initialLangApplied = useRef(false);
 
   useEffect(() => {
-    // Apply saved language on initial load
     if (!initialLangApplied.current) {
       const savedLang = localStorage.getItem('selectedLanguage') || 'en';
       if (savedLang && savedLang !== 'en') {
