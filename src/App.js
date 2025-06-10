@@ -19,16 +19,21 @@ import { applySavedLanguage } from './services/translationService';
 import './components/translation.css';
 import './App.css';
 
-// Component to handle translation on route changes
+// FIXED: Route translation handler
 function RouteTranslator() {
   const location = useLocation();
+  const [prevPath, setPrevPath] = useState('');
 
   useEffect(() => {
-    const savedLang = localStorage.getItem('selectedLanguage');
-    if (savedLang && savedLang !== 'en') {
-      applySavedLanguage(savedLang);
+    // Only translate if path actually changed
+    if (location.pathname !== prevPath) {
+      const savedLang = localStorage.getItem('selectedLanguage') || 'en';
+      if (savedLang && savedLang !== 'en') {
+        applySavedLanguage(savedLang);
+      }
+      setPrevPath(location.pathname);
     }
-  }, [location.pathname]);
+  }, [location]);
 
   return null;
 }
