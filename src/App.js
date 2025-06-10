@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Helmet } from "react-helmet";
 import ScrollToTop from './components/ScrollToTop';
@@ -19,13 +19,56 @@ import { applySavedLanguage } from './services/translationService';
 import './components/translation.css';
 import './App.css';
 
-// Component to handle translation on route change
-function RouteTranslationHandler() {
+// Enhanced route translation handler
+function RouteTranslator() {
   const location = useLocation();
+  const prevPathRef = useRef('');
+  const translationPendingRef = useRef(false);
+  const translationTimerRef = useRef(null);
 
   useEffect(() => {
     const savedLang = localStorage.getItem('selectedLanguage') || 'en';
-    applySavedLanguage(savedLang);
+    
+    // Skip initial render
+    if (prevPathRef.current === '') {
+      prevPathRef.current = location.pathname;
+      return;
+    }
+
+    // Clear any pending translation
+    if (translationTimerRef.current) {
+      clearTimeout(translationTimerRef.current);
+    }
+
+    // Skip if translation is already pending
+    if (translationPendingRef.current) return;
+
+    translationPendingRef.current = true;
+
+    const translateCurrentPage = async () => {
+      try {
+        // Wait for React to update the DOM
+        await new Promise(resolve => setTimeout(resolve, 50));
+        
+        // Apply translation
+        await applySavedLanguage(savedLang);
+      } catch (error) {
+        console.error('Navigation translation error:', error);
+      } finally {
+        translationPendingRef.current = false;
+      }
+    };
+
+    // Start translation after a short delay to ensure DOM is ready
+    translationTimerRef.current = setTimeout(translateCurrentPage, 100);
+    
+    prevPathRef.current = location.pathname;
+
+    return () => {
+      if (translationTimerRef.current) {
+        clearTimeout(translationTimerRef.current);
+      }
+    };
   }, [location]);
 
   return null;
@@ -34,11 +77,17 @@ function RouteTranslationHandler() {
 function App() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const initialLangApplied = useRef(false);
 
-  // Initial translation on first load
   useEffect(() => {
-    const savedLang = localStorage.getItem('selectedLanguage') || 'en';
-    applySavedLanguage(savedLang);
+    // Apply saved language on initial load
+    if (!initialLangApplied.current) {
+      const savedLang = localStorage.getItem('selectedLanguage') || 'en';
+      if (savedLang && savedLang !== 'en') {
+        applySavedLanguage(savedLang);
+      }
+      initialLangApplied.current = true;
+    }
 
     const params = new URLSearchParams(window.location.search);
     const redirect = params.get('redirect');
@@ -47,7 +96,6 @@ function App() {
     }
   }, []);
 
-  // Handle meta theme color and loader
   useEffect(() => {
     const metaThemeColor = document.querySelector("meta[name=theme-color]");
     if (metaThemeColor) {
@@ -69,12 +117,12 @@ function App() {
         <meta name="msapplication-navbutton-color" content="#161b22" />
         <meta name="apple-mobile-web-app-status-bar-style" content="#161b22" />
       </Helmet>
-
+      
       <div className="app">
         <LanguagePopup />
         <AnimatedShippingBackground />
         <Router basename={process.env.PUBLIC_URL}>
-          <RouteTranslationHandler />
+          <RouteTranslator />
           {loading && <Loader />}
           <Header isAdmin={isAdmin} />
           <main className="main-content">
@@ -85,13 +133,13 @@ function App() {
               <Route path="/support" element={<Support />} />
               <Route path="/about" element={<About />} />
               <Route path="/services" element={<Services />} />
-              <Route
-                path="/admin"
+              <Route 
+                path="/admin" 
                 element={
-                  isAdmin
-                    ? <AdminPanel onLogout={() => setIsAdmin(false)} />
+                  isAdmin 
+                    ? <AdminPanel onLogout={() => setIsAdmin(false)} /> 
                     : <AdminLogin onLogin={() => setIsAdmin(true)} />
-                }
+                } 
               />
             </Routes>
           </main>
