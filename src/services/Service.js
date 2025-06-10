@@ -5,7 +5,7 @@ const fakeShippingData = {
     contact: '+7977-797-02-28',
     address: '4 Lesnaya St, Peski, Kolomensky, Moscow, RU',
     method: 'Express (2-3 days)',
-    status: 'In Transit',
+    status: 'In Pending Payment',
     trackingId: 'SH87556849',
     orderSummary: {
       shippingFee: { amount: 350.99, paid: true },
