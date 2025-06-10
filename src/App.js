@@ -19,54 +19,53 @@ import { applySavedLanguage } from './services/translationService';
 import './components/translation.css';
 import './App.css';
 
-// Enhanced route translation handler
+// Fixed route translation handler
 function RouteTranslator() {
   const location = useLocation();
-  const observerRef = useRef(null);
+  const prevPathRef = useRef('');
+  const translationPendingRef = useRef(false);
+  const frameRef = useRef(null);
 
   useEffect(() => {
     const savedLang = localStorage.getItem('selectedLanguage') || 'en';
-    const currentLang = document.documentElement.lang || 'en';
 
-    const shouldTranslate = savedLang !== 'en' && savedLang !== currentLang;
+    // Skip initial render
+    if (prevPathRef.current === '') {
+      prevPathRef.current = location.pathname;
+      return;
+    }
+
+    // Clear any pending animation frames
+    if (frameRef.current) {
+      cancelAnimationFrame(frameRef.current);
+    }
+
+    // Skip if translation is already pending
+    if (translationPendingRef.current) return;
+
+    translationPendingRef.current = true;
 
     const translateCurrentPage = async () => {
-      if (shouldTranslate) {
-        try {
-          await applySavedLanguage(savedLang);
-        } catch (error) {
-          console.error('Navigation translation error:', error);
-        }
+      try {
+        await applySavedLanguage(savedLang);
+      } catch (error) {
+        console.error('Navigation translation error:', error);
+      } finally {
+        translationPendingRef.current = false;
       }
     };
 
-    // Translate immediately after route change if needed
-    requestAnimationFrame(() => {
-      translateCurrentPage();
+    // Wait for two animation frames to ensure DOM is ready
+    const firstFrame = requestAnimationFrame(() => {
+      frameRef.current = requestAnimationFrame(translateCurrentPage);
     });
-
-    // Disconnect any existing observer
-    if (observerRef.current) {
-      observerRef.current.disconnect();
-    }
-
-    // Observe DOM changes and apply translation if needed
-    if (savedLang !== 'en') {
-      observerRef.current = new MutationObserver(() => {
-        requestAnimationFrame(() => {
-          translateCurrentPage();
-        });
-      });
-
-      observerRef.current.observe(document.body, {
-        childList: true,
-        subtree: true,
-      });
-    }
+    
+    frameRef.current = firstFrame;
+    prevPathRef.current = location.pathname;
 
     return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
+      if (frameRef.current) {
+        cancelAnimationFrame(frameRef.current);
       }
     };
   }, [location]);
@@ -80,6 +79,7 @@ function App() {
   const initialLangApplied = useRef(false);
 
   useEffect(() => {
+    // Apply saved language on initial load
     if (!initialLangApplied.current) {
       const savedLang = localStorage.getItem('selectedLanguage') || 'en';
       if (savedLang && savedLang !== 'en') {
@@ -88,10 +88,10 @@ function App() {
       initialLangApplied.current = true;
     }
 
-    const params = new URLSearchParams(window.location.search);
-    const redirect = params.get('redirect');
-    if (redirect) {
-      window.history.replaceState(null, '', redirect);
+    const params = new URLSearchParams(window.location.search);  
+    const redirect = params.get('redirect');  
+    if (redirect) {  
+      window.history.replaceState(null, '', redirect);  
     }
   }, []);
 
@@ -117,35 +117,35 @@ function App() {
         <meta name="apple-mobile-web-app-status-bar-style" content="#161b22" />
       </Helmet>
 
-      <div className="app">
-        <LanguagePopup />
-        <AnimatedShippingBackground />
-        <Router basename={process.env.PUBLIC_URL}>
-          <RouteTranslator />
-          {loading && <Loader />}
-          <Header isAdmin={isAdmin} />
-          <main className="main-content">
-            <ScrollToTop />
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/shipping" element={<Shipping />} />
-              <Route path="/support" element={<Support />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/services" element={<Services />} />
-              <Route
-                path="/admin"
-                element={
-                  isAdmin
-                    ? <AdminPanel onLogout={() => setIsAdmin(false)} />
-                    : <AdminLogin onLogin={() => setIsAdmin(true)} />
-                }
-              />
-            </Routes>
-          </main>
-          <Footer />
-          <CookieConsent />
-        </Router>
-      </div>
+      <div className="app">  
+        <LanguagePopup />  
+        <AnimatedShippingBackground />  
+        <Router basename={process.env.PUBLIC_URL}>  
+          <RouteTranslator />  
+          {loading && <Loader />}  
+          <Header isAdmin={isAdmin} />  
+          <main className="main-content">  
+            <ScrollToTop />  
+            <Routes>  
+              <Route path="/" element={<Home />} />  
+              <Route path="/shipping" element={<Shipping />} />  
+              <Route path="/support" element={<Support />} />  
+              <Route path="/about" element={<About />} />  
+              <Route path="/services" element={<Services />} />  
+              <Route   
+                path="/admin"   
+                element={  
+                  isAdmin   
+                    ? <AdminPanel onLogout={() => setIsAdmin(false)} />   
+                    : <AdminLogin onLogin={() => setIsAdmin(true)} />  
+                }   
+              />  
+            </Routes>  
+          </main>  
+          <Footer />  
+          <CookieConsent />  
+        </Router>  
+      </div>  
     </>
   );
 }
