@@ -23,7 +23,7 @@ import './App.css';
 function RouteTranslator() {
   const location = useLocation();
   const [prevPath, setPrevPath] = useState('');
- // eslint-disable-next-line
+ // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     // Only translate if path actually changed
     if (location.pathname !== prevPath) {
