@@ -25,4 +25,14 @@ export const SELECT_BUTTON_TEXTS = {
   ja: '選択する'
 };
 
+// NEW: Translation status message
+export const TRANSLATING_MESSAGE = {
+  en: 'Translating your experience...',
+  ru: 'Переводим ваш интерфейс...',
+  fr: 'Traduction de votre expérience...',
+  es: 'Traduciendo tu experiencia...',
+  de: 'Ihre Erfahrung wird übersetzt...',
+  ja: 'エクスペリエンスを翻訳しています...'
+};
+
 export const SUPPORTED_LANGUAGES = ['en', 'ru', 'fr', 'es', 'de', 'ja'];
