@@ -118,19 +118,16 @@ export const preloadCommonTranslations = async () => {
 
 // Enhanced node filtering for complete coverage
 const shouldTranslateNode = (node) => {
-  // Skip script/style elements and textareas
   if (node.parentNode.tagName === 'SCRIPT' || 
       node.parentNode.tagName === 'STYLE' ||
       node.parentNode.tagName === 'TEXTAREA') {
     return NodeFilter.FILTER_REJECT;
   }
   
-  // Skip translation for elements with no-translate class
   if (node.parentElement.closest('.no-translate')) {
     return NodeFilter.FILTER_REJECT;
   }
   
-  // Skip translation for code blocks
   if (node.parentElement.closest('code') || node.parentElement.closest('pre')) {
     return NodeFilter.FILTER_REJECT;
   }
@@ -140,12 +137,10 @@ const shouldTranslateNode = (node) => {
 
 // Enhanced translation engine for full coverage
 export const translatePage = async (targetLang) => {
-  if (document.documentElement.lang === targetLang) return;
-  
+  // Removed: if (document.documentElement.lang === targetLang) return;
   localStorage.setItem('selectedLanguage', targetLang);
   document.documentElement.lang = targetLang;
-  
-  // Create optimized tree walker for document body
+
   const bodyWalker = document.createTreeWalker(
     document.body,
     NodeFilter.SHOW_TEXT,
@@ -156,8 +151,7 @@ export const translatePage = async (targetLang) => {
   while (bodyWalker.nextNode()) {
     bodyTextNodes.push(bodyWalker.currentNode);
   }
-  
-  // Create tree walker for head elements (title, meta, etc.)
+
   const headWalker = document.createTreeWalker(
     document.head,
     NodeFilter.SHOW_TEXT,
@@ -168,11 +162,8 @@ export const translatePage = async (targetLang) => {
   while (headWalker.nextNode()) {
     headTextNodes.push(headWalker.currentNode);
   }
-  
-  // Combine all text nodes
+
   const allTextNodes = [...bodyTextNodes, ...headTextNodes];
-  
-  // Batch processing for performance
   const BATCH_SIZE = 25;
   const batches = Math.ceil(allTextNodes.length / BATCH_SIZE);
   
@@ -180,12 +171,10 @@ export const translatePage = async (targetLang) => {
     const start = i * BATCH_SIZE;
     const end = start + BATCH_SIZE;
     const batchNodes = allTextNodes.slice(start, end);
-    
+
     await Promise.all(batchNodes.map(node => {
       return new Promise(async (resolve) => {
         const originalText = node.textContent;
-        
-        // Only translate if needed
         if (originalText.trim() && !node.parentElement.closest('.no-translate')) {
           const translation = await translateText(originalText, targetLang);
           if (translation && translation !== originalText) {
@@ -196,8 +185,7 @@ export const translatePage = async (targetLang) => {
       });
     }));
   }
-  
-  // Special handling for title tag
+
   const title = document.querySelector('title');
   if (title && !title.classList.contains('no-translate')) {
     const translatedTitle = await translateText(title.textContent, targetLang);
@@ -205,8 +193,7 @@ export const translatePage = async (targetLang) => {
       title.textContent = translatedTitle;
     }
   }
-  
-  // Special handling for meta description
+
   const metaDescription = document.querySelector('meta[name="description"]');
   if (metaDescription && !metaDescription.classList.contains('no-translate')) {
     const translatedDescription = await translateText(metaDescription.content, targetLang);
@@ -214,8 +201,7 @@ export const translatePage = async (targetLang) => {
       metaDescription.content = translatedDescription;
     }
   }
-  
-  // Special handling for input placeholders
+
   const inputElements = document.querySelectorAll('input[placeholder]:not(.no-translate)');
   for (const input of inputElements) {
     const translatedPlaceholder = await translateText(input.placeholder, targetLang);
@@ -223,8 +209,7 @@ export const translatePage = async (targetLang) => {
       input.placeholder = translatedPlaceholder;
     }
   }
-  
-  // Special handling for alt text
+
   const imgElements = document.querySelectorAll('img[alt]:not(.no-translate)');
   for (const img of imgElements) {
     const translatedAlt = await translateText(img.alt, targetLang);
@@ -232,8 +217,7 @@ export const translatePage = async (targetLang) => {
       img.alt = translatedAlt;
     }
   }
-  
-  // Special handling for aria labels
+
   const ariaElements = document.querySelectorAll('[aria-label]:not(.no-translate)');
   for (const element of ariaElements) {
     const translatedAriaLabel = await translateText(element.getAttribute('aria-label'), targetLang);
