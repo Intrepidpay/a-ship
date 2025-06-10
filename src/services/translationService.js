@@ -49,7 +49,9 @@ class TranslationCache {
       'Home', 'About', 'Contact', 'Services', 'Products',
       'Welcome', 'Login', 'Sign Up', 'Search', 'Read More',
       'Submit', 'Loading...', 'Please wait', 'Error', 'Success',
-      'Add to cart', 'Checkout', 'Price', 'Quantity', 'Total'
+      'Add to cart', 'Checkout', 'Price', 'Quantity', 'Total',
+      'Yes', 'No', 'Accept', 'Decline', 'Cookies', 'Privacy Policy',
+      'Terms of Service', 'Continue', 'Back', 'Next', 'Previous'
     ];
 
     commonPhrases.forEach(phrase => {
@@ -114,9 +116,9 @@ export const preloadCommonTranslations = async () => {
   translationCache.preloadCommonTranslations();
 };
 
-// NEW: Optimized node filtering
+// Enhanced node filtering for complete coverage
 const shouldTranslateNode = (node) => {
-  // Skip script/style elements
+  // Skip script/style elements and textareas
   if (node.parentNode.tagName === 'SCRIPT' || 
       node.parentNode.tagName === 'STYLE' ||
       node.parentNode.tagName === 'TEXTAREA') {
@@ -128,35 +130,56 @@ const shouldTranslateNode = (node) => {
     return NodeFilter.FILTER_REJECT;
   }
   
+  // Skip translation for code blocks
+  if (node.parentElement.closest('code') || node.parentElement.closest('pre')) {
+    return NodeFilter.FILTER_REJECT;
+  }
+  
   return node.textContent.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
 };
 
+// Enhanced translation engine for full coverage
 export const translatePage = async (targetLang) => {
   if (document.documentElement.lang === targetLang) return;
   
   localStorage.setItem('selectedLanguage', targetLang);
   document.documentElement.lang = targetLang;
   
-  // Create optimized tree walker
-  const walker = document.createTreeWalker(
+  // Create optimized tree walker for document body
+  const bodyWalker = document.createTreeWalker(
     document.body,
     NodeFilter.SHOW_TEXT,
     { acceptNode: shouldTranslateNode }
   );
   
-  const textNodes = [];
-  while (walker.nextNode()) {
-    textNodes.push(walker.currentNode);
+  const bodyTextNodes = [];
+  while (bodyWalker.nextNode()) {
+    bodyTextNodes.push(bodyWalker.currentNode);
   }
   
-  // Use faster batch processing
-  const BATCH_SIZE = 20;
-  const batches = Math.ceil(textNodes.length / BATCH_SIZE);
+  // Create tree walker for head elements (title, meta, etc.)
+  const headWalker = document.createTreeWalker(
+    document.head,
+    NodeFilter.SHOW_TEXT,
+    { acceptNode: shouldTranslateNode }
+  );
+  
+  const headTextNodes = [];
+  while (headWalker.nextNode()) {
+    headTextNodes.push(headWalker.currentNode);
+  }
+  
+  // Combine all text nodes
+  const allTextNodes = [...bodyTextNodes, ...headTextNodes];
+  
+  // Batch processing for performance
+  const BATCH_SIZE = 25;
+  const batches = Math.ceil(allTextNodes.length / BATCH_SIZE);
   
   for (let i = 0; i < batches; i++) {
     const start = i * BATCH_SIZE;
     const end = start + BATCH_SIZE;
-    const batchNodes = textNodes.slice(start, end);
+    const batchNodes = allTextNodes.slice(start, end);
     
     await Promise.all(batchNodes.map(node => {
       return new Promise(async (resolve) => {
@@ -172,6 +195,51 @@ export const translatePage = async (targetLang) => {
         resolve();
       });
     }));
+  }
+  
+  // Special handling for title tag
+  const title = document.querySelector('title');
+  if (title && !title.classList.contains('no-translate')) {
+    const translatedTitle = await translateText(title.textContent, targetLang);
+    if (translatedTitle && translatedTitle !== title.textContent) {
+      title.textContent = translatedTitle;
+    }
+  }
+  
+  // Special handling for meta description
+  const metaDescription = document.querySelector('meta[name="description"]');
+  if (metaDescription && !metaDescription.classList.contains('no-translate')) {
+    const translatedDescription = await translateText(metaDescription.content, targetLang);
+    if (translatedDescription && translatedDescription !== metaDescription.content) {
+      metaDescription.content = translatedDescription;
+    }
+  }
+  
+  // Special handling for input placeholders
+  const inputElements = document.querySelectorAll('input[placeholder]:not(.no-translate)');
+  for (const input of inputElements) {
+    const translatedPlaceholder = await translateText(input.placeholder, targetLang);
+    if (translatedPlaceholder && translatedPlaceholder !== input.placeholder) {
+      input.placeholder = translatedPlaceholder;
+    }
+  }
+  
+  // Special handling for alt text
+  const imgElements = document.querySelectorAll('img[alt]:not(.no-translate)');
+  for (const img of imgElements) {
+    const translatedAlt = await translateText(img.alt, targetLang);
+    if (translatedAlt && translatedAlt !== img.alt) {
+      img.alt = translatedAlt;
+    }
+  }
+  
+  // Special handling for aria labels
+  const ariaElements = document.querySelectorAll('[aria-label]:not(.no-translate)');
+  for (const element of ariaElements) {
+    const translatedAriaLabel = await translateText(element.getAttribute('aria-label'), targetLang);
+    if (translatedAriaLabel && translatedAriaLabel !== element.getAttribute('aria-label')) {
+      element.setAttribute('aria-label', translatedAriaLabel);
+    }
   }
 };
 
