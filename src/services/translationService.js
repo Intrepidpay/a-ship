@@ -4,6 +4,7 @@
 export const applySavedLanguage = async (langCode) => {
   if (!langCode || langCode === 'en') return;
   await translatePage(langCode);
+  observeDOMChanges(langCode); // Start observing after initial translation
 };
 
 /**
@@ -30,7 +31,7 @@ export const translatePage = async (targetLang) => {
 };
 
 /**
- * Recursively translates all text nodes in a given element.
+ * Recursively translates all text nodes in a given element using batching.
  */
 const translateTextNodes = async (rootElement, targetLang) => {
   const walker = document.createTreeWalker(
@@ -38,7 +39,6 @@ const translateTextNodes = async (rootElement, targetLang) => {
     NodeFilter.SHOW_TEXT,
     {
       acceptNode: (node) => {
-        // Skip text nodes inside script, style, and noscript elements
         const parent = node.parentNode;
         if (
           parent.nodeName === 'SCRIPT' ||
@@ -47,7 +47,6 @@ const translateTextNodes = async (rootElement, targetLang) => {
         ) {
           return NodeFilter.FILTER_REJECT;
         }
-        // Skip empty or whitespace-only text nodes
         if (!node.nodeValue.trim()) {
           return NodeFilter.FILTER_REJECT;
         }
@@ -63,10 +62,16 @@ const translateTextNodes = async (rootElement, targetLang) => {
     textNodes.push(currentNode);
   }
 
-  for (const node of textNodes) {
-    const translatedText = await translateText(node.nodeValue, targetLang);
-    node.nodeValue = translatedText;
-  }
+  // Collect all text contents
+  const texts = textNodes.map((node) => node.nodeValue);
+
+  // Translate them in batch
+  const translatedTexts = await translateTextBatch(texts, targetLang);
+
+  // Update nodes
+  textNodes.forEach((node, index) => {
+    node.nodeValue = translatedTexts[index] || node.nodeValue;
+  });
 };
 
 /**
@@ -97,4 +102,65 @@ export const translateText = async (text, targetLang) => {
     console.error('Translation error:', error);
     return text;
   }
+};
+
+/**
+ * Uses Google Translate API to translate a batch of texts.
+ */
+const translateTextBatch = async (texts, targetLang) => {
+  if (!texts.length || targetLang === 'en') return texts;
+
+  try {
+    const delimiter = '|||'; // Use a delimiter unlikely to occur naturally
+    const joinedText = texts.join(delimiter);
+    const apiUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(
+      joinedText
+    )}`;
+
+    const response = await fetch(apiUrl);
+
+    if (!response.ok) {
+      console.error(`Translation API error: ${response.status}`);
+      return texts;
+    }
+
+    const data = await response.json();
+
+    if (Array.isArray(data) && data[0]) {
+      const translatedJoinedText = data[0].map((segment) => segment[0]).join('');
+      return translatedJoinedText.split(delimiter);
+    }
+
+    return texts;
+  } catch (error) {
+    console.error('Batch translation error:', error);
+    return texts;
+  }
+};
+
+/**
+ * Observe dynamic DOM changes and translate new content automatically.
+ */
+const observeDOMChanges = (targetLang) => {
+  const observer = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      if (mutation.type === 'childList') {
+        mutation.addedNodes.forEach(async (node) => {
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            await translateTextNodes(node, targetLang);
+          }
+        });
+      } else if (mutation.type === 'attributes') {
+        if (mutation.target.nodeType === Node.ELEMENT_NODE) {
+          translateTextNodes(mutation.target, targetLang);
+        }
+      }
+    }
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+  });
 };
