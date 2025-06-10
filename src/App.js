@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import { Helmet } from "react-helmet";
+import { Helmet } from 'react-helmet';
 import ScrollToTop from './components/ScrollToTop';
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
@@ -15,17 +15,17 @@ import Loader from './components/Loader/Loader';
 import AnimatedShippingBackground from './components/AnimatedShippingBackground';
 import CookieConsent from './components/CookieConsent/CookieConsent';
 import LanguagePopup from './components/LanguagePopup';
-import { applyLanguage } from './services/translationService';
+import { applySavedLanguage } from './services/translationService';
 import './components/translation.css';
 import './App.css';
 
-// Simplified route translation handler
+// Route translation handler
 function RouteTranslator() {
   const location = useLocation();
   const savedLang = localStorage.getItem('selectedLanguage') || 'en';
 
   useEffect(() => {
-    applyLanguage(savedLang);
+    applySavedLanguage(savedLang);
   }, [location, savedLang]);
 
   return null;
@@ -41,7 +41,7 @@ function App() {
     if (!initialLangApplied.current) {
       const savedLang = localStorage.getItem('selectedLanguage') || 'en';
       if (savedLang && savedLang !== 'en') {
-        applyLanguage(savedLang);
+        applySavedLanguage(savedLang);
       }
       initialLangApplied.current = true;
     }
@@ -54,17 +54,18 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const metaThemeColor = document.querySelector("meta[name=theme-color]");
+    const metaThemeColor = document.querySelector('meta[name=theme-color]');
     if (metaThemeColor) {
-      metaThemeColor.setAttribute("content", "#161b22");
+      metaThemeColor.setAttribute('content', '#161b22');
     } else {
       const meta = document.createElement('meta');
-      meta.name = "theme-color";
-      meta.content = "#161b22";
+      meta.name = 'theme-color';
+      meta.content = '#161b22';
       document.head.appendChild(meta);
     }
 
-    setTimeout(() => setLoading(false), 2000);
+    const loadingTimer = setTimeout(() => setLoading(false), 2000);
+    return () => clearTimeout(loadingTimer);
   }, []);
 
   return (
@@ -74,7 +75,7 @@ function App() {
         <meta name="msapplication-navbutton-color" content="#161b22" />
         <meta name="apple-mobile-web-app-status-bar-style" content="#161b22" />
       </Helmet>
-      
+
       <div className="app">
         <LanguagePopup />
         <AnimatedShippingBackground />
@@ -90,13 +91,15 @@ function App() {
               <Route path="/support" element={<Support />} />
               <Route path="/about" element={<About />} />
               <Route path="/services" element={<Services />} />
-              <Route 
-                path="/admin" 
+              <Route
+                path="/admin"
                 element={
-                  isAdmin 
-                    ? <AdminPanel onLogout={() => setIsAdmin(false)} /> 
-                    : <AdminLogin onLogin={() => setIsAdmin(true)} />
-                } 
+                  isAdmin ? (
+                    <AdminPanel onLogout={() => setIsAdmin(false)} />
+                  ) : (
+                    <AdminLogin onLogin={() => setIsAdmin(true)} />
+                  )
+                }
               />
             </Routes>
           </main>
