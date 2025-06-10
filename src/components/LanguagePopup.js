@@ -4,10 +4,11 @@ import {
   SELECT_BUTTON_TEXTS, 
   LANGUAGE_NAMES,
   SUPPORTED_LANGUAGES,
-  TRANSLATING_MESSAGE // NEW IMPORT
+  TRANSLATING_MESSAGE
 } from './constants';
 import { 
-  preloadCommonTranslations
+  preloadCommonTranslations,
+  translatePage // NEW: Import translatePage directly
 } from '../services/translationService';
 import './translation.css';
 
@@ -62,7 +63,7 @@ const LanguagePopup = () => {
     setState(prev => ({ ...prev, stage: 'language-selection' }));
   };
 
-  const handleLanguageSelect = (langCode) => {
+  const handleLanguageSelect = async (langCode) => {
     setState(prev => ({ 
       ...prev, 
       isTranslating: true,
@@ -75,16 +76,16 @@ const LanguagePopup = () => {
     // Hide popup but keep translating overlay visible
     setState(prev => ({ ...prev, showPopup: false }));
     
-    // Hide overlay after 1s (translation continues in background)
-    setTimeout(() => {
-      setState(prev => ({ ...prev, isTranslating: false }));
-    }, 1000);
+    // Perform full page translation
+    await translatePage(langCode);
+    
+    // Hide overlay after translation completes
+    setState(prev => ({ ...prev, isTranslating: false }));
   };
 
   if (state.isTranslating) {
     return (
       <div className="global-translating-overlay">
-        {/* Use translated message */}
         <div className="translating-message">
           {TRANSLATING_MESSAGE[state.userLang] || TRANSLATING_MESSAGE.en}
         </div>
