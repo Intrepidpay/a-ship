@@ -25,11 +25,8 @@ function RouteTranslationHandler() {
 
   useEffect(() => {
     const savedLang = localStorage.getItem('selectedLanguage') || 'en';
-    // Delay to ensure React has rendered the new page content
-    setTimeout(() => {
-      applySavedLanguage(savedLang);
-    }, 0);
-  }, [location.pathname]);
+    applySavedLanguage(savedLang);
+  }, [location]);
 
   return null;
 }
@@ -41,9 +38,7 @@ function App() {
   // Initial translation on first load
   useEffect(() => {
     const savedLang = localStorage.getItem('selectedLanguage') || 'en';
-    setTimeout(() => {
-      applySavedLanguage(savedLang);
-    }, 0);
+    applySavedLanguage(savedLang);
 
     const params = new URLSearchParams(window.location.search);
     const redirect = params.get('redirect');
