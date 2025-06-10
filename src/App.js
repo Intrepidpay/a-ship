@@ -19,38 +19,31 @@ import { applySavedLanguage } from './services/translationService';
 import './components/translation.css';
 import './App.css';
 
-// Enhanced route translation handler
+// Enhanced route translation handler with DOM change detection
 function RouteTranslator() {
   const location = useLocation();
   const prevPathRef = useRef('');
   const translationPendingRef = useRef(false);
-  const translationTimerRef = useRef(null);
+  const observerRef = useRef(null);
 
   useEffect(() => {
     const savedLang = localStorage.getItem('selectedLanguage') || 'en';
-    
+
     // Skip initial render
     if (prevPathRef.current === '') {
       prevPathRef.current = location.pathname;
       return;
     }
 
-    // Clear any pending translation
-    if (translationTimerRef.current) {
-      clearTimeout(translationTimerRef.current);
+    // Disconnect any existing observer
+    if (observerRef.current) {
+      observerRef.current.disconnect();
     }
-
-    // Skip if translation is already pending
-    if (translationPendingRef.current) return;
 
     translationPendingRef.current = true;
 
     const translateCurrentPage = async () => {
       try {
-        // Wait for React to update the DOM
-        await new Promise(resolve => setTimeout(resolve, 50));
-        
-        // Apply translation
         await applySavedLanguage(savedLang);
       } catch (error) {
         console.error('Navigation translation error:', error);
@@ -59,14 +52,29 @@ function RouteTranslator() {
       }
     };
 
-    // Start translation after a short delay to ensure DOM is ready
-    translationTimerRef.current = setTimeout(translateCurrentPage, 100);
-    
+    // Set up MutationObserver to detect DOM changes after route change
+    observerRef.current = new MutationObserver((mutationsList, observer) => {
+      if (!translationPendingRef.current) {
+        translationPendingRef.current = true;
+        // Wait for the next animation frame to ensure React has fully committed changes
+        requestAnimationFrame(async () => {
+          await translateCurrentPage();
+          translationPendingRef.current = false;
+        });
+      }
+    });
+
+    // Start observing the entire document body for subtree and childList changes
+    observerRef.current.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
     prevPathRef.current = location.pathname;
 
     return () => {
-      if (translationTimerRef.current) {
-        clearTimeout(translationTimerRef.current);
+      if (observerRef.current) {
+        observerRef.current.disconnect();
       }
     };
   }, [location]);
