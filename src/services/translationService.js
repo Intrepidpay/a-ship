@@ -17,7 +17,7 @@ export const translatePage = async (targetLang) => {
   document.documentElement.lang = targetLang;
 
   try {
-    await translateTextNodes(document.body, targetLang);
+    await translateVisibleTextNodes(document.body, targetLang);
 
     // Translate the document title.
     const titleElement = document.querySelector('title');
@@ -31,9 +31,9 @@ export const translatePage = async (targetLang) => {
 };
 
 /**
- * Recursively translates all text nodes in a given element using batching.
+ * Recursively translates visible text nodes in a given element, preserving HTML structure.
  */
-const translateTextNodes = async (rootElement, targetLang) => {
+const translateVisibleTextNodes = async (rootElement, targetLang) => {
   const walker = document.createTreeWalker(
     rootElement,
     NodeFilter.SHOW_TEXT,
@@ -50,6 +50,9 @@ const translateTextNodes = async (rootElement, targetLang) => {
         if (!node.nodeValue.trim()) {
           return NodeFilter.FILTER_REJECT;
         }
+        if (!isVisible(parent)) {
+          return NodeFilter.FILTER_REJECT;
+        }
         return NodeFilter.FILTER_ACCEPT;
       },
     },
@@ -62,20 +65,20 @@ const translateTextNodes = async (rootElement, targetLang) => {
     textNodes.push(currentNode);
   }
 
-  // Collect all text contents
-  const texts = textNodes.map((node) => node.nodeValue);
-
-  // Translate them in batch
-  const translatedTexts = await translateTextBatch(texts, targetLang);
-
-  // Update nodes
-  textNodes.forEach((node, index) => {
-    node.nodeValue = translatedTexts[index] || node.nodeValue;
-  });
+  // Batch translate in groups of 5–10 nodes (adjust as needed for API limits)
+  const batchSize = 10;
+  for (let i = 0; i < textNodes.length; i += batchSize) {
+    const batch = textNodes.slice(i, i + batchSize);
+    const texts = batch.map((node) => node.nodeValue);
+    const translatedTexts = await translateTextBatch(texts, targetLang);
+    batch.forEach((node, index) => {
+      node.nodeValue = translatedTexts[index] || node.nodeValue;
+    });
+  }
 };
 
 /**
- * Uses Google Translate API to translate a given text.
+ * Uses Google Translate API to translate a single text.
  */
 export const translateText = async (text, targetLang) => {
   if (!text || targetLang === 'en') return text;
@@ -111,27 +114,8 @@ const translateTextBatch = async (texts, targetLang) => {
   if (!texts.length || targetLang === 'en') return texts;
 
   try {
-    const delimiter = '|||'; // Use a delimiter unlikely to occur naturally
-    const joinedText = texts.join(delimiter);
-    const apiUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(
-      joinedText
-    )}`;
-
-    const response = await fetch(apiUrl);
-
-    if (!response.ok) {
-      console.error(`Translation API error: ${response.status}`);
-      return texts;
-    }
-
-    const data = await response.json();
-
-    if (Array.isArray(data) && data[0]) {
-      const translatedJoinedText = data[0].map((segment) => segment[0]).join('');
-      return translatedJoinedText.split(delimiter);
-    }
-
-    return texts;
+    const promises = texts.map((text) => translateText(text, targetLang));
+    return await Promise.all(promises);
   } catch (error) {
     console.error('Batch translation error:', error);
     return texts;
@@ -139,21 +123,17 @@ const translateTextBatch = async (texts, targetLang) => {
 };
 
 /**
- * Observe dynamic DOM changes and translate new content automatically.
+ * Observe dynamic DOM changes and translate new visible content automatically.
  */
 const observeDOMChanges = (targetLang) => {
   const observer = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
       if (mutation.type === 'childList') {
         mutation.addedNodes.forEach(async (node) => {
-          if (node.nodeType === Node.ELEMENT_NODE) {
-            await translateTextNodes(node, targetLang);
+          if (node.nodeType === Node.ELEMENT_NODE && isVisible(node)) {
+            await translateVisibleTextNodes(node, targetLang);
           }
         });
-      } else if (mutation.type === 'attributes') {
-        if (mutation.target.nodeType === Node.ELEMENT_NODE) {
-          translateTextNodes(mutation.target, targetLang);
-        }
       }
     }
   });
@@ -161,6 +141,15 @@ const observeDOMChanges = (targetLang) => {
   observer.observe(document.body, {
     childList: true,
     subtree: true,
-    attributes: true,
   });
+};
+
+/**
+ * Determines if an element is visible.
+ */
+const isVisible = (element) => {
+  return (
+    element.offsetParent !== null ||
+    (element instanceof SVGElement && element.getBBox().width > 0)
+  );
 };
