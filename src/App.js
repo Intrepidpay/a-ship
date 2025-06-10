@@ -26,16 +26,21 @@ function RouteTranslator() {
 
   useEffect(() => {
     const savedLang = localStorage.getItem('selectedLanguage') || 'en';
+    const currentLang = document.documentElement.lang || 'en';
+
+    const shouldTranslate = savedLang !== 'en' && savedLang !== currentLang;
 
     const translateCurrentPage = async () => {
-      try {
-        await applySavedLanguage(savedLang);
-      } catch (error) {
-        console.error('Navigation translation error:', error);
+      if (shouldTranslate) {
+        try {
+          await applySavedLanguage(savedLang);
+        } catch (error) {
+          console.error('Navigation translation error:', error);
+        }
       }
     };
 
-    // Translate immediately after route change
+    // Translate immediately after route change if needed
     requestAnimationFrame(() => {
       translateCurrentPage();
     });
@@ -45,17 +50,19 @@ function RouteTranslator() {
       observerRef.current.disconnect();
     }
 
-    // Observe DOM changes
-    observerRef.current = new MutationObserver(() => {
-      requestAnimationFrame(() => {
-        translateCurrentPage();
+    // Observe DOM changes and apply translation if needed
+    if (savedLang !== 'en') {
+      observerRef.current = new MutationObserver(() => {
+        requestAnimationFrame(() => {
+          translateCurrentPage();
+        });
       });
-    });
 
-    observerRef.current.observe(document.body, {
-      childList: true,
-      subtree: true,
-    });
+      observerRef.current.observe(document.body, {
+        childList: true,
+        subtree: true,
+      });
+    }
 
     return () => {
       if (observerRef.current) {
@@ -109,7 +116,7 @@ function App() {
         <meta name="msapplication-navbutton-color" content="#161b22" />
         <meta name="apple-mobile-web-app-status-bar-style" content="#161b22" />
       </Helmet>
-      
+
       <div className="app">
         <LanguagePopup />
         <AnimatedShippingBackground />
@@ -125,13 +132,13 @@ function App() {
               <Route path="/support" element={<Support />} />
               <Route path="/about" element={<About />} />
               <Route path="/services" element={<Services />} />
-              <Route 
-                path="/admin" 
+              <Route
+                path="/admin"
                 element={
-                  isAdmin 
-                    ? <AdminPanel onLogout={() => setIsAdmin(false)} /> 
+                  isAdmin
+                    ? <AdminPanel onLogout={() => setIsAdmin(false)} />
                     : <AdminLogin onLogin={() => setIsAdmin(true)} />
-                } 
+                }
               />
             </Routes>
           </main>
