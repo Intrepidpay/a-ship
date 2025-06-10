@@ -105,7 +105,7 @@ export const translatePage = async (targetLang) => {
   const allTextNodes = [...bodyTextNodes, ...headTextNodes];
   
   // Batch processing for performance
-  const BATCH_SIZE = 15; // Reduced for better responsiveness
+  const BATCH_SIZE = 15;
   const batches = Math.ceil(allTextNodes.length / BATCH_SIZE);
   
   for (let i = 0; i < batches; i++) {
