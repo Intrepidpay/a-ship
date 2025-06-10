@@ -243,6 +243,33 @@ export const translatePage = async (targetLang) => {
   }
 };
 
+// NEW: MutationObserver setup for dynamic content
+export const setupTranslationObserver = (targetLang) => {
+  const observer = new MutationObserver((mutations) => {
+    const shouldRetranslate = mutations.some(mutation => {
+      // Only react to meaningful DOM changes
+      return mutation.addedNodes.length > 0 || 
+             mutation.type === 'characterData' ||
+             (mutation.attributeName === 'class' && 
+              mutation.target.classList.contains('translated'));
+    });
+    
+    if (shouldRetranslate) {
+      applySavedLanguage(targetLang).catch(console.error);
+    }
+  });
+
+  observer.observe(document.documentElement, {
+    childList: true,
+    subtree: true,
+    characterData: true,
+    attributes: true,
+    attributeFilter: ['class']
+  });
+
+  return observer;
+};
+
 export const applySavedLanguage = async (lang) => {
   try {
     await translatePage(lang);
