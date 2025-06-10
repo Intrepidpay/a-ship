@@ -8,7 +8,7 @@ export const applySavedLanguage = async (langCode) => {
 
 /**
  * Translates the entire page by updating the document's lang attribute
- * and replacing body text and title.
+ * and replacing all text nodes.
  */
 export const translatePage = async (targetLang) => {
   if (!targetLang || targetLang === 'en') return;
@@ -16,12 +16,7 @@ export const translatePage = async (targetLang) => {
   document.documentElement.lang = targetLang;
 
   try {
-    // Translate the entire body text as a single string.
-    const bodyText = document.body.innerText;
-    if (bodyText) {
-      const translatedText = await translateText(bodyText, targetLang);
-      document.body.innerText = translatedText;
-    }
+    await translateTextNodes(document.body, targetLang);
 
     // Translate the document title.
     const titleElement = document.querySelector('title');
@@ -31,6 +26,46 @@ export const translatePage = async (targetLang) => {
     }
   } catch (error) {
     console.error('Translation error:', error);
+  }
+};
+
+/**
+ * Recursively translates all text nodes in a given element.
+ */
+const translateTextNodes = async (rootElement, targetLang) => {
+  const walker = document.createTreeWalker(
+    rootElement,
+    NodeFilter.SHOW_TEXT,
+    {
+      acceptNode: (node) => {
+        // Skip text nodes inside script, style, and noscript elements
+        const parent = node.parentNode;
+        if (
+          parent.nodeName === 'SCRIPT' ||
+          parent.nodeName === 'STYLE' ||
+          parent.nodeName === 'NOSCRIPT'
+        ) {
+          return NodeFilter.FILTER_REJECT;
+        }
+        // Skip empty or whitespace-only text nodes
+        if (!node.nodeValue.trim()) {
+          return NodeFilter.FILTER_REJECT;
+        }
+        return NodeFilter.FILTER_ACCEPT;
+      },
+    },
+    false
+  );
+
+  const textNodes = [];
+  let currentNode;
+  while ((currentNode = walker.nextNode())) {
+    textNodes.push(currentNode);
+  }
+
+  for (const node of textNodes) {
+    const translatedText = await translateText(node.nodeValue, targetLang);
+    node.nodeValue = translatedText;
   }
 };
 
