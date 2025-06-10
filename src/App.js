@@ -15,67 +15,38 @@ import Loader from './components/Loader/Loader';
 import AnimatedShippingBackground from './components/AnimatedShippingBackground';
 import CookieConsent from './components/CookieConsent/CookieConsent';
 import LanguagePopup from './components/LanguagePopup';
-import { applySavedLanguage, setupTranslationObserver } from './services/translationService';
+import { applySavedLanguage } from './services/translationService';
 import './components/translation.css';
 import './App.css';
 
-// New robust route translation handler
 function RouteTranslationHandler() {
   const location = useLocation();
   const initialRender = useRef(true);
-  const observerRef = useRef(null);
-  const retryTimerRef = useRef(null);
-  const attemptRef = useRef(0);
+  const translationTimer = useRef(null);
 
   useEffect(() => {
-    const savedLang = localStorage.getItem('selectedLanguage') || 'en';
-    
-    // Skip initial render
     if (initialRender.current) {
       initialRender.current = false;
       return;
     }
 
-    // Cleanup previous attempts
-    if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
-    if (observerRef.current) {
-      observerRef.current.disconnect();
-      observerRef.current = null;
-    }
-
-    // Main translation function with retry logic
-    const attemptTranslation = async () => {
-      try {
-        await applySavedLanguage(savedLang);
-      } catch (error) {
-        console.error('Translation attempt failed:', error);
-        
-        // Setup observer if first attempt fails
-        if (attemptRef.current === 0) {
-          observerRef.current = setupTranslationObserver(savedLang);
-        }
-        
-        // Retry up to 3 times
-        if (attemptRef.current < 3) {
-          attemptRef.current++;
-          retryTimerRef.current = setTimeout(attemptTranslation, 300 * attemptRef.current);
-        } else {
-          attemptRef.current = 0;
-        }
-      }
-    };
-
-    // Reset attempt counter
-    attemptRef.current = 0;
+    // Clear any pending translations
+    if (translationTimer.current) clearTimeout(translationTimer.current);
     
-    // First translation attempt
-    attemptTranslation();
+    const savedLang = localStorage.getItem('selectedLanguage') || 'en';
     
+    // First attempt after React completes rendering
+    translationTimer.current = setTimeout(() => {
+      applySavedLanguage(savedLang);
+      
+      // Second attempt for async components
+      translationTimer.current = setTimeout(() => {
+        applySavedLanguage(savedLang);
+      }, 300);
+    }, 100);
+
     return () => {
-      if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
+      if (translationTimer.current) clearTimeout(translationTimer.current);
     };
   }, [location]);
 
