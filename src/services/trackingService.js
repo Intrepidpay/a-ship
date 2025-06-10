@@ -1,22 +1,37 @@
 let mockPackages = [
   {
     trackingNumber: "SH87556849",
-    status: "In Transit",
+    status: "Pending Payment",
     recipient: "Victor",
     destination: "4 Lesnaya St, Peski, Kolomensky, Moscow, RU",
     weight: "3.7 kg",
-    progress: 15,
+    progress: 83,
     createdAt: new Date("2025-06-07T08:33:00Z"),
     estimatedDelivery: new Date("2025-06-12T12:00:00Z"),
     history: [
       {
         timestamp: new Date("2025-06-07T08:41:00Z"),
         location: "Kabul Warehouse",
-        status: "processing",
+        status: "processed",
         coordinates: { lat: 34.5255, lng: 69.1708 },
-        isCurrentLocation: true
+        isCurrentLocation: false 
+      },
+      {
+        timestamp: new Date("2025-06-08T15:45:00Z"),
+        location: "Istanbul Warehouse",
+        status: "shipped",
+        coordinates: { lat: 41.0082, lng: 28.9784 },
+        isCurrentLocation: false
       }
-    ]
+      ,
+       {
+       timestamp: new Date("2025-06-21T11:20:00Z"),
+       location: "Vladivostok Warehouse",
+       status: "In Transit",
+       coordinates: { lat: 43.1155, lng: 131.8855 },
+       isCurrentLocation: true
+       }
+    ] 
   },
   {
     trackingNumber: "Sopuruon1",
