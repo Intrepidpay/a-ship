@@ -19,12 +19,16 @@ import { applySavedLanguage } from './services/translationService';
 import './components/translation.css';
 import './App.css';
 
+// Component to handle translation on route change
 function RouteTranslationHandler() {
   const location = useLocation();
 
   useEffect(() => {
     const savedLang = localStorage.getItem('selectedLanguage') || 'en';
-    applySavedLanguage(savedLang);
+    // Delay to ensure React has rendered the new page content
+    setTimeout(() => {
+      applySavedLanguage(savedLang);
+    }, 0);
   }, [location.pathname]);
 
   return null;
@@ -34,11 +38,21 @@ function App() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Initial translation on first load
   useEffect(() => {
     const savedLang = localStorage.getItem('selectedLanguage') || 'en';
-    applySavedLanguage(savedLang);
+    setTimeout(() => {
+      applySavedLanguage(savedLang);
+    }, 0);
+
+    const params = new URLSearchParams(window.location.search);
+    const redirect = params.get('redirect');
+    if (redirect) {
+      window.history.replaceState(null, '', redirect);
+    }
   }, []);
 
+  // Handle meta theme color and loader
   useEffect(() => {
     const metaThemeColor = document.querySelector("meta[name=theme-color]");
     if (metaThemeColor) {
@@ -79,11 +93,9 @@ function App() {
               <Route
                 path="/admin"
                 element={
-                  isAdmin ? (
-                    <AdminPanel onLogout={() => setIsAdmin(false)} />
-                  ) : (
-                    <AdminLogin onLogin={() => setIsAdmin(true)} />
-                  )
+                  isAdmin
+                    ? <AdminPanel onLogout={() => setIsAdmin(false)} />
+                    : <AdminLogin onLogin={() => setIsAdmin(true)} />
                 }
               />
             </Routes>
