@@ -162,6 +162,7 @@ const observeDOMChanges = (targetLang) => {
         // Handle added nodes
         if (mutation.type === 'childList') {
           mutation.addedNodes.forEach((node) => {
+            // Handle elements directly
             if (node.nodeType === Node.ELEMENT_NODE) {
               elementsToTranslate.add(node);
             }
@@ -174,6 +175,13 @@ const observeDOMChanges = (targetLang) => {
           if (isVisible(mutation.target)) {
             elementsToTranslate.add(mutation.target);
           }
+        }
+      });
+
+      // Also check for reveal animations that might not trigger mutations
+      document.querySelectorAll('.reveal, .reveal-active, .in-view, .tracking-reveal').forEach(element => {
+        if (isVisible(element) && !elementsToTranslate.has(element)) {
+          elementsToTranslate.add(element);
         }
       });
 
@@ -196,7 +204,7 @@ const observeDOMChanges = (targetLang) => {
 };
 
 /**
- * Improved visibility check.
+ * Improved visibility check with reveal animation support.
  */
 const isVisible = (element) => {
   if (!element || !(element instanceof Element)) return false;
@@ -207,7 +215,30 @@ const isVisible = (element) => {
     return false;
   }
   
+  // Special case for reveal animations
+  if (element.classList.contains('reveal') || 
+      element.classList.contains('reveal-active') || 
+      element.classList.contains('in-view') || 
+      element.classList.contains('tracking-reveal')) {
+    return true;
+  }
+  
   // Check bounding rectangle
   const rect = element.getBoundingClientRect();
   return rect.width > 0 && rect.height > 0;
 };
+
+/**
+ * Periodically check for reveal elements that need translation
+ */
+setInterval(() => {
+  const lang = localStorage.getItem('selectedLanguage') || 'en';
+  if (lang === 'en') return;
+  
+  // Look for reveal elements that might have been missed
+  document.querySelectorAll('.reveal, .reveal-active, .in-view, .tracking-reveal').forEach(async (element) => {
+    if (isVisible(element)) {
+      await translateVisibleTextNodes(element, lang);
+    }
+  });
+}, 3000); // Check every 3 seconds
