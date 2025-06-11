@@ -1,5 +1,6 @@
 // Cache for translations
 const translationCache = new Map();
+let observerInstance = null;
 
 /**
  * Applies the saved language to the entire page.
@@ -24,7 +25,7 @@ export const translatePage = async (targetLang) => {
 
     // Translate the document title.
     const titleElement = document.querySelector('title');
-    if (titleElement && titleElement.textContent) {
+    if (titleElement && titleElement.textContent && !titleElement.closest('.no-translate')) {
       const translatedTitle = await translateText(titleElement.textContent, targetLang);
       titleElement.textContent = translatedTitle;
     }
@@ -46,11 +47,6 @@ const translateVisibleTextNodes = async (rootElement, targetLang) => {
         
         // Skip if element has "no-translate" class
         if (parent.classList && parent.classList.contains('no-translate')) {
-          return NodeFilter.FILTER_REJECT;
-        }
-        
-        // Skip hidden elements
-        if (!isVisible(parent)) {
           return NodeFilter.FILTER_REJECT;
         }
         
@@ -84,7 +80,10 @@ const translateVisibleTextNodes = async (rootElement, targetLang) => {
     const translatedTexts = await translateTextBatch(texts, targetLang);
     
     batch.forEach((node, index) => {
-      node.nodeValue = translatedTexts[index] || node.nodeValue;
+      // Only update if translation is different
+      if (translatedTexts[index] && translatedTexts[index] !== node.nodeValue) {
+        node.nodeValue = translatedTexts[index];
+      }
     });
   }
 };
@@ -143,32 +142,56 @@ const translateTextBatch = async (texts, targetLang) => {
 
 // Throttle for DOM observation
 let translationThrottle;
-const THROTTLE_DELAY = 300;
+const THROTTLE_DELAY = 500;
 
 /**
  * Observe dynamic DOM changes and translate new visible content automatically.
  */
 const observeDOMChanges = (targetLang) => {
-  const observer = new MutationObserver((mutations) => {
+  // Disconnect existing observer if any
+  if (observerInstance) {
+    observerInstance.disconnect();
+  }
+
+  observerInstance = new MutationObserver((mutations) => {
     clearTimeout(translationThrottle);
     translationThrottle = setTimeout(() => {
+      const elementsToTranslate = new Set();
+
       mutations.forEach((mutation) => {
+        // Handle added nodes
         if (mutation.type === 'childList') {
-          mutation.addedNodes.forEach(async (node) => {
-            if (node.nodeType === Node.ELEMENT_NODE && isVisible(node)) {
-              await translateVisibleTextNodes(node, targetLang);
+          mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              elementsToTranslate.add(node);
             }
           });
+        }
+        
+        // Handle visibility changes (like reveal animations)
+        if (mutation.type === 'attributes' && 
+            (mutation.attributeName === 'class' || mutation.attributeName === 'style')) {
+          if (isVisible(mutation.target)) {
+            elementsToTranslate.add(mutation.target);
+          }
+        }
+      });
+
+      // Translate all collected elements
+      elementsToTranslate.forEach((element) => {
+        if (isVisible(element)) {
+          translateVisibleTextNodes(element, targetLang)
+            .catch(error => console.error('Error translating element:', error));
         }
       });
     }, THROTTLE_DELAY);
   });
 
-  observer.observe(document.body, {
+  observerInstance.observe(document.body, {
     childList: true,
     subtree: true,
-    attributes: false,
-    characterData: false
+    attributes: true,
+    attributeFilter: ['class', 'style']
   });
 };
 
@@ -176,11 +199,11 @@ const observeDOMChanges = (targetLang) => {
  * Improved visibility check.
  */
 const isVisible = (element) => {
-  if (!element) return false;
+  if (!element || !(element instanceof Element)) return false;
   
   // Check computed style
   const style = window.getComputedStyle(element);
-  if (style.visibility === 'hidden' || style.display === 'none') {
+  if (style.visibility === 'hidden' || style.display === 'none' || style.opacity === '0') {
     return false;
   }
   
