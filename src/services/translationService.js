@@ -44,12 +44,12 @@ const translateVisibleTextNodes = async (rootElement, targetLang) => {
     {
       acceptNode: (node) => {
         const parent = node.parentNode;
-
+        
         // Skip if element has "no-translate" class
         if (parent.classList && parent.classList.contains('no-translate')) {
           return NodeFilter.FILTER_REJECT;
         }
-
+        
         // Skip script/style/noscript and empty nodes
         if (
           parent.nodeName === 'SCRIPT' ||
@@ -59,7 +59,7 @@ const translateVisibleTextNodes = async (rootElement, targetLang) => {
         ) {
           return NodeFilter.FILTER_REJECT;
         }
-
+        
         return NodeFilter.FILTER_ACCEPT;
       },
     },
@@ -78,7 +78,7 @@ const translateVisibleTextNodes = async (rootElement, targetLang) => {
     const batch = textNodes.slice(i, i + batchSize);
     const texts = batch.map(node => node.nodeValue);
     const translatedTexts = await translateTextBatch(texts, targetLang);
-
+    
     batch.forEach((node, index) => {
       // Only update if translation is different
       if (translatedTexts[index] && translatedTexts[index] !== node.nodeValue) {
@@ -155,48 +155,40 @@ const observeDOMChanges = (targetLang) => {
 
   observerInstance = new MutationObserver((mutations) => {
     clearTimeout(translationThrottle);
-    translationThrottle = setTimeout(async () => {
+    translationThrottle = setTimeout(() => {
       const elementsToTranslate = new Set();
 
       mutations.forEach((mutation) => {
         // Handle added nodes
         if (mutation.type === 'childList') {
           mutation.addedNodes.forEach((node) => {
+            // Handle elements directly
             if (node.nodeType === Node.ELEMENT_NODE) {
               elementsToTranslate.add(node);
             }
           });
         }
-
+        
         // Handle visibility changes (like reveal animations)
-        if (
-          mutation.type === 'attributes' &&
-          (mutation.attributeName === 'class' || mutation.attributeName === 'style')
-        ) {
+        if (mutation.type === 'attributes' && 
+            (mutation.attributeName === 'class' || mutation.attributeName === 'style')) {
           if (isVisible(mutation.target)) {
             elementsToTranslate.add(mutation.target);
           }
         }
       });
 
-      // Also check for reveal animations that might not trigger mutations
-      document.querySelectorAll('.reveal, .reveal-active, .in-view, .tracking-reveal').forEach((element) => {
-        if (isVisible(element) && !elementsToTranslate.has(element)) {
-          elementsToTranslate.add(element);
-        }
-      });
+      // Add tracking elements specifically
+      const trackingElements = document.querySelectorAll('.premium-tracking-result, .timeline-item, .timeline-content');
+      trackingElements.forEach(el => elementsToTranslate.add(el));
 
       // Translate all collected elements
-      for (const element of elementsToTranslate) {
+      elementsToTranslate.forEach((element) => {
         if (isVisible(element)) {
-          await translateVisibleTextNodes(element, targetLang)
+          translateVisibleTextNodes(element, targetLang)
             .catch(error => console.error('Error translating element:', error));
         }
-      }
-
-      // Translate tracking result elements
-      await translateTrackingResultsInDOM(targetLang);
-
+      });
     }, THROTTLE_DELAY);
   });
 
@@ -209,91 +201,40 @@ const observeDOMChanges = (targetLang) => {
 };
 
 /**
- * Improved visibility check with reveal animation support.
+ * Improved visibility check with tracking reveal support.
  */
 const isVisible = (element) => {
   if (!element || !(element instanceof Element)) return false;
-
+  
+  // Check computed style
   const style = window.getComputedStyle(element);
   if (style.visibility === 'hidden' || style.display === 'none' || style.opacity === '0') {
     return false;
   }
-
-  if (
-    element.classList.contains('reveal') ||
-    element.classList.contains('reveal-active') ||
-    element.classList.contains('in-view') ||
-    element.classList.contains('tracking-reveal')
-  ) {
+  
+  // Special case for tracking elements
+  if (element.classList.contains('premium-tracking-result') || 
+      element.classList.contains('timeline-item') || 
+      element.classList.contains('timeline-content')) {
     return true;
   }
-
+  
+  // Check bounding rectangle
   const rect = element.getBoundingClientRect();
   return rect.width > 0 && rect.height > 0;
 };
 
 /**
- * Periodically check for reveal elements that need translation.
+ * Periodically check for tracking elements that need translation
  */
 setInterval(() => {
   const lang = localStorage.getItem('selectedLanguage') || 'en';
   if (lang === 'en') return;
-
-  document.querySelectorAll('.reveal, .reveal-active, .in-view, .tracking-reveal').forEach(async (element) => {
+  
+  // Look for tracking elements that might have been missed
+  document.querySelectorAll('.premium-tracking-result, .timeline-item, .timeline-content').forEach(async (element) => {
     if (isVisible(element)) {
       await translateVisibleTextNodes(element, lang);
     }
   });
-}, 3000);
-
-/**
- * Translates tracking result elements in the DOM automatically.
- */
-const translateTrackingResultsInDOM = async (targetLang) => {
-  if (!targetLang || targetLang === 'en') return;
-
-  try {
-    const trackingElements = document.querySelectorAll('.tracking-result');
-
-    for (const element of trackingElements) {
-      if (!isVisible(element)) continue;
-
-      const statusElement = element.querySelector('.status');
-      const recipientElement = element.querySelector('.recipient');
-      const historyElements = element.querySelectorAll('.history-item');
-
-      if (statusElement && statusElement.textContent) {
-        const translatedStatus = await translateText(statusElement.textContent, targetLang);
-        statusElement.textContent = translatedStatus;
-      }
-
-      if (recipientElement && recipientElement.textContent) {
-        const translatedRecipient = await translateText(recipientElement.textContent, targetLang);
-        recipientElement.textContent = translatedRecipient;
-      }
-
-      for (const item of historyElements) {
-        const status = item.querySelector('.status');
-        const location = item.querySelector('.location');
-        const description = item.querySelector('.description');
-
-        if (status && status.textContent) {
-          const translatedStatus = await translateText(status.textContent, targetLang);
-          status.textContent = translatedStatus;
-        }
-
-        if (location && location.textContent) {
-          const translatedLocation = await translateText(location.textContent, targetLang);
-          location.textContent = translatedLocation;
-        }
-
-        if (description && description.textContent) {
-          const translatedDescription = await translateText(description.textContent, targetLang);
-          description.textContent = translatedDescription;
-        }
-      }
-    }
-  } catch (error) {
-    console.error('Error translating tracking results:', error);
-  }
-};
+}, 2000); // Check every 2 seconds
