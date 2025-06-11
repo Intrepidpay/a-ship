@@ -22,10 +22,10 @@ const Loader = () => {
   return (
     <div className="loader-overlay">
       <div className="loader-container">
-        <div className="logo-loader no-translate">
-          <span>Ajet</span>
-          <span>Ship</span>
-        </div>
+        <div className="logo-loader">
+  <span className="no-translate">Ajet</span>
+  <span className="no-translate">Ship</span>
+</div>
         <div className="progress-bar-container">
           <div className="ship-animation">
             <img 
