@@ -5,12 +5,12 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(92, 157, 255, 0.1);
+  background-color: rgba(92, 157, 255, 0.01);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 2147483647;
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(3px);
 }
 
 .language-popup-container {
@@ -109,12 +109,12 @@ body.translating::before {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(92, 157, 255, 0.01);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 2147483647;
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(3px);
 }
 
 .translating-message {
@@ -124,6 +124,6 @@ body.translating::before {
   text-align: center;
   padding: 20px;
   background: white;
-  border-radius: 8px;
+  border-radius: 12px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
