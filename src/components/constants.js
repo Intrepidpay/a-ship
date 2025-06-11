@@ -1,5 +1,6 @@
 export const LANGUAGE_NAMES = {
   en: 'English',
+  tr: 'Türkçe', // Turkish added
   ru: 'Русский',
   fr: 'Français',
   es: 'Español',
@@ -9,6 +10,7 @@ export const LANGUAGE_NAMES = {
 
 export const POPUP_TEXTS = {
   en: 'Choose your preferred language',
+  tr: 'Tercih ettiğiniz dili seçin', // Turkish added
   ru: 'Выберите предпочитаемый язык',
   fr: 'Choisissez votre langue préférée',
   es: 'Elige tu idioma preferido',
@@ -18,6 +20,7 @@ export const POPUP_TEXTS = {
 
 export const SELECT_BUTTON_TEXTS = {
   en: 'Select',
+  tr: 'Seç', // Turkish added
   ru: 'Выбрать',
   fr: 'Sélectionner',
   es: 'Seleccionar',
@@ -25,9 +28,9 @@ export const SELECT_BUTTON_TEXTS = {
   ja: '選択する'
 };
 
-// NEW: Translation status message
 export const TRANSLATING_MESSAGE = {
   en: 'Translating your experience...',
+  tr: 'Deneyiminiz çevriliyor...', // Turkish added
   ru: 'Переводим ваш интерфейс...',
   fr: 'Traduction de votre expérience...',
   es: 'Traduciendo tu experiencia...',
@@ -35,4 +38,5 @@ export const TRANSLATING_MESSAGE = {
   ja: 'エクスペリエンスを翻訳しています...'
 };
 
-export const SUPPORTED_LANGUAGES = ['en', 'ru', 'fr', 'es', 'de', 'ja'];
+// Turkish added after English
+export const SUPPORTED_LANGUAGES = ['en', 'tr', 'ru', 'fr', 'es', 'de', 'ja'];
