@@ -1,131 +1,159 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  POPUP_TEXTS, 
-  SELECT_BUTTON_TEXTS, 
-  LANGUAGE_NAMES,
-  SUPPORTED_LANGUAGES,
-  TRANSLATING_MESSAGE
-} from './constants';
-import { translatePage } from '../services/translationService';
-import './translation.css';
+/* Prevent body scroll when popup is open */
+body.popup-open {
+  overflow: hidden;
+}
 
-const LanguagePopup = () => {
-  const [state, setState] = useState({
-    showPopup: false,
-    userLang: 'en',
-    stage: 'initial',
-    isTranslating: false
-  });
+/* Premium Popup Styling */
+.language-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(92, 157, 255, 0.05);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2147483647;
+  backdrop-filter: blur(4px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* smooth scrolling on iOS */
+}
 
-  useEffect(() => {
-    const getLangByIP = async () => {
-      try {
-        const response = await fetch('https://ipapi.co/json');
-        const data = await response.json();
-        const ipLang = data.languages?.split(',')[0]?.slice(0, 2);
-        return SUPPORTED_LANGUAGES.includes(ipLang) ? ipLang : 'en';
-      } catch (err) {
-        console.error('IP language detection failed:', err);
-        return 'en';
-      }
-    };
+.language-popup-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 
-    const initialize = async () => {
-      const savedLang = localStorage.getItem('selectedLanguage');
-      const hasShownPopup = localStorage.getItem('hasShownPopup') === 'true';
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  animation: fadeIn 0.5s ease-out;
 
-      let browserLang = navigator.language?.slice(0, 2) || 'en';
-      if (!SUPPORTED_LANGUAGES.includes(browserLang)) {
-        browserLang = await getLangByIP();
-      }
+  max-height: 90vh;  /* prevent overflow on smaller screens */
+  overflow-y: auto;
+  text-align: center;
+}
 
-      if (!hasShownPopup) {
-        setTimeout(() => {
-          setState({ 
-            showPopup: true, 
-            userLang: savedLang || browserLang,
-            stage: 'initial',
-            isTranslating: false
-          });
-        }, 3000);
-      }
-    };
+.language-popup-container h3 {
+  margin-bottom: 20px;
+}
 
-    initialize();
-  }, []);
+.language-popup-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 25px;
+}
 
-  const handleOpenLanguageSelection = () => {
-    setState(prev => ({ ...prev, stage: 'language-selection' }));
-  };
+.select-button {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 6px;
+  background: #5c9dff;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
 
-  const handleLanguageSelect = async (langCode) => {
-    setState(prev => ({ 
-      ...prev, 
-      isTranslating: true,
-      userLang: langCode
-    }));
-    
-    localStorage.setItem('hasShownPopup', 'true');
-    localStorage.setItem('selectedLanguage', langCode);
-    
-    // Hide popup but keep translating overlay visible
-    setState(prev => ({ ...prev, showPopup: false }));
-    
-    // Perform full page translation
-    await translatePage(langCode);
-    
-    // Hide overlay after translation completes
-    setState(prev => ({ ...prev, isTranslating: false }));
-  };
+.select-button:hover {
+  background: #4a8cff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(92, 157, 255, 0.3);
+}
 
-  if (state.isTranslating) {
-    return (
-      <div className="global-translating-overlay">
-        <div className="translating-message">
-          {TRANSLATING_MESSAGE[state.userLang] || TRANSLATING_MESSAGE.en}
-        </div>
-      </div>
-    );
-  }
+.language-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+  max-height: 40vh;
+  overflow-y: auto;
+  width: 100%;
+}
 
-  if (!state.showPopup) return null;
+.language-option {
+  padding: 12px;
+  border: 1px solid #5c9dff;
+  border-radius: 10px;
+  background: white;
+  color: #0d1117;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
 
-  return (
-    <div className="language-popup-overlay">
-      <div className="language-popup-container">
-        {state.stage === 'initial' ? (
-          <>
-            <h3>{POPUP_TEXTS[state.userLang] || POPUP_TEXTS.en}</h3>
-            <div className="language-popup-buttons">
-              <button 
-                className="select-button"
-                onClick={handleOpenLanguageSelection}
-                aria-label={SELECT_BUTTON_TEXTS[state.userLang] || SELECT_BUTTON_TEXTS.en}
-              >
-                {SELECT_BUTTON_TEXTS[state.userLang] || SELECT_BUTTON_TEXTS.en}
-              </button>
-            </div>
-          </>
-        ) : (
-          <>
-            <h3>{POPUP_TEXTS[state.userLang] || POPUP_TEXTS.en}</h3>
-            <div className="language-list">
-              {SUPPORTED_LANGUAGES.map(langCode => (
-                <button
-                  key={langCode}
-                  className="language-option"
-                  onClick={() => handleLanguageSelect(langCode)}
-                  aria-label={LANGUAGE_NAMES[langCode]}
-                >
-                  {LANGUAGE_NAMES[langCode]}
-                </button>
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  );
-};
+.language-option:hover {
+  background: #f0f7ff;
+  border-color: #5c9dff;
+  transform: translateY(-1px);
+}
 
-export default LanguagePopup;
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Loading indicator during translation */
+body.translating::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #5c9dff, #6a7bff);
+  z-index: 2147483647;
+  animation: translating 2s infinite;
+}
+
+@keyframes translating {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Optional: Always show scrollbar to prevent layout jump */
+html {
+  overflow-y: scroll;
+}
+
+/* Global translating overlay */
+.global-translating-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(92, 157, 255, 0.05);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2147483647;
+  backdrop-filter: blur(4px);
+}
+
+.translating-message {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #5c9dff;
+  text-align: center;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(4px);
+  max-width: 90%;
+}
+
+/* Class to exclude elements from translation */
+.no-translate {
+  /* Add specific styles if needed */
+}
