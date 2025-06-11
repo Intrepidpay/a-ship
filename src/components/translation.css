@@ -76,8 +76,6 @@ body.popup-open {
   flex-direction: column;
   gap: 10px;
   margin-top: 20px;
-  max-height: 40vh;
-  overflow-y: auto;
   width: 100%;
 }
 
