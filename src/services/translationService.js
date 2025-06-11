@@ -1,10 +1,13 @@
+// Cache for translations
+const translationCache = new Map();
+
 /**
  * Applies the saved language to the entire page.
  */
 export const applySavedLanguage = async (langCode) => {
   if (!langCode || langCode === 'en') return;
   await translatePage(langCode);
-  observeDOMChanges(langCode); // Start observing after initial translation
+  observeDOMChanges(langCode);
 };
 
 /**
@@ -40,19 +43,27 @@ const translateVisibleTextNodes = async (rootElement, targetLang) => {
     {
       acceptNode: (node) => {
         const parent = node.parentNode;
-        if (
-          parent.nodeName === 'SCRIPT' ||
-          parent.nodeName === 'STYLE' ||
-          parent.nodeName === 'NOSCRIPT'
-        ) {
+        
+        // Skip if element has "no-translate" class
+        if (parent.classList && parent.classList.contains('no-translate')) {
           return NodeFilter.FILTER_REJECT;
         }
-        if (!node.nodeValue.trim()) {
-          return NodeFilter.FILTER_REJECT;
-        }
+        
+        // Skip hidden elements
         if (!isVisible(parent)) {
           return NodeFilter.FILTER_REJECT;
         }
+        
+        // Skip script/style/noscript and empty nodes
+        if (
+          parent.nodeName === 'SCRIPT' ||
+          parent.nodeName === 'STYLE' ||
+          parent.nodeName === 'NOSCRIPT' ||
+          !node.nodeValue.trim()
+        ) {
+          return NodeFilter.FILTER_REJECT;
+        }
+        
         return NodeFilter.FILTER_ACCEPT;
       },
     },
@@ -65,12 +76,13 @@ const translateVisibleTextNodes = async (rootElement, targetLang) => {
     textNodes.push(currentNode);
   }
 
-  // Batch translate in groups of 5–10 nodes (adjust as needed for API limits)
-  const batchSize = 10;
+  // Batch translate in groups
+  const batchSize = 15;
   for (let i = 0; i < textNodes.length; i += batchSize) {
     const batch = textNodes.slice(i, i + batchSize);
-    const texts = batch.map((node) => node.nodeValue);
+    const texts = batch.map(node => node.nodeValue);
     const translatedTexts = await translateTextBatch(texts, targetLang);
+    
     batch.forEach((node, index) => {
       node.nodeValue = translatedTexts[index] || node.nodeValue;
     });
@@ -78,15 +90,19 @@ const translateVisibleTextNodes = async (rootElement, targetLang) => {
 };
 
 /**
- * Uses Google Translate API to translate a single text.
+ * Uses Google Translate API to translate a single text with caching.
  */
 export const translateText = async (text, targetLang) => {
   if (!text || targetLang === 'en') return text;
 
+  // Check cache first
+  const cacheKey = `${text}-${targetLang}`;
+  if (translationCache.has(cacheKey)) {
+    return translationCache.get(cacheKey);
+  }
+
   try {
-    const apiUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(
-      text
-    )}`;
+    const apiUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
     const response = await fetch(apiUrl);
 
     if (!response.ok) {
@@ -95,12 +111,15 @@ export const translateText = async (text, targetLang) => {
     }
 
     const data = await response.json();
+    let translated = text;
 
     if (Array.isArray(data) && data[0]) {
-      return data[0].map((segment) => segment[0]).join('');
+      translated = data[0].map(segment => segment[0]).join('');
     }
 
-    return text;
+    // Cache result
+    translationCache.set(cacheKey, translated);
+    return translated;
   } catch (error) {
     console.error('Translation error:', error);
     return text;
@@ -114,7 +133,7 @@ const translateTextBatch = async (texts, targetLang) => {
   if (!texts.length || targetLang === 'en') return texts;
 
   try {
-    const promises = texts.map((text) => translateText(text, targetLang));
+    const promises = texts.map(text => translateText(text, targetLang));
     return await Promise.all(promises);
   } catch (error) {
     console.error('Batch translation error:', error);
@@ -122,34 +141,50 @@ const translateTextBatch = async (texts, targetLang) => {
   }
 };
 
+// Throttle for DOM observation
+let translationThrottle;
+const THROTTLE_DELAY = 300;
+
 /**
  * Observe dynamic DOM changes and translate new visible content automatically.
  */
 const observeDOMChanges = (targetLang) => {
   const observer = new MutationObserver((mutations) => {
-    for (const mutation of mutations) {
-      if (mutation.type === 'childList') {
-        mutation.addedNodes.forEach(async (node) => {
-          if (node.nodeType === Node.ELEMENT_NODE && isVisible(node)) {
-            await translateVisibleTextNodes(node, targetLang);
-          }
-        });
-      }
-    }
+    clearTimeout(translationThrottle);
+    translationThrottle = setTimeout(() => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'childList') {
+          mutation.addedNodes.forEach(async (node) => {
+            if (node.nodeType === Node.ELEMENT_NODE && isVisible(node)) {
+              await translateVisibleTextNodes(node, targetLang);
+            }
+          });
+        }
+      });
+    }, THROTTLE_DELAY);
   });
 
   observer.observe(document.body, {
     childList: true,
     subtree: true,
+    attributes: false,
+    characterData: false
   });
 };
 
 /**
- * Determines if an element is visible.
+ * Improved visibility check.
  */
 const isVisible = (element) => {
-  return (
-    element.offsetParent !== null ||
-    (element instanceof SVGElement && element.getBBox().width > 0)
-  );
+  if (!element) return false;
+  
+  // Check computed style
+  const style = window.getComputedStyle(element);
+  if (style.visibility === 'hidden' || style.display === 'none') {
+    return false;
+  }
+  
+  // Check bounding rectangle
+  const rect = element.getBoundingClientRect();
+  return rect.width > 0 && rect.height > 0;
 };
