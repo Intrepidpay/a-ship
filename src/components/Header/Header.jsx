@@ -27,7 +27,7 @@ const Header = ({ isAdmin }) => {
   return (
     <header className={`header ${scrolled ? 'scrolled' : ''}`}>
       <div className="header-container">
-        <Link to="/" className="logo">
+        <Link to="/" className="logo no-translate">
          <span className="color-1">Ajet</span>
          <span className="color-2">Ship</span>
         </Link>
