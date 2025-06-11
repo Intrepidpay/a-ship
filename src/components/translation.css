@@ -11,7 +11,6 @@
   align-items: center;
   z-index: 2147483647;
   backdrop-filter: blur(4px);
-  overflow-y: auto; /* allow scrolling if content overflows vertically */
 }
 
 .language-popup-container {
@@ -23,13 +22,10 @@
   text-align: center;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
   animation: fadeIn 0.5s ease-out;
-  max-height: 90vh;  /* prevent overflow on smaller screens */
-  overflow-y: auto;
 }
 
 .language-popup-buttons {
   display: flex;
-  flex-wrap: wrap; /* allow wrapping if needed */
   justify-content: center;
   gap: 15px;
   margin-top: 25px;
@@ -131,5 +127,4 @@ body.translating::before {
   border-radius: 12px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(4px);
-  max-width: 90%;
-}
+    }
