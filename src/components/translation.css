@@ -155,6 +155,7 @@ html {
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(4px);
   max-width: 90%;
+  transform: translateY(-10%);
 }
 
 /* Class for marking elements as excluded from translation */
