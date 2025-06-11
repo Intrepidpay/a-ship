@@ -22,7 +22,7 @@ const Loader = () => {
   return (
     <div className="loader-overlay">
       <div className="loader-container">
-        <div className="logo-loader">
+        <div className="logo-loader no-translate">
           <span>Ajet</span>
           <span>Ship</span>
         </div>
