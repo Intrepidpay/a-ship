@@ -20,12 +20,12 @@ const Home = () => {
   return (
     <div className="home-page">
       <section className="hero">
-        <div className="hero-content">
-          <h1>Ajet Shipping & Logistics Solutions</h1>
-          <p>Track shipments worldwide</p>
-          <TrackingForm onTrack={handleTrack} />
-        </div>
-      </section>
+  <div className="hero-content">
+    <h1 className="no-translate">Ajet Shipping & Logistics Solutions</h1>
+    <p>Track shipments worldwide</p>
+    <TrackingForm onTrack={handleTrack} />
+  </div>
+</section>
 
       {trackingInfo && (
         <TrackingResult 
