@@ -6,9 +6,7 @@ import {
   SUPPORTED_LANGUAGES,
   TRANSLATING_MESSAGE
 } from './constants';
-import { 
-  translatePage // Only import translatePage
-} from '../services/translationService';
+import { translatePage } from '../services/translationService';
 import './translation.css';
 
 const LanguagePopup = () => {
