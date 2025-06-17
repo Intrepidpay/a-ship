@@ -74,13 +74,13 @@ let mockPackages = [
     weight: "3.7 kg",
     progress: 13,
     createdAt: new Date("2025-06-017T06:33:00Z"),
-    estimatedDelivery: new Date("2025-06-12T12:00:00Z"),
+    estimatedDelivery: new Date("2025-06-20T12:00:00Z"),
     history: [
       {
-        timestamp: new Date("2025-06-07T06:41:00Z"),
+        timestamp: new Date("2025-06-17T06:41:00Z"),
         location: "Amman Warehouse",
         status: "processing",
-        coordinates: { lat: 34.5255, lng: 69.1708 },
+        coordinates: { lat: 31.9539, lng: 35.9106 },
         isCurrentLocation: true
       }
       ]
