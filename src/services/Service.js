@@ -26,6 +26,7 @@ const fakeShippingData = {
       clearance: { amount: 3.00, paid: false },
       tax: { amount: 2.00, paid: true },
       total: 15.00
+     }
     },
     SH87577841: {
     recipient: 'Shinya Ohno',
