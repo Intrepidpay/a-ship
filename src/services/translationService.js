@@ -1,13 +1,17 @@
 // Cache for translations
 const translationCache = new Map();
 let observerInstance = null;
+let currentLang = null;
 
 // Manual overrides for problematic translations
 const TRANSLATION_OVERRIDES = {
   'in transit': {
     ja: '輸送中',
     es: 'En tránsito',
-    fr: 'En transit'
+    fr: 'En transit',
+    de: 'Unterwegs',
+    it: 'In transito',
+    pt: 'Em trânsito'
   }
 };
 
@@ -16,6 +20,7 @@ const TRANSLATION_OVERRIDES = {
  */
 export const applySavedLanguage = async (langCode) => {
   if (!langCode || langCode === 'en') return;
+  currentLang = langCode;
   await translatePage(langCode);
   observeDOMChanges(langCode);
 };
@@ -47,6 +52,9 @@ export const translatePage = async (targetLang) => {
  * Recursively translates visible text nodes in a given element, preserving HTML structure.
  */
 const translateVisibleTextNodes = async (rootElement, targetLang) => {
+  // Create a Set to track translated nodes in this batch
+  const translatedNodes = new Set();
+  
   const walker = document.createTreeWalker(
     rootElement,
     NodeFilter.SHOW_TEXT,
@@ -64,7 +72,8 @@ const translateVisibleTextNodes = async (rootElement, targetLang) => {
           parent.nodeName === 'SCRIPT' ||
           parent.nodeName === 'STYLE' ||
           parent.nodeName === 'NOSCRIPT' ||
-          !node.nodeValue.trim()
+          !node.nodeValue.trim() ||
+          translatedNodes.has(node)  // Skip already translated nodes
         ) {
           return NodeFilter.FILTER_REJECT;
         }
@@ -92,8 +101,8 @@ const translateVisibleTextNodes = async (rootElement, targetLang) => {
       // Only update if translation is different
       if (translatedTexts[index] && translatedTexts[index] !== node.nodeValue) {
         node.nodeValue = translatedTexts[index];
-        // Mark parent as translated
-        node.parentNode.dataset.translated = 'true';
+        // Mark as translated in this batch
+        translatedNodes.add(node);
       }
     });
   }
@@ -142,8 +151,14 @@ export const translateText = async (text, targetLang) => {
       } else if (data[0] && typeof data[0] === 'string') {
         // Alternate response structure
         translated = data[0];
+      } else if (data[0] && Array.isArray(data[0]) && data[0][0] && Array.isArray(data[0][0])) {
+        // Deeper nested structure
+        translated = data[0][0].map(segment => segment[0]).join('');
       }
     }
+
+    // Remove any bracketed text added by Google Translate
+    translated = translated.replace(/\s*\([^)]*\)\s*/g, ' ').trim();
 
     // Cache result
     translationCache.set(cacheKey, translated);
@@ -192,19 +207,16 @@ const observeDOMChanges = (targetLang) => {
         if (mutation.type === 'childList') {
           mutation.addedNodes.forEach((node) => {
             // Handle elements directly
-            if (node.nodeType === Node.ELEMENT_NODE && 
-                !node.dataset.translated && 
-                isVisible(node)) {
+            if (node.nodeType === Node.ELEMENT_NODE && isVisible(node)) {
               elementsToTranslate.add(node);
             }
           });
         }
         
-        // Handle visibility changes (like reveal animations)
+        // Handle visibility changes
         if (mutation.type === 'attributes' && 
             (mutation.attributeName === 'class' || mutation.attributeName === 'style')) {
-          if (isVisible(mutation.target) && 
-              !mutation.target.dataset.translated) {
+          if (isVisible(mutation.target)) {
             elementsToTranslate.add(mutation.target);
           }
         }
@@ -213,7 +225,7 @@ const observeDOMChanges = (targetLang) => {
       // Add tracking elements specifically
       const trackingElements = document.querySelectorAll('.premium-tracking-result, .timeline-item, .timeline-content');
       trackingElements.forEach(el => {
-        if (!el.dataset.translated && isVisible(el)) {
+        if (isVisible(el)) {
           elementsToTranslate.add(el);
         }
       });
@@ -262,13 +274,12 @@ const isVisible = (element) => {
  * Periodically check for tracking elements that need translation
  */
 setInterval(() => {
-  const lang = localStorage.getItem('selectedLanguage') || 'en';
-  if (lang === 'en') return;
+  if (!currentLang || currentLang === 'en') return;
   
   // Look for tracking elements that might have been missed
   document.querySelectorAll('.premium-tracking-result, .timeline-item, .timeline-content').forEach(async (element) => {
-    if (isVisible(element) && !element.dataset.translated) {
-      await translateVisibleTextNodes(element, lang);
+    if (isVisible(element)) {
+      await translateVisibleTextNodes(element, currentLang);
     }
   });
-}, 5000); // Reduced to every 5 seconds
+}, 3000); // Every 3 seconds
