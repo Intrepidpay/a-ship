@@ -72,7 +72,7 @@ let mockPackages = [
     recipient: "Shinya Ohno",
     destination: " Tokyo Kikaku Co. Ltd. 2-6-1 Shinobu, Gyoda-shi Saitama 361-0077 JAPAN",
     weight: "3.7 kg",
-    progress: 21,
+    progress: 56,
     createdAt: new Date("2025-06-017T06:33:00Z"),
     estimatedDelivery: new Date("2025-06-20T12:00:00Z"),
     history: [
@@ -81,9 +81,16 @@ let mockPackages = [
         location: "Amman Warehouse",
         status: "processed",
         coordinates: { lat: 31.9539, lng: 35.9106 },
+        isCurrentLocation: false
+      },
+      {
+        timestamp: new Date("2025-06-18T07:45:00Z"),
+        location: "Istanbul Warehouse",
+        status: "In Transit",
+        coordinates: { lat: 41.0082, lng: 28.9784 },
         isCurrentLocation: true
       }
-      ]
+   ]
   }
 ];
 
