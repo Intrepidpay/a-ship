@@ -2,6 +2,15 @@
 const translationCache = new Map();
 let observerInstance = null;
 
+// Manual overrides for problematic translations
+const TRANSLATION_OVERRIDES = {
+  'in transit': {
+    ja: '輸送中',
+    es: 'En tránsito',
+    fr: 'En transit'
+  }
+};
+
 /**
  * Applies the saved language to the entire page.
  */
@@ -83,6 +92,8 @@ const translateVisibleTextNodes = async (rootElement, targetLang) => {
       // Only update if translation is different
       if (translatedTexts[index] && translatedTexts[index] !== node.nodeValue) {
         node.nodeValue = translatedTexts[index];
+        // Mark parent as translated
+        node.parentNode.dataset.translated = 'true';
       }
     });
   }
@@ -94,6 +105,12 @@ const translateVisibleTextNodes = async (rootElement, targetLang) => {
 export const translateText = async (text, targetLang) => {
   if (!text || targetLang === 'en') return text;
 
+  // Check manual overrides first (case-insensitive)
+  const normalizedText = text.trim().toLowerCase();
+  if (TRANSLATION_OVERRIDES[normalizedText]?.[targetLang]) {
+    return TRANSLATION_OVERRIDES[normalizedText][targetLang];
+  }
+
   // Check cache first
   const cacheKey = `${text}-${targetLang}`;
   if (translationCache.has(cacheKey)) {
@@ -102,7 +119,9 @@ export const translateText = async (text, targetLang) => {
 
   try {
     const apiUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
-    const response = await fetch(apiUrl);
+    const response = await fetch(apiUrl, {
+      headers: {'User-Agent': 'Mozilla/5.0'}
+    });
 
     if (!response.ok) {
       console.error(`Translation API error: ${response.status}`);
@@ -112,8 +131,18 @@ export const translateText = async (text, targetLang) => {
     const data = await response.json();
     let translated = text;
 
-    if (Array.isArray(data) && data[0]) {
-      translated = data[0].map(segment => segment[0]).join('');
+    // Robust response parsing
+    if (Array.isArray(data)) {
+      // Handle different response structures
+      if (Array.isArray(data[0])) {
+        // Standard response structure
+        translated = data[0].map(segment => 
+          Array.isArray(segment) && segment[0] ? segment[0] : ''
+        ).join('');
+      } else if (data[0] && typeof data[0] === 'string') {
+        // Alternate response structure
+        translated = data[0];
+      }
     }
 
     // Cache result
@@ -163,7 +192,9 @@ const observeDOMChanges = (targetLang) => {
         if (mutation.type === 'childList') {
           mutation.addedNodes.forEach((node) => {
             // Handle elements directly
-            if (node.nodeType === Node.ELEMENT_NODE) {
+            if (node.nodeType === Node.ELEMENT_NODE && 
+                !node.dataset.translated && 
+                isVisible(node)) {
               elementsToTranslate.add(node);
             }
           });
@@ -172,7 +203,8 @@ const observeDOMChanges = (targetLang) => {
         // Handle visibility changes (like reveal animations)
         if (mutation.type === 'attributes' && 
             (mutation.attributeName === 'class' || mutation.attributeName === 'style')) {
-          if (isVisible(mutation.target)) {
+          if (isVisible(mutation.target) && 
+              !mutation.target.dataset.translated) {
             elementsToTranslate.add(mutation.target);
           }
         }
@@ -180,14 +212,16 @@ const observeDOMChanges = (targetLang) => {
 
       // Add tracking elements specifically
       const trackingElements = document.querySelectorAll('.premium-tracking-result, .timeline-item, .timeline-content');
-      trackingElements.forEach(el => elementsToTranslate.add(el));
+      trackingElements.forEach(el => {
+        if (!el.dataset.translated && isVisible(el)) {
+          elementsToTranslate.add(el);
+        }
+      });
 
       // Translate all collected elements
       elementsToTranslate.forEach((element) => {
-        if (isVisible(element)) {
-          translateVisibleTextNodes(element, targetLang)
-            .catch(error => console.error('Error translating element:', error));
-        }
+        translateVisibleTextNodes(element, targetLang)
+          .catch(error => console.error('Error translating element:', error));
       });
     }, THROTTLE_DELAY);
   });
@@ -233,8 +267,8 @@ setInterval(() => {
   
   // Look for tracking elements that might have been missed
   document.querySelectorAll('.premium-tracking-result, .timeline-item, .timeline-content').forEach(async (element) => {
-    if (isVisible(element)) {
+    if (isVisible(element) && !element.dataset.translated) {
       await translateVisibleTextNodes(element, lang);
     }
   });
-}, 2000); // Check every 2 seconds
+}, 5000); // Reduced to every 5 seconds
