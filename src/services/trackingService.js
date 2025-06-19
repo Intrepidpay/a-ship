@@ -98,7 +98,6 @@ let mockPackages = [
         isCurrentLocation: true
        }
    ]
-  }
 ];
 
 export const trackingService = {
