@@ -86,10 +86,17 @@ let mockPackages = [
       {
         timestamp: new Date("2025-06-18T07:45:00Z"),
         location: "Istanbul Warehouse",
-        status: "In Transit",
+        status: "shipped",
         coordinates: { lat: 41.0082, lng: 28.9784 },
+        isCurrentLocation: false
+      },
+       {
+        timestamp: new Date("2025-06-19T21:20:00Z"),
+        location: "Okinawa Warehouse,
+        status: "In Transit",
+        coordinates: { lat: 26.3344, lng: 127.8056 },
         isCurrentLocation: true
-      }
+       }
    ]
   }
 ];
