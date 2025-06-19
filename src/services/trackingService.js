@@ -92,12 +92,13 @@ let mockPackages = [
       },
        {
         timestamp: new Date("2025-06-19T21:20:00Z"),
-        location: "Okinawa Warehouse,
+        location: "Okinawa Warehouse",
         status: "In Transit",
         coordinates: { lat: 26.3344, lng: 127.8056 },
         isCurrentLocation: true
        }
    ]
+  }
 ];
 
 export const trackingService = {
