@@ -68,11 +68,11 @@ let mockPackages = [
   },
   {
     trackingNumber: "SH87577841",
-    status: "Pending Payment",
+    status: "In Transit",
     recipient: "Shinya Ohno",
     destination: " Tokyo Kikaku Co. Ltd. 2-6-1 Shinobu, Gyoda-shi Saitama 361-0077 JAPAN",
     weight: "3.7 kg",
-    progress: 84,
+    progress: 91,
     createdAt: new Date("2025-06-017T06:33:00Z"),
     estimatedDelivery: new Date("2025-06-20T12:00:00Z"),
     history: [
