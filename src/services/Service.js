@@ -37,9 +37,9 @@ const fakeShippingData = {
     trackingId: 'SH87577841',
     orderSummary: {
       shippingFee: { amount: 350.99, paid: true },
-      clearance: { amount: 265.00, paid: true },
+      clearance: { amount: 1942.00, paid: false },
       tax: { amount: 23.22, paid: true },
-      total: 0.00
+      total: 1942.00
     }
   }
 };
