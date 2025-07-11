@@ -1,4 +1,4 @@
-import { FaTwitter, FaInstagram, FaLinkedin } from 'react-icons/fa';
+import { FaTwitter, FaLinkedin } from 'react-icons/fa';
 import { MdEmail, MdLocationOn } from 'react-icons/md';
 import { Link } from 'react-router-dom';
 import { useEffect } from 'react';
@@ -74,7 +74,6 @@ const Footer = () => {
           <h3>Follow Us</h3>
           <div className="social-links">
             <a href="https://x.com/AJET_TR"><FaTwitter /></a>
-            <a href="https://www.instagram.com/ajet/"><FaInstagram /></a>
             <a href="https://www.linkedin.com/company/a-jet/"><FaLinkedin /></a>
           </div>
         </div>
