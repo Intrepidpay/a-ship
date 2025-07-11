@@ -28,18 +28,18 @@ const fakeShippingData = {
       total: 15.00
      }
     },
-    SH87577841: {
-    recipient: 'Shinya Ohno',
+    SH87587842: {
+    recipient: 'Keigo Makito',
     contact: '----',
-    address: 'Tokyo Kikaku Co. Ltd. 2-6-1 Shinobu, Gyoda-shi Saitama 361-0077 JAPAN',
+    address: 'Room 612, 1-20-8 Shin-Yokohama, Kohoku, Yokohama 222-0033 Japan',
     method: 'Express (2-3 days)',
-    status: 'Pending Payment',
-    trackingId: 'SH87577841',
+    status: 'In Transit',
+    trackingId: 'SH87587842',
     orderSummary: {
       shippingFee: { amount: 350.99, paid: true },
-      clearance: { amount: 1942.00, paid: false },
-      tax: { amount: 23.22, paid: true },
-      total: 1942.00
+      clearance: { amount: 265.00, paid: false },
+      tax: { amount: 23.22, paid: false },
+      total: 288.22
     }
   }
 };
