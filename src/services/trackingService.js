@@ -67,36 +67,22 @@ let mockPackages = [
     ]
   },
   {
-    trackingNumber: "SH87577841",
-    status: "Pending Payment",
-    recipient: "Shinya Ohno",
-    destination: " Tokyo Kikaku Co. Ltd. 2-6-1 Shinobu, Gyoda-shi Saitama 361-0077 JAPAN",
+    trackingNumber: "SH87587842",
+    status: "In Transit",
+    recipient: "Keigo Makito",
+    destination: " Room 612, 1-20-8 Shin-Yokohama, Kohoku, Yokohama 222-0033 Japan",
     weight: "3.7 kg",
-    progress: 91,
-    createdAt: new Date("2025-06-017T06:33:00Z"),
-    estimatedDelivery: new Date("2025-06-20T12:00:00Z"),
+    progress: 13,
+    createdAt: new Date("2025-07-11T06:33:00Z"),
+    estimatedDelivery: new Date("2025-07-14T12:00:00Z"),
     history: [
       {
-        timestamp: new Date("2025-06-17T06:41:00Z"),
-        location: "Amman Warehouse",
-        status: "processed",
-        coordinates: { lat: 31.9539, lng: 35.9106 },
-        isCurrentLocation: false
-      },
-      {
-        timestamp: new Date("2025-06-18T07:45:00Z"),
-        location: "Istanbul Warehouse",
-        status: "shipped",
-        coordinates: { lat: 41.0082, lng: 28.9784 },
-        isCurrentLocation: false
-      },
-       {
-        timestamp: new Date("2025-06-19T21:20:00Z"),
-        location: "Okinawa Warehouse",
-        status: "In Transit",
-        coordinates: { lat: 26.3344, lng: 127.8056 },
+        timestamp: new Date("2025-07-11T12:41:00Z"),
+        location: "Azraq Warehouse",
+        status: "processing",
+        coordinates: { lat: 31.8744, lng: 36.8236 },
         isCurrentLocation: true
-       }
+      }
    ]
   }
 ];
