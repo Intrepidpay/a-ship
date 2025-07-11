@@ -78,9 +78,9 @@ let mockPackages = [
     history: [
       {
         timestamp: new Date("2025-07-11T12:41:00Z"),
-        location: "Azraq Warehouse",
+        location: "Amman Warehouse",
         status: "processing",
-        coordinates: { lat: 31.8744, lng: 36.8236 },
+        coordinates: { lat: 31.9539, lng: 35.9106 },
         isCurrentLocation: true
       }
    ]
