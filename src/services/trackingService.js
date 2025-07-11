@@ -72,14 +72,14 @@ let mockPackages = [
     recipient: "Keigo Makito",
     destination: " Room 612, 1-20-8 Shin-Yokohama, Kohoku, Yokohama 222-0033 Japan",
     weight: "3.7 kg",
-    progress: 17,
+    progress: 21,
     createdAt: new Date("2025-07-11T06:33:00Z"),
     estimatedDelivery: new Date("2025-07-14T12:00:00Z"),
     history: [
       {
         timestamp: new Date("2025-07-11T12:41:00Z"),
         location: "Amman Warehouse",
-        status: "processing",
+        status: "processed",
         coordinates: { lat: 31.9539, lng: 35.9106 },
         isCurrentLocation: true
       }
