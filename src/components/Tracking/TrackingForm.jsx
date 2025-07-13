@@ -7,7 +7,45 @@ const TrackingForm = ({ onTrack }) => {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef(null);
+  const originalFontSize = useRef(null);
 
+  // iOS zoom prevention
+  useEffect(() => {
+    // Detect iOS devices
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    
+    if (!isIOS || !inputRef.current) return;
+    
+    const input = inputRef.current;
+    
+    const handleFocus = () => {
+      // Save original font size
+      if (!originalFontSize.current) {
+        originalFontSize.current = window.getComputedStyle(input).fontSize;
+      }
+      // Set to 16px to prevent iOS zoom
+      input.style.fontSize = '16px';
+    };
+    
+    const handleBlur = () => {
+      // Restore original font size
+      if (originalFontSize.current) {
+        input.style.fontSize = originalFontSize.current;
+      }
+    };
+    
+    // Add event listeners
+    input.addEventListener('focus', handleFocus);
+    input.addEventListener('blur', handleBlur);
+    
+    // Cleanup function
+    return () => {
+      input.removeEventListener('focus', handleFocus);
+      input.removeEventListener('blur', handleBlur);
+    };
+  }, []);
+
+  // Existing error timeout logic
   useEffect(() => {
     let timeoutId;
     if (error) {
@@ -20,6 +58,7 @@ const TrackingForm = ({ onTrack }) => {
     };
   }, [error]);
 
+  // Existing submit handler
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
