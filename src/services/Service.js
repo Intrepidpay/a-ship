@@ -33,7 +33,7 @@ const fakeShippingData = {
     contact: '----',
     address: 'Room 612, 1-20-8 Shin-Yokohama, Kohoku, Yokohama 222-0033 Japan',
     method: 'Express (2-3 days)',
-    status: 'In Transit',
+    status: 'Pending Payment',
     trackingId: 'SH87587842',
     orderSummary: {
       shippingFee: { amount: 350.99, paid: true },
