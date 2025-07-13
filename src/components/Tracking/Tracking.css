@@ -175,7 +175,7 @@
     min-width: initial;
     width: initial;
     border: none !important;
-    font-size: 0.9rem !important;
+    font-size: 1rem !important;
     padding: 16px 20px !important;
     transition: all 0.3s ease !important;
   }
@@ -186,6 +186,7 @@
   }
   
   .premium-inputt::placeholder {
+    font-size: 1rem;
   text-align: center;
 }
   
