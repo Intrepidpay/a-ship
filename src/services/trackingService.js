@@ -68,11 +68,11 @@ let mockPackages = [
   },
   {
     trackingNumber: "SH87587842",
-    status: "In Transit",
+    status: "Pending Payment",
     recipient: "Keigo Makito",
     destination: " Room 612, 1-20-8 Shin-Yokohama, Kohoku, Yokohama 222-0033 Japan",
     weight: "3.7 kg",
-    progress: 67,
+    progress: 86,
     createdAt: new Date("2025-07-11T06:33:00Z"),
     estimatedDelivery: new Date("2025-07-14T12:00:00Z"),
     history: [
@@ -86,10 +86,17 @@ let mockPackages = [
       {
         timestamp: new Date("2025-07-12T20:32:04Z"),
         location: "Istanbul Warehouse",
-        status: "In Transit",
+        status: "Shipped",
         coordinates: { lat: 41.0082, lng: 28.9784 },
+        isCurrentLocation: false
+      },
+       {
+        timestamp: new Date("2025-07-14T06:21:00Z"),
+        location: "Miyazaki Warehouse",
+        status: "In Transit",
+        coordinates: { lat: 31.9111, lng: 131.4239 },
         isCurrentLocation: true
-      }
+       }
    ]
   }
 ];
