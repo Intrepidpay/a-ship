@@ -1,12 +1,12 @@
 
 const fakeShippingData = {
-  SH87556849: {
-    recipient: 'Victor',
-    contact: '+7977-797-02-28',
-    address: '4 Lesnaya St, Peski, Kolomensky, Moscow, RU',
+  SH85187283: {
+    recipient: 'Junichi Sudo',
+    contact: '+81 90-5387-4864',
+    address: '2-3-1 Kusamihigashi, Kokuraminami-ku Kitakyushu-shi, Fukuoka-ken 800-0232 Japan',
     method: 'Express (2-3 days)',
-    status: 'Pending Payment',
-    trackingId: 'SH87556849',
+    status: 'In Transit',
+    trackingId: 'SH85187283',
     orderSummary: {
       shippingFee: { amount: 350.99, paid: true },
       clearance: { amount: 265.00, paid: false },
