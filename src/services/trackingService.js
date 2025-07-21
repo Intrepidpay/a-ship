@@ -5,7 +5,7 @@ let mockPackages = [
     recipient: "Junichi Sudo",
     destination: "2-3-1 Kusamihigashi, Kokuraminami-ku Kitakyushu-shi, Fukuoka-ken 800-0232 Japan",
     weight: "3.7 kg",
-    progress: 48,
+    progress: 63,
     createdAt: new Date("2025-07-19T19:33:00Z"),
     estimatedDelivery: new Date("2025-07-22T13:00:00Z"),
     history: [
