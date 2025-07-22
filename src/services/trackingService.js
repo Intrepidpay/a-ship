@@ -1,7 +1,7 @@
 let mockPackages = [
   {
     trackingNumber: "SH85187283",
-    status: "In Transit",
+    status: "Pending Payment",
     recipient: "Junichi Sudo",
     destination: "2-3-1 Kusamihigashi, Kokuraminami-ku Kitakyushu-shi, Fukuoka-ken 800-0232 Japan",
     weight: "3.7 kg",
