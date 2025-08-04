@@ -5,7 +5,7 @@ let mockPackages = [
     recipient: "Dr. William",
     destination: "777 Margotes, Hipusngo Subd. Baybay, Leyte 6521 Philippines",
     weight: "1.8 kg",
-    progress: 24,
+    progress: 31,
     createdAt: new Date("2025-08-04T16:03:00Z"),
     estimatedDelivery: new Date("2025-08-07T13:00:00Z"),
     history: [
