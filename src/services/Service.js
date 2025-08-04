@@ -1,12 +1,12 @@
 
 const fakeShippingData = {
-  SH85187283: {
-    recipient: 'Junichi Sudo',
-    contact: '+81 90-5387-4864',
-    address: '2-3-1 Kusamihigashi, Kokuraminami-ku Kitakyushu-shi, Fukuoka-ken 800-0232 Japan',
+ SH82417287: {
+    recipient: 'Dr. William',
+    contact: '+63 (951)498-5830',
+    address: '777 Margotes, Hipusngo Subd. Baybay, Leyte 6521 Philippines',
     method: 'Express (2-3 days)',
-    status: 'Pending Payment',
-    trackingId: 'SH85187283',
+    status: 'In Transit',
+    trackingId: 'SH82417287',
     orderSummary: {
       shippingFee: { amount: 350.99, paid: true },
       clearance: { amount: 265.00, paid: false },
@@ -61,3 +61,4 @@ export const getShippingDetails = async (shippingNumber) => {
     }, 500);
   });
 };
+
