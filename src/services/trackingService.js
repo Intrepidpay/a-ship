@@ -5,7 +5,7 @@ let mockPackages = [
     recipient: "Dr. William",
     destination: "777 Margotes, Hipusngo Subd. Baybay, Leyte 6521 Philippines",
     weight: "1.8 kg",
-    progress: 37,
+    progress: 54,
     createdAt: new Date("2025-08-04T16:03:00Z"),
     estimatedDelivery: new Date("2025-08-07T13:00:00Z"),
     history: [
@@ -14,6 +14,13 @@ let mockPackages = [
         location: "Amman Warehouse",
         status: "processed",
         coordinates: { lat: 31.9539, lng: 35.9106 },
+        isCurrentLocation: false
+      },
+      {
+        timestamp: new Date("2025-08-03T34:45:00Z"),
+        location: "Istanbul Warehouse",
+        status: "In Transit",
+        coordinates: { lat: 41.0082, lng: 28.9784 },
         isCurrentLocation: true
       }
     ] 
