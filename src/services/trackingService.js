@@ -19,7 +19,7 @@ let mockPackages = [
       {
         timestamp: new Date("2025-08-06T03:34:00Z"),
         location: "Istanbul Warehouse",
-        status: "In Transit",
+        status: "Shipped",
         coordinates: { lat: 41.0082, lng: 28.9784 },
         isCurrentLocation: false
       },
