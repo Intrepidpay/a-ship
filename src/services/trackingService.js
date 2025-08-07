@@ -26,6 +26,25 @@ let mockPackages = [
     ] 
   },
   {
+    trackingNumber: "SH82437295",
+    status: "In Transit",
+    recipient: "Satoru Ueno",
+    destination: "4-13-3 Tatekawa Sumida-ku, Tokyo 130-0023 Japan",
+    weight: "1.8 kg",
+    progress: 13,
+    createdAt: new Date("2025-08-07T23:26:00Z"),
+    estimatedDelivery: new Date("2025-08-10T13:00:00Z"),
+    history: [
+      {
+        timestamp: new Date("2025-08-07T23:28:00Z"),
+        location: "Amman Warehouse",
+        status: "processing",
+        coordinates: { lat: 31.9539, lng: 35.9106 },
+        isCurrentLocation: true
+      }
+    ]
+  },
+  {
     trackingNumber: "Sopuruon1",
     status: "Delivered",
     recipient: "Jane Smith",
