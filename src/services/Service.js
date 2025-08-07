@@ -12,6 +12,7 @@ const fakeShippingData = {
       clearance: { amount: 265.00, paid: false },
       tax: { amount: 23.22, paid: false },
       total: 288.22
+    }
    },
   SH82437295: {
     recipient: 'Satoru Ueno',
@@ -74,6 +75,7 @@ export const getShippingDetails = async (shippingNumber) => {
     }, 500);
   });
 };
+
 
 
 
