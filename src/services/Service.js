@@ -12,7 +12,20 @@ const fakeShippingData = {
       clearance: { amount: 265.00, paid: false },
       tax: { amount: 23.22, paid: false },
       total: 288.22
-    }
+   },
+  SH82437295: {
+    recipient: 'Satoru Ueno',
+    contact: '+81 (90) 7716-1223',
+    address: '4-13-3 Tatekawa Sumida-ku, Tokyo 130-0023 Japan',
+    method: 'Express (2-3 days)',
+    status: 'In Transit',
+    trackingId: 'SH82437295',
+    orderSummary: {
+      shippingFee: { amount: 350.99, paid: true },
+      clearance: { amount: 265.00, paid: false },
+      tax: { amount: 23.22, paid: false },
+      total: 288.22
+   }
   },
   SHIP67890: {
     recipient: 'Jane Smith',
@@ -61,5 +74,6 @@ export const getShippingDetails = async (shippingNumber) => {
     }, 500);
   });
 };
+
 
 
