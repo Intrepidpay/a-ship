@@ -21,8 +21,15 @@ let mockPackages = [
         location: "Istanbul Warehouse",
         status: "In Transit",
         coordinates: { lat: 41.0082, lng: 28.9784 },
+        isCurrentLocation: false
+      },
+       {
+        timestamp: new Date("2025-08-07T22:21:00Z"),
+        location: "Manila Warehouse",
+        status: "OnHold",
+        coordinates: { lat: 14.5995, lng: 120.9842 },
         isCurrentLocation: true
-      }
+       }
     ] 
   },
   {
@@ -31,14 +38,14 @@ let mockPackages = [
     recipient: "Satoru Ueno",
     destination: "4-13-3 Tatekawa Sumida-ku, Tokyo 130-0023 Japan",
     weight: "1.8 kg",
-    progress: 13,
+    progress: 19,
     createdAt: new Date("2025-08-07T21:26:00Z"),
     estimatedDelivery: new Date("2025-08-10T13:00:00Z"),
     history: [
       {
         timestamp: new Date("2025-08-07T21:28:00Z"),
         location: "Amman Warehouse",
-        status: "processing",
+        status: "processed",
         coordinates: { lat: 31.9539, lng: 35.9106 },
         isCurrentLocation: true
       }
