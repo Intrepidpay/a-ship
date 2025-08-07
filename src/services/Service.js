@@ -5,7 +5,7 @@ const fakeShippingData = {
     contact: '+63 (951) 498-5830',
     address: '777 Margotes, Hipusngo Subd. Baybay, Leyte 6521 Philippines',
     method: 'Express (2-3 days)',
-    status: 'In Transit',
+    status: 'Pending Payment',
     trackingId: 'SH82417287',
     orderSummary: {
       shippingFee: { amount: 350.99, paid: true },
@@ -75,6 +75,7 @@ export const getShippingDetails = async (shippingNumber) => {
     }, 500);
   });
 };
+
 
 
 
