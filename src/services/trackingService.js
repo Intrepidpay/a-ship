@@ -1,7 +1,7 @@
 let mockPackages = [
   {
     trackingNumber: "SH82417287",
-    status: "In Transit",
+    status: "Pending Payment",
     recipient: "Dr. William",
     destination: "777 Margotes, Hipusngo Subd. Baybay, Leyte 6521 Philippines",
     weight: "1.8 kg",
