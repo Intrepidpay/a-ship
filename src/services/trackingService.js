@@ -64,14 +64,14 @@ let mockPackages = [
     recipient: "Joey",
     destination: "103 Witherspoon Court, Warner Robins, GA 31088, USA",
     weight: "800 g",
-    progress: 17,
+    progress: 23,
     createdAt: new Date("2025-08-08T12:40:00Z"),
     estimatedDelivery: new Date("2025-08-11T12:00:00Z"),
     history: [
         {
         timestamp: new Date("2025-08-08T12:42:00Z"),
         location: "Amman Warehouse",
-        status: "Processing",
+        status: "Processed",
         coordinates: { lat: 34.5255, lng: 69.1708 },
         isCurrentLocation: true
       }
