@@ -28,18 +28,18 @@ const fakeShippingData = {
       total: 288.22
    }
   },
-  SHIP67890: {
-    recipient: 'Jane Smith',
-    contact: '(555) 987-6543',
-    address: '456 Sunset Blvd, Los Angeles, CA',
-    method: 'Standard (5-7 days)',
-    status: 'Pending Payment',
-    trackingId: 'TRK987654321',
+  SH86737495: {
+    recipient: 'Joey',
+    contact: '+1 (478) 538-8354',
+    address: '103 Witherspoon Court, Warner Robins, GA 31088, USA',
+    method: 'Express (2-3 days)',
+    status: 'In Transit',
+    trackingId: 'SH86737495',
     orderSummary: {
-      shippingFee: { amount: 10.00, paid: true },
-      clearance: { amount: 3.00, paid: false },
-      tax: { amount: 2.00, paid: true },
-      total: 15.00
+      shippingFee: { amount: 350.99, paid: true },
+      clearance: { amount: 285.00, paid: false },
+      tax: { amount: 43.22, paid: false },
+      total: 328.22
      }
     },
     SH87587842: {
@@ -75,6 +75,7 @@ export const getShippingDetails = async (shippingNumber) => {
     }, 500);
   });
 };
+
 
 
 
