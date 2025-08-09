@@ -72,7 +72,7 @@ let mockPackages = [
         timestamp: new Date("2025-08-08T12:42:00Z"),
         location: "Amman Warehouse",
         status: "Processed",
-        coordinates: { lat: 34.5255, lng: 69.1708 },
+        coordinates: { lat: 31.9539, lng: 35.9106 },
         isCurrentLocation: true
       }
     ]
