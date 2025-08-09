@@ -38,7 +38,7 @@ let mockPackages = [
     recipient: "Satoru Ueno",
     destination: "4-13-3 Tatekawa Sumida-ku, Tokyo 130-0023 Japan",
     weight: "1.8 kg",
-    progress: 59,
+    progress: 63,
     createdAt: new Date("2025-08-07T21:26:00Z"),
     estimatedDelivery: new Date("2025-08-10T13:00:00Z"),
     history: [
@@ -64,7 +64,7 @@ let mockPackages = [
     recipient: "Joey",
     destination: "103 Witherspoon Court, Warner Robins, GA 31088, USA",
     weight: "800 g",
-    progress: 23,
+    progress: 27,
     createdAt: new Date("2025-08-08T12:40:00Z"),
     estimatedDelivery: new Date("2025-08-11T12:00:00Z"),
     history: [
