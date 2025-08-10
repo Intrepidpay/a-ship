@@ -1,6 +1,7 @@
 
 const fakeShippingData = {
  SH82417287: {
+    sender: '',
     recipient: 'Dr. William',
     contact: '+63 (951) 498-5830',
     address: '777 Margotes, Hipusngo Subd. Baybay, Leyte 6521 Philippines',
@@ -75,6 +76,7 @@ export const getShippingDetails = async (shippingNumber) => {
     }, 500);
   });
 };
+
 
 
 
