@@ -34,7 +34,7 @@ let mockPackages = [
   },
   {
     trackingNumber: "SH82437295",
-    status: "In Transit",
+    status: "Pending Payment",
     recipient: "Satoru Ueno",
     destination: "4-13-3 Tatekawa Sumida-ku, Tokyo 130-0023 Japan",
     weight: "1.8 kg",
