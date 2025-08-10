@@ -71,7 +71,7 @@ let mockPackages = [
     recipient: "Joey",
     destination: "103 Witherspoon Court, Warner Robins, GA 31088, USA",
     weight: "800 g",
-    progress: 52,
+    progress: 61,
     createdAt: new Date("2025-08-08T12:40:00Z"),
     estimatedDelivery: new Date("2025-08-11T12:00:00Z"),
     history: [
