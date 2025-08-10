@@ -19,7 +19,7 @@ const fakeShippingData = {
     contact: '+81 (90) 7716-1223',
     address: '4-13-3 Tatekawa Sumida-ku, Tokyo 130-0023 Japan',
     method: 'Express (2-3 days)',
-    status: 'In Transit',
+    status: 'Pending Payment',
     trackingId: 'SH82437295',
     orderSummary: {
       shippingFee: { amount: 350.99, paid: true },
@@ -75,6 +75,7 @@ export const getShippingDetails = async (shippingNumber) => {
     }, 500);
   });
 };
+
 
 
 
