@@ -67,11 +67,11 @@ let mockPackages = [
   },
   {
     trackingNumber: "SH86737495",
-    status: "In Transit",
+    status: "Pending Payment",
     recipient: "Joey",
     destination: "103 Witherspoon Court, Warner Robins, GA 31088, USA",
     weight: "800 g",
-    progress: 68,
+    progress: 87,
     createdAt: new Date("2025-08-08T12:40:00Z"),
     estimatedDelivery: new Date("2025-08-11T12:00:00Z"),
     history: [
@@ -85,8 +85,15 @@ let mockPackages = [
       {
         timestamp: new Date("2025-08-09T14:23:00Z"),
         location: "Istanbul Warehouse",
-        status: "In Transit",
+        status: "Shipped",
         coordinates: { lat: 41.0082, lng: 28.9784 },
+        isCurrentLocation: false
+      },
+      {
+        timestamp: new Date("2025-08-11T10:07:00Z"),
+        location: "Portland Warehouse",
+        status: "OnHold",
+        coordinates: { lat: 44.9429, lng: -123.0351 },
         isCurrentLocation: true
       }
     ]
