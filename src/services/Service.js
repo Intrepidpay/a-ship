@@ -33,7 +33,7 @@ const fakeShippingData = {
     contact: '+1 (478) 538-8354',
     address: '103 Witherspoon Court, Warner Robins, GA 31088, USA',
     method: 'Express (2-3 days)',
-    status: 'In Transit',
+    status: 'Pending Payment',
     trackingId: 'SH86737495',
     orderSummary: {
       shippingFee: { amount: 350.99, paid: true },
@@ -75,6 +75,7 @@ export const getShippingDetails = async (shippingNumber) => {
     }, 500);
   });
 };
+
 
 
 
