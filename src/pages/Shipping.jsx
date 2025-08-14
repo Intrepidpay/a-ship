@@ -221,11 +221,6 @@ const PaymentPage = () => {
                       <span className="premium-detail-label">Sender:</span>
                       <span className="premium-detail-value">{shippingInfo.sender}</span>
                     </div> 
-
-                    <div className="premium-detail-row">
-                      <span className="premium-detail-label">Method:</span>
-                      <span className="premium-detail-value">{shippingInfo.method}</span>
-                    </div> 
                     <div className="premium-detail-row">
                       <span className="premium-detail-label">Tracking:</span>
                       <span className="premium-detail-value">{shippingInfo.trackingId || 'N/A'}</span>
@@ -236,6 +231,10 @@ const PaymentPage = () => {
                         {shippingInfo.status}
                       </span>
                     </div>
+                    <div className="premium-detail-row">
+                      <span className="premium-detail-label">Method:</span>
+                      <span className="premium-detail-value">{shippingInfo.method}</span>
+                    </div> 
                   </div>
                 </div>
                 
