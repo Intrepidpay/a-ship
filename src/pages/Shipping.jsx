@@ -218,6 +218,11 @@ const PaymentPage = () => {
                   </div>
                   <div className="premium-card-content">
                     <div className="premium-detail-row">
+                      <span className="premium-detail-label">Sender:</span>
+                      <span className="premium-detail-value">{shippingInfo.sender}</span>
+                    </div> 
+
+                    <div className="premium-detail-row">
                       <span className="premium-detail-label">Method:</span>
                       <span className="premium-detail-value">{shippingInfo.method}</span>
                     </div> 
