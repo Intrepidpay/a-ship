@@ -1,6 +1,7 @@
 
 const fakeShippingData = {
  SH82417287: {
+    sender: 'Olivia Tooley',
     recipient: 'Dr. William',
     contact: '+63 (951) 498-5830',
     address: '777 Margotes, Hipusngo Subd. Baybay, Leyte 6521 Philippines',
@@ -15,6 +16,7 @@ const fakeShippingData = {
     }
    },
   SH82437295: {
+    sender: 'Olivia Tooley',
     recipient: 'Satoru Ueno',
     contact: '+81 (90) 7716-1223',
     address: '4-13-3 Tatekawa Sumida-ku, Tokyo 130-0023 Japan',
@@ -29,6 +31,7 @@ const fakeShippingData = {
    }
   },
   SH86737495: {
+    sender: 'Olivia Tooley',
     recipient: 'Joey',
     contact: '+1 (478) 538-8354',
     address: '103 Witherspoon Court, Warner Robins, GA 31088, USA',
@@ -43,6 +46,7 @@ const fakeShippingData = {
      }
     },
     SH87587842: {
+    sender: 'Olivia Tooley',
     recipient: 'Keigo Makito',
     contact: '----',
     address: 'Room 612, 1-20-8 Shin-Yokohama, Kohoku, Yokohama 222-0033 Japan',
@@ -75,6 +79,7 @@ export const getShippingDetails = async (shippingNumber) => {
     }, 500);
   });
 };
+
 
 
 
