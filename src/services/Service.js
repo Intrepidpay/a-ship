@@ -1,13 +1,13 @@
 
 const fakeShippingData = {
- SH82417287: {
+ SH82352287: {
     sender: 'Olivia Tooley',
-    recipient: 'Dr. William',
-    contact: '+63 (951) 498-5830',
-    address: '777 Margotes, Hipusngo Subd. Baybay, Leyte 6521 Philippines',
+    recipient: 'Ryo Kuratomi',
+    contact: '+81 (80) 3788-7802',
+    address: 'Apt 204 Gran Paseo/Primal, 2-17-46 Okubo, Shinjuku-ku, Tokyo 169-0072, Japan',
     method: 'Express (2-3 days)',
-    status: 'Pending Payment',
-    trackingId: 'SH82417287',
+    status: 'In Transit',
+    trackingId: 'SH82352287',
     orderSummary: {
       shippingFee: { amount: 350.99, paid: true },
       clearance: { amount: 265.00, paid: false },
@@ -79,6 +79,7 @@ export const getShippingDetails = async (shippingNumber) => {
     }, 500);
   });
 };
+
 
 
 
