@@ -6,11 +6,11 @@ let mockPackages = [
     destination: "Apt 204 Gran Paseo/Primal, 2-17-46 Okubo, Shinjuku-ku, Tokyo 169-0072, Japan",
     weight: "800 g",
     progress: 12,
-    createdAt: new Date("2025-09-21T20:53:00Z"),
+    createdAt: new Date("2025-09-20T23:53:00Z"),
     estimatedDelivery: new Date("2025-09-24T13:00:00Z"),
     history: [
       {
-        timestamp: new Date("2025-09-21T21:17:00Z"),
+        timestamp: new Date("2025-09-20T21:17:00Z"),
         location: "Amman Warehouse",
         status: "processing",
         coordinates: { lat: 31.9539, lng: 35.9106 },
