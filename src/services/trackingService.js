@@ -5,7 +5,7 @@ let mockPackages = [
     recipient: "Ryo Kuratomi",
     destination: "Apt 204 Gran Paseo/Primal, 2-17-46 Okubo, Shinjuku-ku, Tokyo 169-0072, Japan",
     weight: "800 g",
-    progress: 27,
+    progress: 32,
     createdAt: new Date("2025-09-20T23:53:00Z"),
     estimatedDelivery: new Date("2025-09-24T13:00:00Z"),
     history: [
