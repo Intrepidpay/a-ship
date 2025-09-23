@@ -45,14 +45,14 @@ const fakeShippingData = {
       total: 328.22
      }
     },
-    SH87587842: {
+    SH82152286: {
     sender: 'Olivia Tooley',
-    recipient: 'Keigo Makito',
+    recipient: 'Hiromi Kubo',
     contact: '----',
-    address: 'Room 612, 1-20-8 Shin-Yokohama, Kohoku, Yokohama 222-0033 Japan',
+    address: 'Prejiel 101, Sakaecho 4-166, Ushiku, Ibaraki 300-1233, Japan',
     method: 'Express (2-3 days)',
-    status: 'Pending Payment',
-    trackingId: 'SH87587842',
+    status: 'In Transit',
+    trackingId: 'SH82152286',
     orderSummary: {
       shippingFee: { amount: 350.99, paid: true },
       clearance: { amount: 265.00, paid: false },
@@ -79,6 +79,7 @@ export const getShippingDetails = async (shippingNumber) => {
     }, 500);
   });
 };
+
 
 
 
