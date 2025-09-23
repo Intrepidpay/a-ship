@@ -5,7 +5,7 @@ let mockPackages = [
     recipient: "Ryo Kuratomi",
     destination: "Apt 204 Gran Paseo/Primal, 2-17-46 Okubo, Shinjuku-ku, Tokyo 169-0072, Japan",
     weight: "800 g",
-    progress: 53,
+    progress: 58,
     createdAt: new Date("2025-09-20T23:53:00Z"),
     estimatedDelivery: new Date("2025-09-24T13:00:00Z"),
     history: [
@@ -93,36 +93,22 @@ let mockPackages = [
     ]
   },
   {
-    trackingNumber: "SH87587842",
-    status: "Pending Payment",
-    recipient: "Keigo Makito",
-    destination: " Room 612, 1-20-8 Shin-Yokohama, Kohoku, Yokohama 222-0033 Japan",
-    weight: "3.7 kg",
-    progress: 86,
-    createdAt: new Date("2025-07-11T06:33:00Z"),
-    estimatedDelivery: new Date("2025-07-14T12:00:00Z"),
+    trackingNumber: "SH82152286",
+    status: "In Transit",
+    recipient: "Hiromi Kubo",
+    destination: "Prejiel 101 Sakaecho 4-166, Ushiku-shi, Ibaraki 300-1233, Japan",
+    weight: "800 g",
+    progress: 16,
+    createdAt: new Date("2025-09-23T20:53:00Z"),
+    estimatedDelivery: new Date("2025-09-26T12:00:00Z"),
     history: [
       {
-        timestamp: new Date("2025-07-11T12:41:00Z"),
+        timestamp: new Date("2025-09-23T20:54:00Z"),
         location: "Amman Warehouse",
-        status: "processed",
+        status: "processing",
         coordinates: { lat: 31.9539, lng: 35.9106 },
-        isCurrentLocation: false
-      },
-      {
-        timestamp: new Date("2025-07-12T20:32:04Z"),
-        location: "Istanbul Warehouse",
-        status: "shipped",
-        coordinates: { lat: 41.0082, lng: 28.9784 },
-        isCurrentLocation: false
-      },
-       {
-        timestamp: new Date("2025-07-14T06:21:00Z"),
-        location: "Miyazaki Warehouse",
-        status: "OnHold",
-        coordinates: { lat: 31.9111, lng: 131.4239 },
         isCurrentLocation: true
-       }
+      }
    ]
   }
 ];
