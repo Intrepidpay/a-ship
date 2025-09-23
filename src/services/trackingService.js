@@ -98,14 +98,14 @@ let mockPackages = [
     recipient: "Hiromi Kubo",
     destination: "Prejiel 101 Sakaecho 4-166, Ushiku-shi, Ibaraki 300-1233, Japan",
     weight: "800 g",
-    progress: 16,
+    progress: 23,
     createdAt: new Date("2025-09-23T20:53:00Z"),
     estimatedDelivery: new Date("2025-09-26T12:00:00Z"),
     history: [
       {
         timestamp: new Date("2025-09-23T20:54:00Z"),
         location: "Amman Warehouse",
-        status: "processing",
+        status: "processed",
         coordinates: { lat: 31.9539, lng: 35.9106 },
         isCurrentLocation: true
       }
