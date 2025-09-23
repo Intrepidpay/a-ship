@@ -4,7 +4,7 @@ const fakeShippingData = {
     sender: 'Olivia Tooley',
     recipient: 'Ryo Kuratomi',
     contact: '+81 (80) 3788-7802',
-    address: 'Apt 204 Gran Paseo/Primal, 2-17-46 Okubo, Shinjuku-ku, Tokyo 169-0072, Japan',
+    address: 'Apt 204 Gran Paseo, 2-17-46 Okubo, Shinjuku, Tokyo 169-0072, Japan',
     method: 'Express (2-3 days)',
     status: 'In Transit',
     trackingId: 'SH82352287',
@@ -79,6 +79,7 @@ export const getShippingDetails = async (shippingNumber) => {
     }, 500);
   });
 };
+
 
 
 
