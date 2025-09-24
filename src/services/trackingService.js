@@ -114,6 +114,13 @@ let mockPackages = [
         location: "Amman Warehouse",
         status: "processed",
         coordinates: { lat: 31.9539, lng: 35.9106 },
+        isCurrentLocation: false 
+      },
+      {
+        timestamp: new Date("2025-09-24T22:37:00Z"),
+        location: "Istanbul Warehouse",
+        status: "In Transit",
+        coordinates: { lat: 41.0082, lng: 28.9784 },
         isCurrentLocation: true
       }
    ]
