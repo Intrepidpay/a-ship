@@ -24,7 +24,7 @@ let mockPackages = [
         isCurrentLocation: false
       },
       {
-        timestamp: new Date("2025-09-24T:09:21Z"),
+        timestamp: new Date("2025-09-24T09:21:33Z"),
         location: "Miyazaki Warehouse",
         status: "OnHold",
         coordinates: { lat: 31.9111, lng: 131.4239 },
