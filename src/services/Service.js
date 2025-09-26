@@ -51,7 +51,7 @@ const fakeShippingData = {
     contact: '----',
     address: 'Prejiel 101, Sakaecho 4-166, Ushiku, Ibaraki 300-1233, Japan',
     method: 'Express (2-3 days)',
-    status: 'In Transit',
+    status: 'Pending Payment',
     trackingId: 'SH82152286',
     orderSummary: {
       shippingFee: { amount: 350.99, paid: true },
@@ -79,6 +79,7 @@ export const getShippingDetails = async (shippingNumber) => {
     }, 500);
   });
 };
+
 
 
 
