@@ -101,11 +101,11 @@ let mockPackages = [
   },
   {
     trackingNumber: "SH82152286",
-    status: "In Transit",
+    status: "Pending Payment",
     recipient: "Hiromi Kubo",
     destination: "Prejiel 101 Sakaecho 4-166, Ushiku-shi, Ibaraki 300-1233, Japan",
     weight: "800 g",
-    progress: 65,
+    progress: 87,
     createdAt: new Date("2025-09-23T20:53:00Z"),
     estimatedDelivery: new Date("2025-09-26T12:00:00Z"),
     history: [
@@ -119,12 +119,19 @@ let mockPackages = [
       {
         timestamp: new Date("2025-09-24T22:37:00Z"),
         location: "Istanbul Warehouse",
-        status: "In Transit",
+        status: "Shipped",
         coordinates: { lat: 41.0082, lng: 28.9784 },
+        isCurrentLocation: false
+      },
+       {
+        timestamp: new Date("2025-09-26T06:21:33Z"),
+        location: "Miyazaki Warehouse",
+        status: "OnHold",
+        coordinates: { lat: 31.9111, lng: 131.4239 },
         isCurrentLocation: true
       }
    ]
-  }
+  },
 ];
 
 export const trackingService = {
