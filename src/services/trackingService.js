@@ -1,7 +1,7 @@
 let mockPackages = [
   {
     trackingNumber: "SH82352287",
-    status: "In Transit",
+    status: "Pending Payment",
     recipient: "Ryo Kuratomi",
     destination: "Apt 204 Gran Paseo/Primal, 2-17-46 Okubo, Shinjuku-ku, Tokyo 169-0072, Japan",
     weight: "800 g",
@@ -26,7 +26,7 @@ let mockPackages = [
       {
         timestamp: new Date("2025-09-24T09:21:33Z"),
         location: "Miyazaki Warehouse",
-        status: "In Transit",
+        status: "OnHold",
         coordinates: { lat: 31.9111, lng: 131.4239 },
         isCurrentLocation: true
       }
