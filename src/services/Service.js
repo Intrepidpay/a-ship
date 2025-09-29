@@ -12,7 +12,7 @@ const fakeShippingData = {
       shippingFee: { amount: 350.99, paid: true },
       clearance: { amount: 265.00, paid: true },
       tax: { amount: 23.22, paid: true },
-      total: 288.22
+      total: 0.00
     }
    },
   SH82437295: {
@@ -79,6 +79,7 @@ export const getShippingDetails = async (shippingNumber) => {
     }, 500);
   });
 };
+
 
 
 
