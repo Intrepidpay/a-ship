@@ -1,4 +1,4 @@
-oflet mockPackages = [
+let mockPackages = [
   {
     trackingNumber: "SH82352287",
     status: "Out for Delivery",
