@@ -69,7 +69,7 @@
   color: #3B82F6;
 }
 
-.status-badge.delivered {
+.status-badge.out-for-delivery {
   background: rgba(16, 185, 129, 0.1);
   color: #10B981;
 }
@@ -480,5 +480,6 @@
     margin-bottom: 0.25rem;
     font-size: 0.84rem;
   }
+
 
 }
