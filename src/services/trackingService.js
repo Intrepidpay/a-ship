@@ -1,7 +1,7 @@
-let mockPackages = [
+oflet mockPackages = [
   {
     trackingNumber: "SH82352287",
-    status: "In Transit",
+    status: "Out for Delivery",
     recipient: "Ryo Kuratomi",
     destination: "Apt 204 Gran Paseo/Primal, 2-17-46 Okubo, Shinjuku-ku, Tokyo 169-0072, Japan",
     weight: "800 g",
