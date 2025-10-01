@@ -6,7 +6,7 @@ const fakeShippingData = {
     contact: '+81 (80) 3788-7802',
     address: 'Apt 204 Gran Paseo, 2-17-46 Okubo, Shinjuku, Tokyo 169-0072, Japan',
     method: 'Express (2-3 days)',
-    status: 'Out For Delivery',
+    status: 'Out for Delivery',
     trackingId: 'SH82352287',
     orderSummary: {
       shippingFee: { amount: 350.99, paid: true },
@@ -79,6 +79,7 @@ export const getShippingDetails = async (shippingNumber) => {
     }, 500);
   });
 };
+
 
 
 
