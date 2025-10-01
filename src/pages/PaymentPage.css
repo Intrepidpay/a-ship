@@ -543,7 +543,7 @@
   color: #3B82F6;
 }
 
-.status-delivered {
+.status-out-for-delivery {
   color: #10B981;
 }
 
@@ -833,4 +833,5 @@
   .premium-payment-actions {
     flex-direction: column;
   }
+
 }
