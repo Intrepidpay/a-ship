@@ -1,5 +1,6 @@
+
 const fakeShippingData = {
-  SH82352287: {
+ SH82352287: {
     sender: 'Olivia Tooley',
     recipient: 'Ryo Kuratomi',
     contact: '+81 (80) 3788-7802',
@@ -13,7 +14,7 @@ const fakeShippingData = {
       tax: { amount: 23.22, paid: true },
       total: 0.00
     }
-  },
+   },
   SH82437295: {
     sender: 'Olivia Tooley',
     recipient: 'Satoru Ueno',
@@ -27,7 +28,7 @@ const fakeShippingData = {
       clearance: { amount: 265.00, paid: false },
       tax: { amount: 23.22, paid: false },
       total: 288.22
-    }
+   }
   },
   SH86737495: {
     sender: 'Olivia Tooley',
@@ -42,9 +43,9 @@ const fakeShippingData = {
       clearance: { amount: 285.00, paid: false },
       tax: { amount: 43.22, paid: false },
       total: 328.22
-    }
-  },
-  SH82152286: {
+     }
+    },
+    SH82152286: {
     sender: 'Olivia Tooley',
     recipient: 'Hiromi Kubo',
     contact: '----',
@@ -61,36 +62,20 @@ const fakeShippingData = {
   }
 };
 
-// Helper to format numbers with commas + 2 decimals
-const formatCurrency = (num) => num.toLocaleString("en-US", { minimumFractionDigits: 2 });
-
 export const getShippingDetails = async (shippingNumber) => {
+  // simulate async (could be fetch from API or Firebase etc)
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       const details = fakeShippingData[shippingNumber];
       if (details) {
-        // Format each part of orderSummary
-        const formattedSummary = Object.fromEntries(
-          Object.entries(details.orderSummary).map(([key, val]) => {
-            if (typeof val === "object") {
-              return [key, { ...val, amountFormatted: `$${formatCurrency(val.amount)}` }];
-            } else {
-              // total is just a number in your structure
-              return [key, { amount: val, amountFormatted: `$${formatCurrency(val)}` }];
-            }
-          })
-        );
-
+        // Format the total with currency symbol
         const formattedDetails = {
           ...details,
-          orderSummary: formattedSummary,
-          total: `$${formatCurrency(details.orderSummary.total)}`
+          total: `$${details.orderSummary.total.toFixed(2)}`
         };
-
         resolve(formattedDetails);
-      } else {
-        reject(new Error('Shipping number not found.'));
       }
+      else reject(new Error('Shipping number not found.'));
     }, 500);
   });
 };
