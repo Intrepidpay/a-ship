@@ -5,7 +5,7 @@ let mockPackages = [
     recipient: "Ryo Kuratomi",
     destination: "Apt 204 Gran Paseo/Primal, 2-17-46 Okubo, Shinjuku-ku, Tokyo 169-0072, Japan",
     weight: "800 g",
-    progress: 94,
+    progress: 97,
     createdAt: new Date("2025-09-20T23:53:00Z"),
     estimatedDelivery: new Date("2025-09-24T13:00:00Z"),
     history: [
@@ -34,7 +34,7 @@ let mockPackages = [
         timestamp: new Date("2025-10-04T05:38:33Z"),
         location: "Tokyo Chiyoda City",
         status: "In Transit",
-        coordinates: { lat: 35.6895, lng: 139.6917 },
+        coordinates: { lat: 35.6938, lng: 139.7530 },
         isCurrentLocation: true
       }
     ] 
