@@ -187,3 +187,11 @@ img {
   100% { transform: scale(1); }
 }
 
+/* index.css */
+html, body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+
