@@ -187,11 +187,34 @@ img {
   100% { transform: scale(1); }
 }
 
-/* index.css */
-html, body {
+/* === Font Rendering Normalizer === */
+
+/* Make all text render more evenly across OSes */
+html, body, * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
+
+/* If fonts look too light on Mac/iOS, slightly boost weight */
+@supports (-webkit-touch-callout: none) {
+  /* Safari/iOS/macOS only */
+  body, p, span, div, input, button {
+    font-weight: 500 !important;
+  }
+}
+
+/* Optional: make sure your base font family and weight are consistent */
+body {
+  font-family: 'Inter', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #111;
+  background-color: #fff;
+}
+
+
 
 
