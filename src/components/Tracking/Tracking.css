@@ -71,7 +71,7 @@
 }
 
 .premium-track-button:hover {
-  background: linear-gradient(135deg, var(--primary), #afb3bad2) !important;
+ 
 }
 
 
@@ -206,4 +206,5 @@
     transition: all 0.5s ease !important;
   }
 }
+
 
