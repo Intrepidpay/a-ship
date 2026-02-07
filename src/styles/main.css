@@ -18,7 +18,9 @@
 html {
   scrollbar-gutter: stable;
 }
-
+ html, body {
+  overflow-x: hidden;
+}
 
 * {
   margin: 0;
@@ -219,6 +221,7 @@ body {
   color: #111;
   background-color: #fff;
 }
+
 
 
 
