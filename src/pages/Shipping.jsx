@@ -307,7 +307,7 @@ const PaymentPage = () => {
                   <span>PCI Compliant</span>
                 </div>
               </div>
-              <p className="premium-copyright">© 2025 Swift. All rights reserved.</p>
+              <p className="premium-copyright">© 2026 Swift. All rights reserved.</p>
             </div>
           </>
         )}
