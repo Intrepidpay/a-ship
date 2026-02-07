@@ -50,6 +50,7 @@ body {
   transform: translateZ(0);
   will-change: transform;
   isolation: isolate;
+  backface-visibility: hidden;
 }
 
 
@@ -373,6 +374,7 @@ body {
 }
 
 }
+
 
 
 
