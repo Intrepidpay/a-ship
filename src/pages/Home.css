@@ -30,7 +30,7 @@ body {
   padding: 0 20px;
 }
 
-/* Hero Section - FIXED FOR MACOS CHROME */
+/* Hero Section - FIXED FOR MACOS CHROME WITH GLOBAL OVERFLOW CONFLICT */
 .hero {
   position: relative;
   height: 400px;
@@ -44,18 +44,37 @@ body {
   justify-content: center;
   background: linear-gradient(135deg, var(--white), var(--light-gray));
   padding-bottom: 1%;
-  /* CRITICAL FIX: Remove overflow hidden to prevent shadow clipping */
-  overflow: visible;
-  contain: layout style;
-  /* Shadow fix for macOS */
+  /* CRITICAL: Create isolation context to prevent global overflow from affecting shadows */
+  isolation: isolate;
+  /* Use padding trick to extend shadow area without overflow visible */
+  padding: 1% 0;
+  margin-bottom: 60px; /* Space for shadow to render */
+  /* Shadow with inset to work with parent overflow */
   box-shadow: 0 20px 40px rgba(86, 109, 142, 0.333);
-  /* Performance optimizations with vendor prefixes for macOS Chrome */
+  /* Performance optimizations */
   transform: translate3d(0, 0, 0);
   -webkit-transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   perspective: 1000px;
   -webkit-perspective: 1000px;
+  /* Force new stacking context */
+  z-index: 1;
+  /* Ensure proper rendering on macOS */
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+}
+
+/* Wrapper to handle overflow properly */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -60px;
+  left: -60px;
+  right: -60px;
+  bottom: -60px;
+  z-index: -1;
+  pointer-events: none;
 }
 
 .hero-content {
@@ -245,6 +264,7 @@ body {
     width: 100%;
     left: 0%;
     transform: none;
+    margin-bottom: 40px;
   }
   
   .hero h1 {
@@ -287,6 +307,7 @@ body {
     width: 100%;
     left: 0%;
     transform: none;
+    margin-bottom: 30px;
   }
   
   .service-card h3 {
