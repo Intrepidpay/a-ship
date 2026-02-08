@@ -1,6 +1,3 @@
-
-
-
 /* Tracking Form Container */
 .tracking-form-container {
   width: 100%;
@@ -25,12 +22,11 @@
   box-shadow: 0 10px 30px rgba(0, 86, 214, 0.2);
 }
 
-
 /* Input Field */
 .premium-inputt {
-  flex: 1; /* Takes remaining space */
-  min-width: 0; /* Allows shrinking */
-  width: 83%; /* Base width */
+  flex: 1;
+  min-width: 0;
+  width: 83%;
   padding: 18px 24px;
   border: none;
   font-size: 1rem;
@@ -44,21 +40,20 @@
   background: var(--white);
 }
 
-
-
 .premium-inputt::placeholder {
   color: #718096;
   opacity: 0.7;
 }
 
-/* Track Button */
+/* Track Button - FIXED FOR MACOS CHROME */
 .premium-track-button {
   width: 17% !important;
   min-width: 100px;
   flex-shrink: 0;
   padding: 18px 10px;
-  background: var(--primary)) !important;
-  color: white;
+  /* CRITICAL FIX: Use solid color instead of gradient to prevent flicker */
+  background: var(--primary) !important;
+  color: black;
   border: none;
   font-size: 1rem;
   font-weight: 600;
@@ -67,17 +62,30 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: background 0.5s ease;
+  /* CRITICAL FIX: Use opacity transition instead of background for smooth rendering on macOS */
+  transition: opacity 0.2s ease;
+  /* Force GPU acceleration for macOS Chrome */
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+  will-change: opacity;
 }
 
 .premium-track-button:hover {
- 
+  /* CRITICAL FIX: Change opacity instead of background to prevent flicker */
+  opacity: 0.85;
 }
 
+.premium-track-button:active {
+  opacity: 0.7;
+}
 
 .premium-track-button:disabled {
-  background: #CBD5E0;
+  background: #CBD5E0 !important;
   cursor: not-allowed;
+  opacity: 1;
 }
 
 .track-icon {
@@ -115,6 +123,11 @@
   border-radius: 12px;
   font-size: 0.9rem;
   animation: fadeIn 0.3s ease;
+  transition: opacity 0.5s ease;
+}
+
+.premium-error-messag.hiding {
+  opacity: 0;
 }
 
 .error-icon {
@@ -122,13 +135,6 @@
   height: 18px;
   margin-right: 8px;
   fill: currentColor;
-}
-
-.premium-error-messag {
-  transition: opacity 0.5s ease;
-}
-.premium-error-messag.hiding {
-  opacity: 0;
 }
 
 .premium-tracking-result:focus {
@@ -141,10 +147,7 @@
 }
 
 /* Responsive */
-
 @media (max-width: 768px) {
-
-
   .tracking-form-container {
     width: 100% !important;
     max-width: 800px !important;
@@ -158,7 +161,6 @@
     display: initial;
     flex-direction: initial;
   }
-
 
   .input-group {
     display: flex !important;
@@ -187,8 +189,8 @@
   
   .premium-inputt::placeholder {
     font-size: 1rem;
-  text-align: center;
-}
+    text-align: center;
+  }
   
   .premium-track-button {
     width: initial !important;
@@ -203,9 +205,7 @@
     display: flex !important;
     align-items: center !important;
     gap: 8px;
-    transition: all 0.5s ease !important;
+    /* Keep the opacity transition on mobile too */
+    transition: opacity 0.2s ease !important;
   }
 }
-
-
-
