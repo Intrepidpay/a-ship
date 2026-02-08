@@ -57,8 +57,8 @@
   min-width: 100px;
   flex-shrink: 0;
   padding: 18px 10px;
-  background: linear-gradient(135deg, var(--primary), var(--primary)) !important;
-  color: black;
+  background: var(--primary)) !important;
+  color: white;
   border: none;
   font-size: 1rem;
   font-weight: 600;
@@ -206,5 +206,6 @@
     transition: all 0.5s ease !important;
   }
 }
+
 
 
