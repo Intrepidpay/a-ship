@@ -30,10 +30,9 @@ body {
   padding: 0 20px;
 }
 
-/* Hero Section */
-
+/* Hero Section - FIXED FOR MACOS CHROME */
 .hero {
- position: relative;
+  position: relative;
   height: 400px;
   width: 90%;
   margin: 0 auto;
@@ -44,19 +43,20 @@ body {
   border-top-right-radius: 60px;
   justify-content: center;
   background: linear-gradient(135deg, var(--white), var(--light-gray));
-  overflow: visible;
   padding-bottom: 1%;
+  /* CRITICAL FIX: Remove overflow hidden to prevent shadow clipping */
+  overflow: visible;
+  contain: layout style;
+  /* Shadow fix for macOS */
   box-shadow: 0 20px 40px rgba(86, 109, 142, 0.333);
-  transform: translateZ(0);
-  will-change: transform;
-  isolation: isolate;
+  /* Performance optimizations with vendor prefixes for macOS Chrome */
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
-  -webkit-transform: translateZ(0); 
   -webkit-backface-visibility: hidden;
+  perspective: 1000px;
+  -webkit-perspective: 1000px;
 }
-
-
-
 
 .hero-content {
   position: relative;
@@ -79,7 +79,6 @@ body {
   padding-bottom: 0.1em;
 }
 
-
 .hero p {
   font-size: 1.3rem;
   margin-bottom: 1.5rem;
@@ -93,24 +92,6 @@ body {
 }
 
 /* Services Section */
-.services-section {
-  padding: 100px 0;
-}
-
-.services-section h2 {
-  text-align: center;
-  font-size: 2.25rem;
-  margin-bottom: 3rem;
-  color: var(--dark-gray);
-}
-
-.services-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 30px;
-}
-
-/* Services Section - Premium Cards */
 .services-section {
   padding: 100px 0;
   background: transparent;
@@ -165,34 +146,49 @@ body {
   left: 0;
   width: 100%;
   height: 5px;
-  
 }
-
 
 .service-icon {
   height: 80px;
   margin-bottom: 20px;
   display: flex;
   align-items: center;
+  background: var(--light-gray);
+  border-radius: 12px;
 }
 
 .placeholder-icon {
   width: 60px;
   height: 60px;
   border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
   background: var(--light-gray);
 }
 
-.express {
-  background: linear-gradient(135deg, #38A169, #2C7A4E);
+.service-image,
+.service-truck,
+.service-cop {
+  max-width: 85%;
+  max-height: 85%;
+  object-fit: contain;
+  transition: all 0.3s ease;
+  filter: brightness(0) invert(1); 
+  opacity: 0.9;
 }
 
-.refrigerated {
-  background: linear-gradient(135deg, #73a9fb, #003D99);
+.express { 
+  background: linear-gradient(135deg, #73a9fb, #003D99); 
 }
 
-.customs {
-  background: linear-gradient(135deg, #F6AD55, #DD6B20);
+.refrigerated { 
+  background: linear-gradient(135deg, #38A169, #2C7A4E); 
+}
+
+.customs { 
+  background: linear-gradient(135deg, #F6AD55, #DD6B20); 
 }
 
 .service-card h3 {
@@ -218,91 +214,26 @@ body {
   transform: translateX(5px);
 }
 
-.service-card:hover .service-png {
-  transform: scale(1.1); /* Subtle zoom effect on hover */
-}
-
-/* Keep all existing placeholder styles */
-.placeholder-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 5px; /* Creates inner spacing */
-  background: var(--light-gray); /* Default fallback */
-}
-
-/* Add these new image-specific styles */
-.service-image {
-  max-width: 85%; /* Limits image size within placeholder */
-  max-height: 85%;
-  object-fit: contain;
-  transition: all 0.3s ease;
-  filter: brightness(0) invert(1); 
-  opacity: 0.9; 
-}
-
-.service-truck{
-  max-width: 85%; /* Limits image size within placeholder */
-  max-height: 85%;
-  object-fit: contain;
-  transition: all 0.3s ease;
-  filter: brightness(0) invert(1); 
-  opacity: 0.9;
-}
-
-.service-cop{
-  max-width: 85%; /* Limits image size within placeholder */
-  max-height: 85%;
-  object-fit: contain;
-  transition: all 0.3s ease;
-  filter: brightness(0) invert(1); 
-  opacity: 0.9;
-}
-
-/* Keep your existing color classes */
-.express { background: linear-gradient(135deg, #73a9fb, #003D99); }
-.refrigerated { background: linear-gradient(135deg, #38A169, #2C7A4E); }
-.customs { background: linear-gradient(135deg, #F6AD55, #DD6B20); }
-
-/* Hover effects */
-.service-card:hover .service-image {
-  transform: scale(1.1);
-}
-
-.service-card:hover .service-truck {
-  transform: scale(1.1);
-}
-
+.service-card:hover .service-image,
+.service-card:hover .service-truck,
 .service-card:hover .service-cop {
   transform: scale(1.1);
 }
 
-
-
-/* Fallback if images fail to load */
-.service-icon {
-  background: var(--light-gray); /* Matches your color scheme */
-  border-radius: 12px;
-}
-
+/* Responsive */
 @media only screen and (min-width: 377px) and (max-width: 768px) {
   .hero {
     height: 510px !important;
   }
 }
 
-/* Responsive */
 @media (max-width: 768px) {
-
- .container {
-   width: 100%;
-   max-width: 1200px;
-   margin: 0 auto;
-   padding: 0 20px;
-}
+  .container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
 
   .hero {
     height: 100%;
@@ -324,34 +255,29 @@ body {
     font-size: 17px !important;
   }
   
-  .service-card h3 {
-  font-size: 1.28rem;
-  margin-bottom: 15px;
-  color: var(--dark-gray);
-}
-
-.service-card p {
-  color: #64748B;
-  margin-bottom: 20px;
-  font-size: 0.9rem;
-}
-
   .service-card {
     width: 110%;
     right: 4.9%;
+    padding: 25px;
+  }
+
+  .service-card h3 {
+    font-size: 1.28rem;
+    margin-bottom: 15px;
+    color: var(--dark-gray);
+  }
+
+  .service-card p {
+    color: #64748B;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
   }
 
   .services-grid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  
-  .service-card {
-    padding: 25px;
-  }
 }
-
-
 
 @media only screen and (max-width: 375px) {
   .hero {
@@ -363,24 +289,15 @@ body {
     transform: none;
   }
   
-.service-card h3 {
-  font-size: 1.08rem;
-  margin-bottom: 15px;
-  color: var(--dark-gray);
+  .service-card h3 {
+    font-size: 1.08rem;
+    margin-bottom: 15px;
+    color: var(--dark-gray);
+  }
+
+  .service-card p {
+    color: #64748B;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+  }
 }
-
-.service-card p {
-  color: #64748B;
-  margin-bottom: 20px;
-  font-size: 0.9rem;
-}
-
-}
-
-
-
-
-
-
-
-
