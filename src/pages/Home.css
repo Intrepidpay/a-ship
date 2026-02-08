@@ -44,13 +44,15 @@ body {
   border-top-right-radius: 60px;
   justify-content: center;
   background: linear-gradient(135deg, var(--white), var(--light-gray));
-  overflow: hidden;
+  overflow: visible;
   padding-bottom: 1%;
   box-shadow: 0 20px 40px rgba(86, 109, 142, 0.333);
   transform: translateZ(0);
   will-change: transform;
   isolation: isolate;
   backface-visibility: hidden;
+  -webkit-transform: translateZ(0); 
+  -webkit-backface-visibility: hidden;
 }
 
 
@@ -374,6 +376,7 @@ body {
 }
 
 }
+
 
 
 
