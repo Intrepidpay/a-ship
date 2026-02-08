@@ -19,6 +19,13 @@ html {
   scrollbar-gutter: stable;
 }
 
+/* CRITICAL FIX: Changed from overflow-x: hidden to clip */
+/* This prevents the conflict with hero section shadows */
+html, body {
+  overflow-x: clip; /* Use clip instead of hidden for better shadow rendering */
+  overflow-y: auto;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -162,7 +169,6 @@ img {
   .hamburger {
     display: flex;
   }
-
   .desktop-nav {
     display: none;
   }
@@ -192,7 +198,6 @@ img {
 }
 
 /* === Font Rendering Normalizer === */
-
 /* Make all text render more evenly across OSes */
 html, body, * {
   -webkit-font-smoothing: antialiased;
@@ -218,10 +223,3 @@ body {
   color: #111;
   background-color: #fff;
 }
-
-
-
-
-
-
-
