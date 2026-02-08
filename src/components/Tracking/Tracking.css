@@ -20,6 +20,8 @@
   overflow: hidden;
   position: relative; 
   box-shadow: 0 10px 30px rgba(0, 86, 214, 0.2);
+  /* Ensure consistent rendering across page loads */
+  isolation: isolate;
 }
 
 /* Input Field */
@@ -33,6 +35,9 @@
   color: var(--dark-gray);
   background: rgba(255, 255, 255, 0.95);
   transition: all 0.3s ease;
+  /* Prevent rendering issues on macOS */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .premium-inputt:focus {
@@ -45,14 +50,14 @@
   opacity: 0.7;
 }
 
-/* Track Button - FIXED FOR MACOS CHROME */
+/* Track Button - FIXED FOR MACOS CHROME PERSISTENCE */
 .premium-track-button {
   width: 17% !important;
   min-width: 100px;
   flex-shrink: 0;
   padding: 18px 10px;
-  /* CRITICAL FIX: Use solid color instead of gradient to prevent flicker */
-  background: var(--primary) !important;
+  /* CRITICAL: Solid color prevents gradient re-render flicker */
+  background: #73a9fb !important;
   color: black;
   border: none;
   font-size: 1rem;
@@ -62,19 +67,23 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  /* CRITICAL FIX: Use opacity transition instead of background for smooth rendering on macOS */
+  /* CRITICAL: Lightweight transition that persists across navigation */
   transition: opacity 0.2s ease;
-  /* Force GPU acceleration for macOS Chrome */
+  /* Force consistent GPU layer - prevents re-paint on navigation */
   transform: translate3d(0, 0, 0);
   -webkit-transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   -webkit-font-smoothing: antialiased;
+  /* Create stacking context to prevent flicker */
+  position: relative;
+  z-index: 1;
+  /* Tell browser this property will change */
   will-change: opacity;
 }
 
 .premium-track-button:hover {
-  /* CRITICAL FIX: Change opacity instead of background to prevent flicker */
+  /* Simple opacity change - no reflow/repaint */
   opacity: 0.85;
 }
 
@@ -205,7 +214,7 @@
     display: flex !important;
     align-items: center !important;
     gap: 8px;
-    /* Keep the opacity transition on mobile too */
+    /* Maintain the fix on mobile */
     transition: opacity 0.2s ease !important;
   }
 }
