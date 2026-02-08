@@ -1,0 +1,23 @@
+{
+  "files": {
+    "main.css": "/static/css/main.f2a63de9.css",
+    "main.js": "/static/js/main.8bc70b26.js",
+    "static/media/KeremSarp.png": "/static/media/KeremSarp.c12347fe6ef4f32600f0.png",
+    "static/media/EmilyHampton.png": "/static/media/EmilyHampton.3fb078c55efc9a3f7db7.png",
+    "static/media/AltanErdoğan.png": "/static/media/AltanErdoğan.3ec22c606cc4c563dee9.png",
+    "static/media/MertYuzsever.png": "/static/media/MertYuzsever.8c15850c9d57c3a0f5b8.png",
+    "static/media/express-truck.png": "/static/media/express-truck.73aef94f9f2ad67a474f.png",
+    "static/media/express-cop.png": "/static/media/express-cop.aaeb42660b2e315fde87.png",
+    "static/media/express-shipping.png": "/static/media/express-shipping.45c3d9e85df88cac7187.png",
+    "index.html": "/index.html",
+    "static/media/cargo-ship.svg": "/static/media/cargo-ship.6464d1a550fa7483ddce.svg",
+    "static/media/delivery-truck.svg": "/static/media/delivery-truck.dbb5dd3a69ead0eb464d.svg",
+    "static/media/shipping-container.svg": "/static/media/shipping-container.eb2c7cf22057c6c589f3.svg",
+    "main.f2a63de9.css.map": "/static/css/main.f2a63de9.css.map",
+    "main.8bc70b26.js.map": "/static/js/main.8bc70b26.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.f2a63de9.css",
+    "static/js/main.8bc70b26.js"
+  ]
+}
